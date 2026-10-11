@@ -1,0 +1,90 @@
+# FABRICATED example workspace (see README.md). Shape = My Job Search/settings.yaml.example.
+identity:
+  name: "Taylor Example"
+  first_name: "Taylor"
+  email: "taylor.example@example.com"
+  phone: "303.555.0147"
+  city_state: "Denver, CO"
+  links: ["linkedin.com/in/taylor-example"]
+
+work_authorization:
+  resume_line: "U.S. Citizen"
+  citizenship_only_roles_open: true
+  clearance_possible: true
+  export_controlled_open: true
+  sponsorship_needed: false
+  permanent_resident: false
+
+location:
+  home: "Denver, CO"
+  country: "US"
+  commute_radius_miles: 40
+  commutable_metros: ["Denver CO", "Boulder CO", "Golden CO", "Fort Collins CO"]
+  relocation: "yes"
+  tier1_regex: "Denver|Boulder|Golden|Fort Collins|Colorado|\\bCO\\b|Remote"
+  tier2_regex: "Salt Lake|\\bUT\\b|Albuquerque|\\bNM\\b|Phoenix|\\bAZ\\b|Kansas City|Omaha|\\bNE\\b"
+
+lanes:
+  - name: "power-systems"
+    description: "Transmission and distribution planning, protection coordination and interconnection studies for a utility or ISO"
+    example_titles: ["Power Systems Engineer", "Transmission Planning Engineer", "Protection Engineer", "Interconnection Engineer"]
+    never_claims: ["PE license", "NERC-certified operator", "SCADA administration"]
+    priority: false
+    packs: []
+  - name: "grid-analytics"
+    description: "Data analysis and software for grid operations: load forecasting, outage analytics, DER hosting-capacity studies in Python and SQL"
+    example_titles: ["Grid Analytics Engineer", "Energy Data Scientist", "Power Systems Software Engineer"]
+    never_claims: ["PyTorch", "TensorFlow", "Kubernetes"]
+    priority: true
+    packs: ["deeptech_other"]
+  - name: "test-engineering"
+    description: "Test planning and execution for electrical equipment and grid-edge devices (inverters, relays, meters)"
+    example_titles: ["Test Engineer", "Hardware Test Engineer", "Validation Engineer"]
+    never_claims: ["UL certification authority", "RF compliance testing"]
+    priority: false
+    packs: []
+
+thresholds:
+  build_default_min_rubric: 60
+  commutable_min_rubric: 45
+  auto_skip_below_rubric: 40
+  jd_gate: 0.28
+  band_midpoint_ceiling: null
+  low_band_top: 85000
+
+exclusions:
+  employers: []
+  role_types: ["lineman|linemen", "meter readers?", "recruit(er|ers|ing|ment)", "sales engineers?"]
+  contract_work: false
+  postdocs: false
+
+salary:
+  floor: 95000
+  target: 125000
+  currency: "USD"
+
+modules:
+  inbox_sweep: false
+  outreach: false
+
+run:
+  adzuna: false
+  linkedin_guest: true
+  indeed_jobspy: false
+  window_days: 30
+
+build:
+  resume_filename: "Resume_Taylor_Example.docx"
+  min_experience_entries: 3
+  location_line_default: "Open to relocation"
+
+education:
+  - institution: "Example State University"
+    dates: "Aug 2020 - May 2022"
+    line: "M.S. in Electrical Engineering (Power Systems), Fort Collins, CO  |  Thesis: Hosting-capacity estimation for distribution feeders with high rooftop-solar penetration"
+  - institution: "Example State University"
+    dates: "Aug 2016 - May 2020"
+    line: "B.S. in Electrical Engineering, Cum Laude, Fort Collins, CO"
+
+verification:
+  employer_tokens: ["Front Range Utility", "GridSense"]

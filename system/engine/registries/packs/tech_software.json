@@ -1,0 +1,299 @@
+{
+ "pack": "tech_software",
+ "description": "Software, product, data and design roles at large tech employers with PUBLIC job-board APIs (Greenhouse / Ashby / Lever / SmartRecruiters full text; a few Workday tenants by keyword). A starting set: discovery arms + your own employers (discover_boards.py) do the rest.",
+ "source": "built 2026-10-11 for jobkit v0.3; every entry below was live-fetched that day (counts in the note). Not found that day (no public API, custom careers site): HashiCorp (IBM), Shopify, Zoom, Atlassian, Rippling, Retool, HubSpot, Gong, Wiz, CrowdStrike, Sentry, Postman, Confluent, Intuit, ServiceNow - add them with discover_boards.py when they get a board, or watch their careers page.",
+ "boards": [
+  [
+   "gh",
+   "stripe",
+   "live 2026-10-11: 728 openings"
+  ],
+  [
+   "gh",
+   "airbnb",
+   "live 2026-10-11: 161 openings"
+  ],
+  [
+   "gh",
+   "databricks",
+   "live 2026-10-11: 892 openings"
+  ],
+  [
+   "gh",
+   "figma",
+   "live 2026-10-11: 150 openings"
+  ],
+  [
+   "gh",
+   "cloudflare",
+   "live 2026-10-11: 424 openings"
+  ],
+  [
+   "gh",
+   "datadog",
+   "live 2026-10-11: 435 openings"
+  ],
+  [
+   "gh",
+   "mongodb",
+   "live 2026-10-11: 391 openings"
+  ],
+  [
+   "gh",
+   "gitlab",
+   "live 2026-10-11: 221 openings"
+  ],
+  [
+   "gh",
+   "reddit",
+   "live 2026-10-11: 147 openings"
+  ],
+  [
+   "gh",
+   "discord",
+   "live 2026-10-11: 49 openings"
+  ],
+  [
+   "gh",
+   "coinbase",
+   "live 2026-10-11: 222 openings"
+  ],
+  [
+   "gh",
+   "robinhood",
+   "live 2026-10-11: 182 openings"
+  ],
+  [
+   "gh",
+   "doordashusa",
+   "live 2026-10-11: 463 openings; the DoorDash board slug is doordashusa"
+  ],
+  [
+   "gh",
+   "instacart",
+   "live 2026-10-11: 119 openings"
+  ],
+  [
+   "gh",
+   "lyft",
+   "live 2026-10-11: 187 openings"
+  ],
+  [
+   "gh",
+   "pinterest",
+   "live 2026-10-11: 180 openings"
+  ],
+  [
+   "gh",
+   "anthropic",
+   "live 2026-10-11: 645 openings"
+  ],
+  [
+   "gh",
+   "dropbox",
+   "live 2026-10-11: 32 openings"
+  ],
+  [
+   "gh",
+   "twilio",
+   "live 2026-10-11: 144 openings"
+  ],
+  [
+   "gh",
+   "okta",
+   "live 2026-10-11: 378 openings"
+  ],
+  [
+   "gh",
+   "duolingo",
+   "live 2026-10-11: 58 openings"
+  ],
+  [
+   "gh",
+   "roblox",
+   "live 2026-10-11: 265 openings"
+  ],
+  [
+   "gh",
+   "brex",
+   "live 2026-10-11: 277 openings"
+  ],
+  [
+   "gh",
+   "waymo",
+   "live 2026-10-11: 372 openings"
+  ],
+  [
+   "gh",
+   "samsara",
+   "live 2026-10-11: 240 openings"
+  ],
+  [
+   "gh",
+   "affirm",
+   "live 2026-10-11: 203 openings"
+  ],
+  [
+   "gh",
+   "block",
+   "live 2026-10-11: 231 openings"
+  ],
+  [
+   "gh",
+   "asana",
+   "live 2026-10-11: 102 openings"
+  ],
+  [
+   "gh",
+   "vercel",
+   "live 2026-10-11: 89 openings"
+  ],
+  [
+   "gh",
+   "elastic",
+   "live 2026-10-11: 409 openings"
+  ],
+  [
+   "gh",
+   "pagerduty",
+   "live 2026-10-11: 51 openings"
+  ],
+  [
+   "gh",
+   "gusto",
+   "live 2026-10-11: 97 openings"
+  ],
+  [
+   "ashby",
+   "notion",
+   "live 2026-10-11: 132 openings"
+  ],
+  [
+   "ashby",
+   "snowflake",
+   "live 2026-10-11: 358 openings"
+  ],
+  [
+   "ashby",
+   "openai",
+   "live 2026-10-11: 815 openings"
+  ],
+  [
+   "ashby",
+   "plaid",
+   "live 2026-10-11: 121 openings"
+  ],
+  [
+   "ashby",
+   "ramp",
+   "live 2026-10-11: 165 openings"
+  ],
+  [
+   "ashby",
+   "linear",
+   "live 2026-10-11: 31 openings"
+  ],
+  [
+   "ashby",
+   "supabase",
+   "live 2026-10-11: 54 openings"
+  ],
+  [
+   "lever",
+   "palantir",
+   "live 2026-10-11: 309 openings"
+  ],
+  [
+   "smartrecruiters",
+   "canva",
+   "live 2026-10-11: 124 openings (Australian HQ; US roles kept by the geography filter)"
+  ]
+ ],
+ "workday": [
+  [
+   "nvidia.wd5",
+   "nvidia",
+   "NVIDIAExternalCareerSite",
+   "NVIDIA - CXS live 2026-10-11: 572 hits for 'analyst'"
+  ],
+  [
+   "adobe.wd5",
+   "adobe",
+   "external_experienced",
+   "Adobe - CXS live 2026-10-11: 118 hits for 'analyst'"
+  ],
+  [
+   "salesforce.wd12",
+   "salesforce",
+   "External_Career_Site",
+   "Salesforce - CXS live 2026-10-11: 129 hits for 'analyst'"
+  ],
+  [
+   "workday.wd5",
+   "workday",
+   "Workday",
+   "Workday Inc. - CXS live 2026-10-11: 81 hits for 'analyst'"
+  ],
+  [
+   "paypal.wd1",
+   "paypal",
+   "jobs",
+   "PayPal - CXS live 2026-10-11: 217 hits for 'analyst'"
+  ],
+  [
+   "autodesk.wd1",
+   "autodesk",
+   "Ext",
+   "Autodesk - CXS live 2026-10-11: 108 hits for 'analyst'"
+  ],
+  [
+   "hp.wd5",
+   "hp",
+   "ExternalCareerSite",
+   "HP - CXS live 2026-10-11: 130 hits for 'analyst'"
+  ],
+  [
+   "zendesk.wd1",
+   "zendesk",
+   "Zendesk",
+   "Zendesk - CXS live 2026-10-11: 45 hits for 'analyst'"
+  ]
+ ],
+ "hard": {},
+ "misc": [],
+ "feeds": [],
+ "watch": [
+  {
+   "name": "Shopify",
+   "ats": "MANUAL",
+   "slug": "https://www.shopify.com/careers",
+   "watch_for": [
+    "engineer",
+    "product",
+    "data"
+   ],
+   "note": "custom careers site, no public API found 2026-10-11"
+  },
+  {
+   "name": "Atlassian",
+   "ats": "MANUAL",
+   "slug": "https://www.atlassian.com/company/careers/all-jobs",
+   "watch_for": [
+    "engineer",
+    "product",
+    "data"
+   ],
+   "note": "custom careers site, no public API found 2026-10-11"
+  },
+  {
+   "name": "Zoom",
+   "ats": "MANUAL",
+   "slug": "https://careers.zoom.us/jobs",
+   "watch_for": [
+    "engineer",
+    "product"
+   ],
+   "note": "no public board API answered 2026-10-11"
+  }
+ ]
+}

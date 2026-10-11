@@ -1,0 +1,125 @@
+# FABRICATED example settings.yaml for "Sam Example" (the fictional chemical / process engineer of
+# system/docs/EXAMPLES_FROM_ORIGINAL.md). This is the ANNOTATED REFERENCE for every key the engine reads: copy its SHAPE,
+# never a fact. The shipped template My Job Search/settings.yaml.example is empty on purpose; the onboarding interview
+# fills it. Every value below is invented (2026-10-11).
+
+identity:                              # (required) used by resume_builder.py and verify_resume.py
+  name: "Sam Example"              # full name as it should print at the top of the resume
+  first_name: "Sam"                   # used by the resume parse test (must survive docx->pdf->text)
+  email: "sam.example@example.com"
+  phone: "555.555.0100"                # printed verbatim; the parse test looks for this exact string
+  city_state: "Springfield, IL"        # ATS location prefill; OFF the contact line by default (see build)
+  links:                               # printed in this order on the contact line; leave [] for none
+    - "linkedin.com/in/sam-example"
+    - "github.com/sam-example"
+
+work_authorization:                    # (required) Article I.2 - the engine never assumes a status
+  resume_line: "U.S. Citizen"          # printed verbatim on the resume contact line ("" to omit)
+  citizenship_only_roles_open: true    # true if "must be a U.S. citizen" roles are open to you
+  clearance_possible: true             # true if you can obtain/hold a security clearance
+  export_controlled_open: true         # true if ITAR / "U.S. person" / export-controlled roles are open
+  sponsorship_needed: false            # true if you need visa sponsorship (adds a knockout for "no sponsorship")
+  permanent_resident: false            # true if you hold permanent residency: postings that explicitly admit
+                                       # permanent residents are then OPEN even when citizenship_only_roles_open is false
+
+location:
+  home: "Springfield, IL"
+  country: "US"                        # ONE country of search (US | CA | UK have built-in geography tables in system/engine/tools/geo.py;
+                                       # any other code: set the three regex overrides below or every location counts as inside)
+  # in_country_regex: ""               # optional override: a location string that reads as INSIDE the country (strict; corpus arm)
+  # in_country_regex_loose: ""         # optional override: same, loose (Workday/hard-ATS placeholders like "3 Locations")
+  # foreign_regex_extra: ""            # optional override: extra foreign-place cues to drop (e.g. "United States|USA" for a non-US user)
+  commute_radius_miles: 45
+  commutable_metros:                   # plain words for the judgment agent and the rubric profile
+    - "Springfield IL"
+    - "Champaign-Urbana IL"
+    - "St. Louis MO"
+  relocation: "case-by-case"           # yes | no | case-by-case  (case-by-case = present, state location first)
+  tier1_regex: "Springfield|Champaign|Urbana|St\\.? Louis|Illinois|\\bIL\\b|Remote"   # commutable + remote
+  tier2_regex: "Chicago|Indianapolis|Kansas City|Milwaukee|\\bMO\\b|\\bIN\\b|\\bWI\\b"  # nearby; "" for none
+
+lanes:                                 # (required) 1-6 target lanes in PLAIN WORDS; packs pick registries.
+                                       # The JD-text signature terms for each lane live in profile/signals.yaml (not here).
+                                       # packs: names from system/engine/registries/packs/ (tech_software, healthcare_clinical,
+                                       # government_public, nonprofit_social, education_general, business_marketing_sales,
+                                       # academic_marine_bio, materials_semiconductor, nuclear_aerospace, finance_quant, ...)
+  - name: "process-engineering"        # short canonical label (state.db Lane column warns on anything else)
+    description: "Process development and scale-up for specialty chemical manufacturing"
+    example_titles: ["Process Engineer", "Process Development Engineer", "Scale-up Engineer"]
+    never_claims: ["Six Sigma Black Belt", "ASME Section VIII stamp"]
+    priority: false                    # true = the lane is screened FOR and never auto-skipped (patterns: signals.yaml priority_patterns)
+    packs: ["materials_semiconductor"] # registry packs from system/engine/registries/packs/ (see README there); [] = none
+  - name: "data-analytics"
+    description: "R&D data analysis roles that use statistics and Python, any industry"
+    example_titles: ["Data Analyst", "R&D Data Scientist"]
+    never_claims: ["PyTorch", "TensorFlow"]
+    priority: false
+    packs: []
+
+targets:                               # (optional) what KINDS of positions are in scope, and who you would love to work for
+  track: "industry"                    # industry | academic | government | nonprofit | mix  (onboarding phase 5; informational -
+                                       # it decides which questions are asked and whether the USAJobs key step runs)
+  phd_positions: false                 # true = funded PhD positions / studentships / graduate research assistantships are
+                                       #        targets: the new-grad/campus title drop and the critic's GRAD-GATE are OFF
+  fixed_term_ok: false                 # true = "temporary" / fixed-term titles are not an eligibility drop (academic / grant posts)
+  hourly_ok: false                     # true = hourly-paid / high-school-minimum postings are NOT flagged "BELOW LEVEL" by the
+                                       #        critic (technician, nursing and trades posts are routinely hourly)
+  employers: []                        # up to ~10 employers you would be glad to work for, by name. system/engine/tools/discover_boards.py
+                                       # finds each one's job board (Greenhouse / Lever / Ashby / Workday / Oracle / NEOGOV / ...),
+                                       # verifies it live and registers it in tracking/registries/custom.json; the rest become watch entries.
+                                       # e.g. ["Mayo Clinic", "Denver Health"] / ["Stripe", "Notion"] / ["US Fish and Wildlife Service"]
+
+thresholds:
+  build_default_min_rubric: 60         # dual-blind average at/above this = build by default
+  commutable_min_rubric: 45            # inside commutable_metros, build from this line (user asked for stretches)
+  auto_skip_below_rubric: 40           # below this, both scorers agreeing, non-stub JD -> auto-ledger SKIP
+  jd_gate: 0.28                        # FALLBACK only: profile/signals.yaml thresholds.jd_gate wins when present
+  band_midpoint_ceiling: null          # e.g. 140000 -> critic prints an ADVISORY above it; null = off
+  low_band_top: null                   # e.g. 90000 -> queue tags LOWBAND below it; null = off
+
+exclusions:
+  employers: []                        # regex or plain names, matched on SOURCE/URL only, never JD text
+  role_types: ["buyers?", "procurement", "recruit(er|ers|ing|ment)", "operators?"]   # title-level eligibility drops
+                                       # (regexes, word-bounded, case-insensitive). Intern/co-op/new-grad/temp/contract are built in.
+  contract_work: false                 # false = contract/1099/freelance/contract-to-hire postings are OUT
+  postdocs: false                      # false = postdoctoral positions are OUT (postdoc TITLES are dropped by eligibility.py)
+
+salary:
+  floor: 85000                         # used only for judgment notes, never a silent filter
+  target: 110000
+  currency: "USD"
+
+modules:
+  inbox_sweep: false                   # Gmail read-only sweep. OFF by default. Requires the agent's Gmail tool.
+  outreach: false                      # outreach drafting charter. OFF by default.
+
+run:                                   # discovery arms. Employer boards (packs + custom.json) always run; these are extras.
+  adzuna: false                        # OFFICIAL free API (developer.adzuna.com) - the recommended aggregator; true needs
+                                       # adzuna_id/adzuna_key in keys.json (onboarding phase 16 offers it)
+  linkedin_guest: false                # OPT-IN. Public guest cards scraped from linkedin.com; LinkedIn's terms of service restrict
+                                       # automated access, the endpoint is unversioned and rate-limited (degrades to zero results).
+                                       # Turn on only if you accept that (system/docs/DEVELOPER.md).
+  indeed_jobspy: false                 # OPT-IN, same caveat (Indeed's terms); needs python-jobspy (requirements-optional.txt)
+  window_days: 30                      # recency window on UPDATED date (see charters/search.md)
+
+build:
+  format: "resume"                     # "resume" = one-page industry resume (resume_builder.Resume, verify = 1 page, 90-93% fill)
+                                       # "academic_cv" = multi-page CV (resume_builder.AcademicCV; verify = cv_min_pages..cv_max_pages;
+                                       #   audit_claims checks EVERY line against approved_claims.yaml incl. its `cv:` block)
+  resume_filename: "Resume_Sam_Example.docx"   # every built resume uses this exact filename
+  cv_filename: "CV_Sam_Example.docx"  # academic_cv only: the CV filename (must start with "CV" for the audit's CV mode)
+  cv_min_pages: 2                      # academic_cv: page range verify_resume enforces
+  cv_max_pages: 3
+  min_experience_entries: 3            # resume_builder warns below this
+  location_line_default: "Open to relocation"   # contact-line text for roles outside commutable_metros
+
+education:                             # printed by resume_builder.education(); newest first
+  - institution: "State University"
+    dates: "Sep 2018 - May 2022"
+    line: "M.S. in Chemical Engineering, Springfield, IL  |  Thesis: <title>"
+  - institution: "State University"
+    dates: "Sep 2014 - May 2018"
+    line: "B.S. in Chemical Engineering, Cum Laude, Springfield, IL"
+
+verification:                          # verify_resume.py parse test: tokens that must survive docx->pdf->text
+  employer_tokens: ["Acme Chemical", "State University"]   # checked only when the resume mentions them

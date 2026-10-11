@@ -1,0 +1,95 @@
+{
+ "pack": "consulting",
+ "description": "Management consulting advanced-degree programs and experienced-hire boards (also engineering consulting).",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [],
+ "workday": [
+  [
+   "mmc.wd1",
+   "mmc",
+   "MMC",
+   "Marsh McLennan (Oliver Wyman)"
+  ],
+  [
+   "pwc.wd3",
+   "pwc",
+   "Global_Experienced_Careers",
+   "PwC (Strategy&)"
+  ]
+ ],
+ "hard": {
+  "phenom": [
+   {
+    "name": "BCG (Boston Consulting Group)",
+    "base": "https://careers.bcg.com",
+    "locale": "global/en",
+    "note": "2026-10-07 consulting lane: /widgets live, 123 hits 'quantitative', 202 'consultant'; job URL /global/en/job/<jobId> verified 200. Program pages (Bridge to BCG / ADC) are on the watchlist, not reqs."
+   }
+  ],
+  "icims_html": [
+   {
+    "name": "Exponent",
+    "tenant": "careers-exponent"
+   }
+  ]
+ },
+ "misc": [],
+ "watch": [
+  {
+   "name": "McKinsey & Company - APD (Advanced Professional Degree) Associate",
+   "ats": "MANUAL",
+   "slug": "https://www.mckinsey.com/careers/students/advanced-professional-degree-candidates | job search: https://www.mckinsey.com/careers/search-jobs",
+   "watch_for": [
+    "Associate",
+    "Advanced Professional Degree",
+    "APD",
+    "PhD",
+    "Insight"
+   ]
+  },
+  {
+   "name": "BCG - Bridge to BCG / ADC (advanced degree consultant)",
+   "ats": "MANUAL",
+   "slug": "https://careers.bcg.com/us/en/on-campus/programs/advanced-bridge-to-bcg | reqs are swept via hard_registry phenom careers.bcg.com",
+   "watch_for": [
+    "Bridge to BCG",
+    "advanced degree",
+    "Consultant",
+    "PhD"
+   ]
+  },
+  {
+   "name": "Bain & Company - ADvantage / advanced-degree Consultant",
+   "ats": "MANUAL",
+   "slug": "https://www.bain.com/careers/meet-us/ad-summer-programs/ | roles: https://www.bain.com/careers/find-a-role/ (Cloudflare-walled to plain GETs)",
+   "watch_for": [
+    "ADvantage",
+    "advanced degree",
+    "Consultant",
+    "PhD"
+   ]
+  },
+  {
+   "name": "Kearney - experienced-hire consultant (PhD-open)",
+   "ats": "MANUAL",
+   "slug": "https://www.kearney.com/careers/open-positions (403 to plain GETs; Workday tenant kearney.wd1/wd3/wd5 all 422)",
+   "watch_for": [
+    "Consultant",
+    "Associate",
+    "PhD",
+    "advanced degree"
+   ]
+  },
+  {
+   "name": "L.E.K. Consulting - experienced-hire / advanced-degree Consultant",
+   "ats": "MANUAL",
+   "slug": "https://www.lek.com/join-lek/apply (custom site; jobs.lek.com/careers.lek.com DNS fail; lek.wd5 403)",
+   "watch_for": [
+    "Consultant",
+    "Life Sciences",
+    "PhD",
+    "advanced degree"
+   ]
+  }
+ ]
+}

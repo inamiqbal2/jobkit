@@ -1,0 +1,9 @@
+# FABRICATED search terms for Jordan Example (critical-care nursing; onboarding phase 17). Terms are BREADTH only; fit = JD gate + rubric.
+# Shipped examples for three lives: My Job Search/tracking/registries/queries.{nurse,software,biologist}.yaml.example.
+workday_terms: ["registered nurse", "ICU", "critical care", "step-down", "progressive care", "clinical educator", "nurse educator"]
+hard_ats_terms: ["registered nurse", "ICU", "critical care"]
+board_terms: ["registered nurse", "ICU nurse", "critical care", "clinical educator"]
+usajobs: []            # no USAJobs key (not a government track)
+adzuna: []             # no Adzuna key
+linkedin: []           # arm off (opt-in declined)
+indeed: []             # arm off (opt-in declined)

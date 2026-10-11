@@ -1,0 +1,26 @@
+# FABRICATED lexicon seeded from the skills inventory (onboarding phase 8).
+"critical care":          {syn: ["intensive care", "ICU"], claim: YES}
+"ventilator":             {syn: ["mechanical ventilation", "ventilated patients", "vent management"], claim: YES}
+"vasoactive":             {syn: ["vasopressors", "vasoactive drips", "titration"], claim: YES}
+"CRRT":                   {syn: ["continuous renal replacement therapy", "Prismaflex"], claim: YES}
+"hemodynamic monitoring": {syn: ["arterial line", "central line", "art line"], claim: YES}
+"targeted temperature management": {syn: ["Arctic Sun", "therapeutic hypothermia"], claim: YES}
+"sepsis":                 {syn: ["sepsis bundle", "SEP-1"], claim: YES}
+"telemetry":              {syn: ["cardiac monitoring", "rhythm interpretation"], claim: YES}
+"rapid response":         {syn: ["code blue", "RRT"], claim: YES}
+"Epic":                   {syn: ["EHR", "electronic health record"], claim: YES}
+"precepting":             {syn: ["preceptor", "precept", "new graduate orientation"], claim: YES}
+"charge nurse":           {syn: ["relief charge"], claim: UTIL}
+"ECMO":                   {syn: ["extracorporeal membrane oxygenation"], claim: UTIL}
+"IABP":                   {syn: ["intra-aortic balloon pump"], claim: UTIL}
+"CCRN":                   {syn: [], claim: YES}
+"ACLS":                   {syn: [], claim: YES}
+"BLS":                    {syn: ["CPR"], claim: YES}
+"PICC":                   {syn: ["PICC insertion", "PICC placement"], claim: NEVER}
+"nurse practitioner":     {syn: ["APRN", "advanced practice"], claim: NEVER}
+"MSN":                    {syn: ["master's in nursing"], claim: NEVER}
+"NPD-BC":                 {syn: ["nursing professional development certification"], claim: NEVER}
+"TNCC":                   {syn: ["CEN", "trauma nurse"], claim: NEVER}
+"simulation":             {syn: ["sim lab", "simulation facilitation"], claim: ASK}
+"quality improvement":    {syn: ["QI", "process improvement"], claim: ASK}
+"magnet":                 {syn: ["Magnet recognition", "shared governance"], claim: ASK}

@@ -1,0 +1,193 @@
+# FABRICATED approved claims for Marina Example (see ../README.md). Shape = My Job Search/profile/approved_claims.yaml.example
+# plus the optional `cv:` block the academic CV mode reads (system/engine/tools/approved_claims.py). Every line was "confirmed"
+# in this invented world on 2026-10-09; nothing here is a template to copy facts from.
+summaries:
+  coral-reef-research: "Coral-reef field biologist (M.S. Marine Biology) with three years of benthic monitoring, coral nursery and outplant work on Oahu and in the Florida Keys, including graduate research; AAUS scientific diver (300+ dives) who runs survey, photogrammetry and water-quality datasets in R and QGIS."
+  phd-coral: "Marine biologist (M.S.) with three years of coral-reef monitoring and restoration field work and a thesis on the thermal tolerance of coral recruits (2 peer-reviewed publications, 1 first author), seeking a funded PhD in coral-reef ecology."
+  field-biology-transferable: "Field biologist (M.S.) with three years of marine field sampling, laboratory and data work: benthic surveys, water-quality sampling, DNA extraction and PCR, mixed-effects analysis in R, QGIS mapping."
+
+tenure:
+  line: "three years of coral-reef research experience (2020-present, including graduate research and two seasonal field positions)"
+  short: "three years of coral-reef research experience (2020-present, incl. M.S.)"
+  years: 3
+
+experience:
+  - key: ERI
+    org: "Example Reef Institute"
+    dates: "Jun 2023 - Present"
+    role: "Research Technician II, Coral Reef Monitoring & Restoration Program"
+    loc: "Kaneohe, HI"
+    section: research
+    always_include: true
+    evidence: "example_reef_institute.md"
+    nda: "no site coordinates, no unpublished mortality numbers, no permit numbers"
+    bullets:
+      B_ERI_SURVEYS: "Lead diver for benthic photo-transect monitoring at 14 fixed reef sites surveyed four times a year, annotating photoquadrats in CoralNet and running the cover analyses in R."
+      B_ERI_SFM: "Built structure-from-motion photogrammetry models (GoPro rigs, Agisoft Metashape) for six monitoring sites since 2024 to track colony-scale change between surveys."
+      B_ERI_NURSERY: "Run the husbandry schedule for an in-water nursery of about 1,200 Montipora capitata and Porites compressa fragments, with twice-yearly outplanting and 1-, 6- and 12-month survival surveys."
+      B_ERI_WQ: "Collect monthly water-quality profiles (YSI EXO2 sonde) and nutrient samples, and run total-alkalinity titrations in the institute laboratory."
+      B_ERI_GENETICS: "Sample coral tissue for symbiont identification, performing DNA extractions and PCR; qPCR and sequencing are run by the UH genetics core."
+      B_ERI_TRAINING: "Trained six seasonal technicians and nine undergraduate volunteers on the survey and nursery protocols."
+      B_ERI_BLEACH: "Re-scheduled the 2024 survey season within two weeks to capture peak bleaching at all 14 sites."
+    keywords: "benthic survey photo-transect CoralNet photogrammetry Metashape nursery outplanting survival water quality YSI alkalinity DNA extraction PCR training R QGIS"
+  - key: THESIS
+    org: "Example Pacific University, Coral Physiology Laboratory"
+    dates: "Aug 2021 - May 2023"
+    role: "Graduate Research Assistant (M.S. thesis)"
+    loc: "Honolulu, HI"
+    section: research
+    evidence: "ms_thesis.md"
+    bullets:
+      B_THESIS_EXPT: "Reared Montipora capitata larvae from the 2022 spawning and ran a three-cycle repeated heat-stress experiment on 1,440 settled recruits in a 24-tank flow-through system."
+      B_THESIS_PAM: "Measured photosynthetic efficiency with a Diving-PAM fluorometer and symbiont density and chlorophyll a by spectrophotometry, with survival and growth from weekly image analysis in ImageJ."
+      B_THESIS_STATS: "Analyzed survival and growth with mixed-effects models in R (lme4) and produced the thesis figures in ggplot2."
+      B_THESIS_PUB: "First-authored a peer-reviewed paper on recruit thermal tolerance (2024) and co-authored a second on symbiont community shifts (2025)."
+    keywords: "larvae spawning recruits heat stress flow-through PAM Fv/Fm symbiont chlorophyll ImageJ mixed-effects lme4 ggplot2 publication"
+  - key: KEYS
+    org: "Example Keys Restoration Program"
+    dates: "May 2020 - Jul 2021"
+    role: "Field Technician (seasonal)"
+    loc: "Key Largo, FL"
+    section: field
+    evidence: "example_keys_restoration_program.md"
+    bullets:
+      B_KEYS_NURSERY: "Maintained Acropora cervicornis and A. palmata tree nurseries over two seasons, handling about 3,000 fragments per season and recording genotype and condition in the program database."
+      B_KEYS_OUTPLANT: "Outplanted corals with cement and epoxy at nine reef sites and ran the 1- and 6-month bar-tag survival surveys."
+      B_KEYS_BOAT: "Served as dive and boat crew (line handling, anchoring, dive tending) on a 26 ft dive boat and downloaded weekly HOBO temperature loggers."
+    keywords: "Acropora nursery outplanting survival surveys dive crew boat crew HOBO loggers Florida Keys"
+
+entry_variants:
+  ERI_FIELD: {base: ERI, role: "Research Technician II (field lead, coral reef monitoring)"}
+
+projects:
+  cover_qc:
+    title: "Benthic-cover data consistency check"
+    bullet: "R consistency check that caught a transcription error in the 2023 cover dataset before the annual report; now part of the program's QA/QC."
+    evidence: "example_reef_institute.md"
+
+skills_lines:
+  FIELD: ["Field & Diving", "AAUS scientific diver (300+ dives), benthic photo-transects and photoquadrats, coral nursery husbandry and outplanting, structure-from-motion photogrammetry, PAM fluorometry, small-boat crew and operator"]
+  LAB: ["Laboratory", "Larval rearing and settlement experiments, flow-through aquarium systems, DNA extraction and PCR (hands-on); qPCR and Illumina sequencing data used (run by a core facility)"]
+  DATA: ["Data & Analysis", "R (tidyverse, lme4, vegan, ggplot2), QGIS and ArcGIS Pro, CoralNet, Agisoft Metashape, ImageJ, data QA/QC and metadata"]
+  WQ: ["Water Quality", "YSI EXO2 sonde profiles, nutrient sampling, total-alkalinity titration, HOBO temperature loggers"]
+
+publications:
+  line: "2 peer-reviewed publications (1 first author), Example J. Coral Reef Sci. 2024; Example Mar. Ecol. Lett. 2025"
+  short: "2 peer-reviewed publications (1 first author)"
+  counts: {published_peer_reviewed: 2, under_review: 0, in_preparation: 0, total: 2}
+
+hedged_phrases:
+  - "run by the UH genetics core"
+  - "run by a core facility"
+  - "data used"
+
+never_claims:
+  forbidden_terms: ["PhD candidate", "Ph.D. candidate", "Principal Investigator", "USCG", "captain's license", "divemaster", "dive instructor", "Python", "ROV pilot", "flow cytometry", "multibeam"]
+  operator_patterns:
+    - "\\b(ran|operated|performed)\\b[^.;]{0,30}\\b(qPCR|MiSeq|Illumina|sequencing)\\b"
+    - "hands-on[^.;]{0,30}\\b(qPCR|Illumina|ROV)\\b"
+    - "\\b(piloted|flew)\\b[^.;]{0,20}\\bROV\\b"
+
+retired_claims:
+  - "\\b500\\+? dives\\b"            # example: an overstated dive count once drafted and withdrawn
+  - "led the restoration program"
+
+banned_words: ["local"]
+
+consistency_items:
+  - label: "Publications line"
+    kind: line_startswith
+    match: ["publications"]
+  - label: "Thesis bullets"
+    kind: entry_bullets
+    match: ["coral physiology laboratory"]
+
+pending:
+  - claim: "improved outplant survival from 58% to 71%"
+    question: "Was the 2023 baseline measured with the same protocol? Not usable until answered."
+
+# ---- academic CV sections (read by resume_builder.AcademicCV; audited line-by-line by audit_claims.py) --------------
+cv:
+  education:
+    - institution: "Example Pacific University"
+      dates: "Aug 2021 - May 2023"
+      degree: "M.S. in Marine Biology"
+      loc: "Honolulu, HI"
+      details:
+        - "Thesis: Thermal tolerance of Montipora capitata recruits under repeated bleaching (advisor: Dr. A. Example)"
+        - "Graduate Research Award 2023; teaching assistant, Marine Ecology Laboratory (two semesters)"
+    - institution: "Example State University"
+      dates: "Aug 2016 - May 2020"
+      degree: "B.S. in Biology, Marine Science concentration, Cum Laude"
+      loc: "Tampa, FL"
+      details:
+        - "Senior project: settlement preferences of Porites astreoides larvae on crustose coralline algae"
+  publications:
+    - citation: "Example, M., Example, A. (2024). Repeated thermal stress reduces survival but not growth of Montipora capitata recruits. Example Journal of Coral Reef Science 12(3): 101-112."
+      status: published
+      evidence: "publications.md"
+    - citation: "Example, A., Example, M., Sample, K. (2025). Symbiont community shifts in juvenile corals after consecutive bleaching events. Example Marine Ecology Letters 8: 44-57."
+      status: published
+      evidence: "publications.md"
+  presentations:
+    - text: "Example, M. (2024). Thermal tolerance of coral recruits under repeated bleaching. Oral presentation, Example Pacific Coral Reef Symposium, Honolulu, HI."
+      evidence: "publications.md"
+    - text: "Example, M., Example, A., Sample, K. (2025). Photogrammetry for nursery outplant monitoring. Poster, Example Reef Restoration Meeting, Key Largo, FL."
+      evidence: "publications.md"
+  field_experience:
+    - title: "Oahu coral-reef monitoring program (14 fixed sites)"
+      org: "Example Reef Institute"
+      dates: "Jun 2023 - Present"
+      loc: "Oahu, HI"
+      evidence: "example_reef_institute.md"
+      bullets:
+        - "180+ scientific dives: photo-transect surveys, photogrammetry rigs, nursery maintenance and outplanting; dive-team lead since 2024."
+        - "Monthly water-quality field days (sonde profiles, nutrient sampling) from a 24 ft center-console boat."
+    - title: "NOAA reef-assessment cruise (observer)"
+      org: "Example Reef Institute / NOAA partner cruise"
+      dates: "Aug 2025"
+      loc: "Northwestern Hawaiian Islands"
+      evidence: "example_reef_institute.md"
+      bullets:
+        - "Ten-day cruise as a benthic-survey diver and ROV watch observer (ROV operated by the vessel's team)."
+    - title: "Florida Keys coral nursery seasons"
+      org: "Example Keys Restoration Program"
+      dates: "May 2020 - Jul 2021"
+      loc: "Key Largo, FL"
+      evidence: "example_keys_restoration_program.md"
+      bullets:
+        - "About 120 nursery and outplant dives over two seasons; dive and boat crew on a 26 ft dive boat."
+  certifications:
+    - text: "AAUS Scientific Diver (2021 - current), 300+ logged dives"
+      evidence: "skills-inventory.md"
+    - text: "PADI Rescue Diver; DAN Oxygen Provider"
+      evidence: "skills-inventory.md"
+    - text: "American Red Cross First Aid / CPR / AED (2025)"
+      evidence: "skills-inventory.md"
+    - text: "Small-boat operator course (institute MOCC-equivalent, 2023); boat crew and operator under supervision"
+      evidence: "skills-inventory.md"
+  technical_skills:
+    FIELD: ["Field & Diving", "AAUS scientific diver (300+ dives), benthic photo-transects and photoquadrats, coral nursery husbandry and outplanting, structure-from-motion photogrammetry, PAM fluorometry, small-boat crew and operator"]
+    LAB: ["Laboratory", "Larval rearing and settlement experiments, flow-through aquarium systems, DNA extraction and PCR (hands-on); qPCR and Illumina sequencing data used (run by a core facility)"]
+    DATA: ["Data & Analysis", "R (tidyverse, lme4, vegan, ggplot2), QGIS and ArcGIS Pro, CoralNet, Agisoft Metashape, ImageJ, data QA/QC and metadata"]
+    WQ: ["Water Quality", "YSI EXO2 sonde profiles, nutrient sampling, total-alkalinity titration, HOBO temperature loggers"]
+  teaching:
+    - org: "Example Pacific University, Department of Biology"
+      dates: "Aug 2021 - May 2023"
+      role: "Teaching Assistant, Marine Ecology Laboratory"
+      loc: "Honolulu, HI"
+      evidence: "ms_thesis.md"
+      bullets:
+        - "Taught two semesters of the Marine Ecology Laboratory (about 40 students per semester): field sampling, species identification and the R data-analysis labs."
+    - "Mentored nine undergraduate volunteers on benthic survey and nursery protocols at the Example Reef Institute (2023-2026)."
+  grants_awards:
+    - text: "Example Pacific University Graduate Research Award, 2023 ($1,500)"
+      evidence: "ms_thesis.md"
+    - text: "Example State University Dean's List, 2017-2020"
+      evidence: "ms_thesis.md"
+  service:
+    - text: "Volunteer diver, community reef clean-up days, Oahu (2023-present)"
+      evidence: "example_reef_institute.md"
+    - text: "Student member, Example Coral Reef Society (2022-present)"
+      evidence: "ms_thesis.md"
+  references: "Available upon request (advisor, program lead and nursery manager)"

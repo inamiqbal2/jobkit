@@ -1,0 +1,44 @@
+# FABRICATED signals for a critical-care nurse profile (onboarding phase 17 draft; phase 18 kept the example defaults).
+lanes:
+  icu-staff-nurse:
+    role: home
+    terms:
+      - {pattern: "\\b(intensive care|critical care|\\bICU\\b|\\bMICU\\b|\\bSICU\\b|\\bCCU\\b)", weight: 4}
+      - {pattern: "\\bregistered nurse\\b|\\bRN\\b", weight: 3}
+      - {pattern: "\\bventilat|\\bintubated|\\bmechanical ventilation", weight: 4}
+      - {pattern: "\\bvasoactive|\\bvasopressor|\\btitrat", weight: 4}
+      - {pattern: "\\bCRRT\\b|\\bdialysis\\b|\\bPrismaflex\\b", weight: 3}
+      - {pattern: "\\barterial line|\\bhemodynamic|\\bcentral line|\\bSwan", weight: 3}
+      - {pattern: "\\bsepsis\\b|\\brapid response\\b|\\bcode blue\\b", weight: 2}
+      - {pattern: "\\bstep[- ]down\\b|\\bprogressive care\\b|\\bPCU\\b|\\bIMCU\\b", weight: 3}
+      - {pattern: "\\bCCRN\\b|\\bACLS\\b|\\bBLS\\b", weight: 2}
+      - {pattern: "\\btelemetry\\b|\\bmed[- ]?surg", weight: 1}
+      - {pattern: "\\bEpic\\b|\\b12[- ]hour shifts?\\b|\\bnight shift\\b", weight: 1}
+      - {pattern: "\\bprecept|\\bnew graduate|\\bnurse residency", weight: 2}
+    negatives:
+      - {pattern: "\\bpediatric|\\bNICU\\b|\\bneonatal|\\blabor and delivery|\\bL&D\\b", weight: -3}
+      - {pattern: "\\bnurse practitioner|\\bAPRN\\b|\\bCRNA\\b|\\bphysician assistant", weight: -4}
+      - {pattern: "\\bhome health|\\bhospice\\b|\\bper diem\\b|\\btravel (nurse|RN)|\\bLPN\\b|\\bCNA\\b|\\bnursing assistant", weight: -4}
+      - {pattern: "\\bcase manag|\\butilization review|\\bprior authorization|\\bcall center", weight: -3}
+  clinical-educator:
+    role: transferable
+    terms:
+      - {pattern: "\\bclinical (nurse )?educator|\\bnurse educator|\\bprofessional development", weight: 4}
+      - {pattern: "\\bprecept|\\bcompetenc(y|ies)|\\bskills (day|lab|fair)|\\bsimulation", weight: 3}
+      - {pattern: "\\bnurse residency|\\bonboarding|\\borientation\\b|\\bnew graduate", weight: 3}
+      - {pattern: "\\bevidence[- ]based practice|\\bquality improvement|\\bpractice council", weight: 2}
+      - {pattern: "\\bcritical care|\\bICU\\b|\\bacute care", weight: 2}
+      - {pattern: "\\bBSN\\b|\\bCCRN\\b", weight: 2}
+    negatives:
+      - {pattern: "\\bMSN required|\\bmaster'?s (degree )?required|\\bfaculty\\b|\\btenure", weight: -4}
+      - {pattern: "\\bsales\\b|\\brecruit|\\bpharmaceutical rep", weight: -6}
+thresholds:
+  jd_gate: 0.28
+  sig_min: 4
+  sigx_min: 12
+  sig_floor: -4
+priority_patterns:
+  exclude: ["\\bpediatric", "\\bNICU\\b", "\\bneonatal", "\\bnurse practitioner", "\\btravel (nurse|RN)", "\\bper diem", "\\bhome health", "\\bhospice"]
+  strong: ["\\bICU\\b", "\\bintensive care", "\\bcritical care", "\\bMICU\\b", "\\bstep[- ]down", "\\bprogressive care"]
+  weak: ["\\bregistered nurse\\b", "\\bRN\\b", "\\bstaff nurse"]
+  anchor: ["\\bventilat", "\\bvasoactive", "\\bvasopressor", "\\bCRRT\\b", "\\barterial line", "\\bhemodynamic", "\\bcritically ill"]

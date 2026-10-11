@@ -1,0 +1,541 @@
+{
+ "pack": "materials_semiconductor",
+ "description": "Materials, metals, batteries, advanced manufacturing, semiconductor equipment and instruments.",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [
+  [
+   "gh",
+   "redwoodmaterials",
+   150
+  ],
+  [
+   "gh",
+   "tenstorrent",
+   144
+  ],
+  [
+   "gh",
+   "freeformfuturecorp",
+   73
+  ],
+  [
+   "gh",
+   "divergent",
+   69
+  ],
+  [
+   "gh",
+   "factorialenergy",
+   16
+  ],
+  [
+   "gh",
+   "seurat",
+   6
+  ],
+  [
+   "gh",
+   "group14",
+   4
+  ],
+  [
+   "gh",
+   "markforged",
+   2
+  ],
+  [
+   "ashby",
+   "etched",
+   108
+  ],
+  [
+   "lever",
+   "velo3d",
+   35
+  ],
+  [
+   "lever",
+   "protolabs",
+   79
+  ],
+  [
+   "lever",
+   "utilityglobal",
+   3
+  ],
+  [
+   "ashby",
+   "limelight-steel",
+   1
+  ],
+  [
+   "gh",
+   "solidpower",
+   15
+  ],
+  [
+   "ashby",
+   "prometheus",
+   2
+  ],
+  [
+   "ashby",
+   "cerebras",
+   110
+  ],
+  [
+   "gh",
+   "peakenergy",
+   29
+  ],
+  [
+   "gh",
+   "xometry",
+   184
+  ],
+  [
+   "gh",
+   "antora",
+   33
+  ],
+  [
+   "gh",
+   "electrasteel",
+   6
+  ],
+  [
+   "ashby",
+   "brimstone",
+   1
+  ],
+  [
+   "gh",
+   "fictiv",
+   91
+  ],
+  [
+   "lever",
+   "durin",
+   5
+  ],
+  [
+   "lever",
+   "moltenindustries",
+   1
+  ],
+  [
+   "gh",
+   "silananotechnologies",
+   34
+  ],
+  [
+   "ashby",
+   "alloyenterprises",
+   5
+  ],
+  [
+   "ashby",
+   "fourth-power",
+   1
+  ],
+  [
+   "ashby",
+   "formenergy",
+   184
+  ],
+  [
+   "gh",
+   "koboldmetals",
+   33
+  ],
+  [
+   "ashby",
+   "twelve",
+   7
+  ],
+  [
+   "lever",
+   "sila",
+   215
+  ],
+  [
+   "lever",
+   "lumafield",
+   16
+  ],
+  [
+   "gh",
+   "formlabs",
+   204
+  ],
+  [
+   "gh",
+   "carbon",
+   16
+  ],
+  [
+   "gh",
+   "swiftsolar",
+   4
+  ],
+  [
+   "gh",
+   "iconcareers",
+   64
+  ],
+  [
+   "gh",
+   "sirenopt",
+   5
+  ],
+  [
+   "gh",
+   "sesai",
+   42
+  ],
+  [
+   "gh",
+   "rebuildmanufacturing",
+   127
+  ],
+  [
+   "gh",
+   "numattechnologies",
+   1
+  ],
+  [
+   "gh",
+   "vulcanelements",
+   48
+  ],
+  [
+   "gh",
+   "atomicmachines",
+   27
+  ],
+  [
+   "gh",
+   "atomicindustriesinc",
+   17
+  ],
+  [
+   "gh",
+   "volantissemiconductorinc",
+   30
+  ],
+  [
+   "gh",
+   "samsungsemiconductor",
+   61
+  ],
+  [
+   "lever",
+   "viaseparations",
+   2
+  ],
+  [
+   "lever",
+   "boston-materials",
+   12
+  ],
+  [
+   "lever",
+   "PhoenixTailings",
+   26
+  ],
+  [
+   "lever",
+   "layup",
+   25
+  ],
+  [
+   "ashby",
+   "metalenz",
+   1
+  ],
+  [
+   "workable",
+   "americanbatterytechnologycompany",
+   17
+  ],
+  [
+   "smartrecruiters",
+   "Solidigm",
+   53
+  ]
+ ],
+ "workday": [
+  [
+   "amat.wd1",
+   "amat",
+   "External",
+   1907
+  ],
+  [
+   "intel.wd1",
+   "intel",
+   "External",
+   619
+  ],
+  [
+   "kla.wd1",
+   "kla",
+   "Search",
+   961
+  ],
+  [
+   "entegris.wd1",
+   "entegris",
+   "entegriscareers",
+   498
+  ],
+  [
+   "thermofisher.wd5",
+   "thermofisher",
+   "thermofishercareers",
+   3238
+  ],
+  [
+   "agilent.wd5",
+   "agilent",
+   "agilent_Careers",
+   367
+  ],
+  [
+   "micron.wd1",
+   "micron",
+   "External",
+   2780
+  ],
+  [
+   "alcoa.wd5",
+   "alcoa",
+   "Careers",
+   104
+  ],
+  [
+   "cartech.wd5",
+   "cartech",
+   "CTCExternal",
+   50
+  ],
+  [
+   "3m.wd1",
+   "3m",
+   "Search",
+   642
+  ],
+  [
+   "sandvik.wd3",
+   "sandvik",
+   "sandvik-jobs",
+   384
+  ],
+  [
+   "materion.wd5",
+   "materion",
+   "Materion",
+   113
+  ],
+  [
+   "myhr.wd3",
+   "myhr",
+   "PlanseeGroup_Career",
+   177
+  ],
+  [
+   "onto.wd1",
+   "onto",
+   "ONTO_Careers",
+   194
+  ],
+  [
+   "mksinst.wd1",
+   "mksinst",
+   "MKSCareersAmericas",
+   "MKS Instruments"
+  ],
+  [
+   "zeissgroup.wd3",
+   "zeissgroup",
+   "External",
+   "Zeiss"
+  ],
+  [
+   "hitachi.wd1",
+   "hitachi",
+   "hitachi",
+   "Hitachi incl High-Tech"
+  ],
+  [
+   "ppg.wd5",
+   "ppg",
+   "ppg_Careers",
+   692
+  ],
+  [
+   "3m.wd1",
+   "3m",
+   "Search",
+   623
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "Howmet Aerospace",
+    "host": "fa-exty-saasfaprod1.fa.ocs.oraclecloud.com",
+    "site": "CX_1"
+   },
+   {
+    "name": "Arconic",
+    "host": "hdnn.fa.us6.oraclecloud.com",
+    "site": "CX"
+   },
+   {
+    "name": "Solstice Advanced Materials",
+    "host": "ibzdjb.fa.ocs.oraclecloud.com",
+    "site": "SolsticeAdvancedMaterials"
+   },
+   {
+    "name": "Worthington Steel",
+    "host": "cbdt.fa.us2.oraclecloud.com",
+    "site": "cx_3001"
+   }
+  ],
+  "adp": [
+   {
+    "name": "MP Materials",
+    "cid": "2025028d-7acd-4c20-b3da-c49a0d760dac",
+    "ccId": "19000101_000001"
+   }
+  ],
+  "eightfold": [
+   {
+    "name": "Micron",
+    "base": "https://careers.micron.com",
+    "domain": "micron.com"
+   }
+  ],
+  "phenom": [
+   {
+    "name": "ATI Inc.",
+    "base": "https://careers.atimaterials.com"
+   }
+  ],
+  "sap_html": [
+   {
+    "name": "Corning",
+    "base": "https://jobs.corning.com",
+    "note": "2026-09-05: careers.corning.com dead; jobs.corning.com 403s plain GETs (Akamai). Arm blind for Corning — coverage is per-job via LinkedIn/Indeed arms (proven: Staff ME 77753 arrived via both)."
+   },
+   {
+    "name": "Freeport-McMoRan",
+    "base": "https://jobs.fcx.com"
+   },
+   {
+    "name": "Kennametal",
+    "base": "https://careers.kennametal.com"
+   },
+   {
+    "name": "Timken",
+    "base": "https://careers.timken.com"
+   },
+   {
+    "name": "TSMC",
+    "base": "https://ro.careers.tsmc.com"
+   }
+  ],
+  "icims_html": [
+   {
+    "name": "Novelis",
+    "tenant": "novelis"
+   },
+   {
+    "name": "Steel Dynamics",
+    "tenant": "steeldynamics"
+   },
+   {
+    "name": "EaglePicher",
+    "tenant": "eaglepicher"
+   }
+  ]
+ },
+ "misc": [
+  {
+   "kind": "rippling",
+   "name": "Foundation Alloy",
+   "base": "https://ats.rippling.com/foundation-alloy/jobs"
+  },
+  {
+   "kind": "smartrecruiters_search",
+   "name": "Bosch Group",
+   "tenant": "BoschGroup",
+   "note": "feeds.py _SR_TENANTS"
+  }
+ ],
+ "watch": [
+  {
+   "name": "MP Materials",
+   "ats": "adp-automated",
+   "slug": "https://workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid=2025028d-7acd-4c20-b3da-c49a0d760dac&ccId=19000101_000001",
+   "watch_for": [
+    "metallurgist",
+    "R&D metallurg",
+    "process engineer",
+    "materials engineer",
+    "computational",
+    "modeling"
+   ]
+  },
+  {
+   "name": "Lam Research",
+   "ats": "MANUAL",
+   "slug": "see coverage/majors_probe.md",
+   "watch_for": [
+    "materials",
+    "computational",
+    "metallurg"
+   ]
+  },
+  {
+   "name": "Bruker",
+   "ats": "MANUAL",
+   "slug": "see coverage/majors_probe.md",
+   "watch_for": [
+    "materials",
+    "computational",
+    "metallurg"
+   ]
+  },
+  {
+   "name": "Vulcan Elements",
+   "ats": "gh",
+   "slug": "vulcanelements",
+   "watch_for": [
+    "computational",
+    "simulation",
+    "characteriz",
+    "materials scientist",
+    "metallurg",
+    "mechanical",
+    "R&D"
+   ]
+  }
+ ],
+ "feeds": [
+  {
+   "kind": "rss",
+   "name": "acers",
+   "base": "https://careers.ceramics.org/jobs/?display=rss&keywords={kw}",
+   "note": "American Ceramic Society job board RSS; {kw} = each queries.yaml board_term"
+  },
+  {
+   "kind": "html_links",
+   "name": "aist",
+   "base": "https://www.aist.org/professional-development/careers/job-postings",
+   "title_regex": "Metallurg|Materials|Process Engineer|R&D",
+   "note": "AIST steel board; title_regex is the LINK SELECTOR for a page with no job API"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+# tracking/registries/queries.yaml - search terms for every keyword-searched discovery arm. Copy to queries.yaml.
+# Terms are BREADTH, never fit: everything found is scored on its JD text (match.py) and by the blind rubric.
+# Empty lists are legal (that arm is idle and says so). The onboarding interview writes this file in phase 17 from your own
+# field words. Worked examples for three different lives: queries.nurse.yaml.example, queries.software.yaml.example,
+# queries.biologist.yaml.example (same folder). linkedin / indeed lists only matter when those opt-in arms are on in settings.yaml.
+
+workday_terms: []      # sweep.py: one Workday search per term per tenant (3-15 short terms; each costs requests)
+  # - "process engineer"
+  # - "scale-up"
+
+hard_ats_terms: []     # hard_ats.py: Oracle/Eightfold/Phenom/SAP/iCIMS searches (first THREE are used per employer)
+  # - "process"
+  # - "chemical engineer"
+
+board_terms: []        # feeds.py: keyword-searched whole boards (VC portfolio boards, SmartRecruiters search, RSS boards)
+  # - "process engineer"
+
+usajobs: []            # feeds.py USAJobs API (only with your USAJobs key; government track)
+  # - "process engineer"
+
+adzuna: []             # feeds.py Adzuna API (official, free key; settings.yaml run.adzuna + keys.json); quoted phrases allowed
+  # - '"process engineer"'
+  # - '"pilot plant"'
+
+linkedin: []           # feeds.py LinkedIn public guest cards (OPT-IN: settings.yaml run.linkedin_guest, default off); ~2 s per query
+  # - "process engineer"
+
+indeed: []             # feeds.py Indeed via python-jobspy (OPT-IN: settings.yaml run.indeed_jobspy, default off)
+  # - '"process engineer"'

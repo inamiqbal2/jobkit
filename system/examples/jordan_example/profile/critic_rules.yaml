@@ -1,0 +1,32 @@
+# FABRICATED critic rules for Jordan Example (onboarding phases 8 and 14). Generic engine knockouts (eligibility,
+# contract gig) still apply; BELOW LEVEL is OFF via targets.hourly_ok.
+hard_checks:
+  - name: "NEVER-CLAIM CORE: advanced-practice license required (NP / APRN / CRNA)"
+    regex: "(?:must|required to) (?:be|hold|have) (?:a |an )?(?:nurse practitioner|APRN|CRNA|advanced practice)|\\b(?:NP|APRN|CRNA) (?:license|licensure) (?:is )?required"
+  - name: "NEVER-CLAIM CORE: MSN or graduate degree required"
+    regex: "\\bMSN (?:is )?required\\b|master'?s (?:degree )?(?:in nursing )?(?:is )?required|graduate degree required"
+  - name: "WRONG POPULATION: pediatric / neonatal / labor and delivery core"
+    regex: "\\bNICU\\b|neonatal intensive|pediatric intensive|\\bPICU\\b|labor and delivery unit|\\bL&D\\b"
+soft_flags:
+  - name: "soft: CVICU / ECMO / IABP management named - check whether bedside-RN experience is enough"
+    regex: "\\bECMO\\b|\\bIABP\\b|cardiovascular ICU|\\bCVICU\\b|cardiac surgery"
+  - name: "soft: night shift or rotating shifts stated"
+    regex: "night shift|rotating shifts|nights required"
+instrument_owner:
+  verbs: "(manage|operate|run|initiate|insert|place)\\w*[^.]{0,60}"
+  instruments: ["ECMO", "IABP", "Impella", "PICC", "bronchoscop"]
+  min_named: 2
+lane_rules:
+  - {lane: "icu-staff-nurse", regex: "intensive care|critical care|\\bICU\\b|step-down|progressive care"}
+  - {lane: "clinical-educator", regex: "educator|professional development|nurse residency|clinical education"}
+closed_lanes:
+  rule: {min_applied: 5, max_positive: 0}
+  action: advisory
+  title_hint_regex: ""
+priority_advisory:
+  - "soft: CVICU"
+screen_block:
+  APRN: "\\b(?:nurse practitioner|APRN|CRNA)\\b[^.\\n]{0,40}(?:required|license)|licensed (?:nurse practitioner|APRN)"
+  MSN: "\\bMSN (?:is )?required|master'?s (?:degree )?(?:in nursing )?(?:is )?required"
+  peds: "\\bNICU\\b|\\bPICU\\b|neonatal|pediatric intensive"
+screen_auto_exclude_soft: []

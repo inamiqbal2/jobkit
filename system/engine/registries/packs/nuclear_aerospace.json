@@ -1,0 +1,506 @@
+{
+ "pack": "nuclear_aerospace",
+ "description": "Fission, fusion, space launch and satellites, defense primes and startups, national-lab staff boards.",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [
+  [
+   "gh",
+   "spacex",
+   2189
+  ],
+  [
+   "gh",
+   "rocketlab",
+   430
+  ],
+  [
+   "gh",
+   "relativity",
+   352
+  ],
+  [
+   "ashby",
+   "saronic",
+   199
+  ],
+  [
+   "gh",
+   "generalmatter",
+   107
+  ],
+  [
+   "ashby",
+   "helion",
+   104
+  ],
+  [
+   "gh",
+   "muonspace",
+   103
+  ],
+  [
+   "ashby",
+   "radiant-industries",
+   90
+  ],
+  [
+   "gh",
+   "astranis",
+   88
+  ],
+  [
+   "gh",
+   "terrapowerllc",
+   83
+  ],
+  [
+   "gh",
+   "valaratomics",
+   82
+  ],
+  [
+   "lever",
+   "cfsenergy",
+   79
+  ],
+  [
+   "gh",
+   "oklo",
+   72
+  ],
+  [
+   "ashby",
+   "antares",
+   54
+  ],
+  [
+   "lever",
+   "thea.energy",
+   45
+  ],
+  [
+   "gh",
+   "epirus",
+   38
+  ],
+  [
+   "ashby",
+   "fuse",
+   38
+  ],
+  [
+   "lever",
+   "xcimer",
+   31
+  ],
+  [
+   "gh",
+   "pacificfusion",
+   29
+  ],
+  [
+   "gh",
+   "kairospower",
+   23
+  ],
+  [
+   "gh",
+   "standardnuclearinc",
+   20
+  ],
+  [
+   "gh",
+   "albedo",
+   10
+  ],
+  [
+   "gh",
+   "vardaspace",
+   93
+  ],
+  [
+   "ashby",
+   "blue-energy",
+   19
+  ],
+  [
+   "ashby",
+   "proxima-fusion",
+   51
+  ],
+  [
+   "gh",
+   "thea",
+   1
+  ],
+  [
+   "lever",
+   "merlinlabs",
+   23
+  ],
+  [
+   "lever",
+   "last-energy",
+   36
+  ],
+  [
+   "ashby",
+   "turion-space",
+   8
+  ],
+  [
+   "ashby",
+   "hadrian-automation",
+   141
+  ],
+  [
+   "ashby",
+   "radiant",
+   36
+  ],
+  [
+   "ashby",
+   "shield-ai",
+   438
+  ],
+  [
+   "lever",
+   "shieldai",
+   435
+  ],
+  [
+   "gh",
+   "ursamajor",
+   101
+  ],
+  [
+   "lever",
+   "loftorbital",
+   60
+  ],
+  [
+   "lever",
+   "solestial",
+   12
+  ],
+  [
+   "gh",
+   "hawkeye360",
+   18
+  ],
+  [
+   "gh",
+   "supernal",
+   9
+  ],
+  [
+   "gh",
+   "spire",
+   43
+  ],
+  [
+   "ashby",
+   "the-exploration-company",
+   99
+  ],
+  [
+   "gh",
+   "skyryse",
+   13
+  ],
+  [
+   "gh",
+   "andurilindustries",
+   2179
+  ],
+  [
+   "gh",
+   "planetlabs",
+   112
+  ],
+  [
+   "gh",
+   "blacksky",
+   23
+  ],
+  [
+   "gh",
+   "vast",
+   170
+  ],
+  [
+   "gh",
+   "k2spacecorporation",
+   206
+  ],
+  [
+   "gh",
+   "archer56",
+   161
+  ],
+  [
+   "gh",
+   "betatechnologiesinc",
+   102
+  ],
+  [
+   "gh",
+   "lightbridgecorporationanevadacorporation",
+   12
+  ],
+  [
+   "gh",
+   "inversionspace",
+   78
+  ],
+  [
+   "gh",
+   "trueanomalyinc",
+   181
+  ],
+  [
+   "lever",
+   "venusaero",
+   25
+  ],
+  [
+   "lever",
+   "orbaerospace",
+   9
+  ],
+  [
+   "lever",
+   "hermeus",
+   76
+  ],
+  [
+   "lever",
+   "espace",
+   143
+  ],
+  [
+   "gh",
+   "stratolaunch",
+   0
+  ],
+  [
+   "gh",
+   "deepfissioninc",
+   7
+  ],
+  [
+   "ashby",
+   "focused",
+   32
+  ],
+  [
+   "workable",
+   "tokamak-energy",
+   7
+  ],
+  [
+   "ashby",
+   "Marathon Fusion",
+   0
+  ],
+  [
+   "gh",
+   "stokespacetechnologies",
+   66
+  ],
+  [
+   "smartrecruiters",
+   "Thales",
+   2
+  ]
+ ],
+ "workday": [
+  [
+   "gevernova.wd5",
+   "gevernova",
+   "Vernova_ExternalSite",
+   135
+  ],
+  [
+   "globalhr.wd5",
+   "globalhr",
+   "REC_RTX_Ext_Gateway",
+   4450
+  ],
+  [
+   "dukeenergy.wd1",
+   "dukeenergy",
+   "search",
+   "Duke Energy"
+  ],
+  [
+   "curtisswright.wd1",
+   "curtisswright",
+   "CW_External_Career_Site",
+   "Curtiss-Wright"
+  ],
+  [
+   "flir.wd1",
+   "flir",
+   "flircareers",
+   "Teledyne (all)"
+  ],
+  [
+   "blueorigin.wd5",
+   "blueorigin",
+   "blueorigin",
+   0
+  ],
+  [
+   "xenergy.wd5",
+   "xenergy",
+   "X-energyUS",
+   "X-energy"
+  ],
+  [
+   "ngc.wd1",
+   "ngc",
+   "Northrop_Grumman_External_Site",
+   "Northrop Grumman"
+  ],
+  [
+   "leidos.wd5",
+   "leidos",
+   "External",
+   2000
+  ],
+  [
+   "boeing.wd1",
+   "boeing",
+   "External_Careers",
+   742
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "Honeywell",
+    "host": "ibqbjb.fa.ocs.oraclecloud.com",
+    "site": "CX_1"
+   },
+   {
+    "name": "Southern Company / Southern Nuclear",
+    "host": "emje.fa.us6.oraclecloud.com",
+    "site": "SouthernCompanyJobs"
+   },
+   {
+    "name": "Centrus Energy",
+    "host": "eese.fa.us8.oraclecloud.com",
+    "site": "CX"
+   }
+  ],
+  "phenom": [
+   {
+    "name": "GE Aerospace",
+    "base": "https://careers.geaerospace.com",
+    "note": "2026-09-11: moved off Workday (geaerospace.wd1 returns 422); Phenom site, job URLs under /global/en/",
+    "locale": "global/en"
+   }
+  ],
+  "sap_html": [
+   {
+    "name": "Westinghouse",
+    "base": "https://careers.westinghousenuclear.com"
+   },
+   {
+    "name": "BWXT",
+    "base": "https://careers.bwxt.com"
+   },
+   {
+    "name": "Oak Ridge National Laboratory",
+    "base": "https://jobs.ornl.gov",
+    "note": "2026-09-11 market audit: ORNL research-scientist reqs carry no clearance line; LI only surfaces ORNL postdocs"
+   }
+  ],
+  "icims_html": [
+   {
+    "name": "Framatome US",
+    "tenant": "framatome"
+   },
+   {
+    "name": "Pacific Northwest National Laboratory",
+    "tenant": "pnnl"
+   }
+  ]
+ },
+ "misc": [
+  {
+   "kind": "bamboo",
+   "name": "Terrestrial Energy",
+   "base": "https://terrestrialenergy.bamboohr.com"
+  },
+  {
+   "kind": "breezy",
+   "name": "Zeno Power",
+   "base": "https://zeno-power.breezy.hr"
+  },
+  {
+   "kind": "jobvite",
+   "name": "NuScale Power",
+   "base": "https://jobs.jobvite.com/nuscale-power"
+  },
+  {
+   "kind": "rippling",
+   "name": "Aalo Atomics",
+   "base": "https://ats.rippling.com/aalo-atomics/jobs"
+  },
+  {
+   "kind": "rippling",
+   "name": "Zap Energy",
+   "base": "https://ats.rippling.com/zap-energy-careers/jobs"
+  },
+  {
+   "kind": "rippling",
+   "name": "Boom Supersonic",
+   "base": "https://ats.rippling.com/boom-supersonic/jobs"
+  },
+  {
+   "kind": "custom_html",
+   "name": "NANO Nuclear Energy",
+   "base": "https://nanonuclearenergy.com/careers/",
+   "note": "custom WordPress careers page, no ATS API; cards are JS-clickable so the job URL is the page + title anchor",
+   "card_regex": "job-card[^>]*>.*?<h2><strong>([^<]{4,80})</strong></h2>\\s*<p>[^<]*<i[^>]*></i>\\s*([^<]{2,60})"
+  }
+ ],
+ "watch": [
+  {
+   "name": "Thea Energy",
+   "ats": "lever",
+   "slug": "thea.energy",
+   "watch_for": [
+    "material",
+    "plasma",
+    "computational",
+    "characteriz",
+    "mechanical engineer"
+   ]
+  },
+  {
+   "name": "General Atomics",
+   "ats": "MANUAL",
+   "slug": "see coverage/majors_probe.md",
+   "watch_for": [
+    "materials",
+    "computational",
+    "metallurg"
+   ]
+  },
+  {
+   "name": "Pacific Fusion",
+   "ats": "greenhouse",
+   "slug": "pacificfusion",
+   "watch_for": [
+    "material",
+    "metrology",
+    "inspection",
+    "characteriz",
+    "test"
+   ]
+  }
+ ]
+}

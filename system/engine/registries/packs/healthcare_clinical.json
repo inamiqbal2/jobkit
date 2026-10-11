@@ -1,0 +1,180 @@
+{
+ "pack": "healthcare_clinical",
+ "description": "Large hospital systems and clinical employers: Workday and Oracle CX job sites (full keyword search), server-rendered careers sites (Radancy), plus the VA and other federal clinical jobs through USAJobs with your key. Nursing, allied health, clinical educator, pharmacy, lab, therapy, physician roles.",
+ "source": "built 2026-10-11 for jobkit v0.3; every active entry live-fetched that day. Failed that day (watch entries below): HCA Healthcare / HealthONE (careers site answers automation with 403), UCHealth Colorado (403), NYU Langone and UPMC (search rendered in the browser only), Johns Hopkins Medicine (jobs.jhu.edu 403), jobs.kaiserpermanente.org (certificate chain; the kaiserpermanentejobs.org site below works).",
+ "boards": [],
+ "workday": [
+  [
+   "ccf.wd1",
+   "ccf",
+   "ClevelandClinicCareers",
+   "Cleveland Clinic - CXS live 2026-10-11: 2255 hits for ''"
+  ],
+  [
+   "massgeneralbrigham.wd1",
+   "massgeneralbrigham",
+   "MGBExternal",
+   "Mass General Brigham - CXS live 2026-10-11: 2000 hits for ''"
+  ],
+  [
+   "imh.wd108",
+   "imh",
+   "IntermountainCareers",
+   "Intermountain Health - CXS live 2026-10-11: 1449 hits for ''"
+  ],
+  [
+   "denverhealth.wd1",
+   "denverhealth",
+   "DHHA-Main",
+   "Denver Health - CXS live 2026-10-11: 368 hits for ''"
+  ],
+  [
+   "gohealthuc.wd12",
+   "gohealthuc",
+   "External",
+   "GoHealth Urgent Care - CXS live 2026-10-11: 196 hits for 'nurse'"
+  ],
+  [
+   "cvshealth.wd1",
+   "cvshealth",
+   "CVS_Health_Careers",
+   "CVS Health (MinuteClinic, pharmacy) - CXS live 2026-10-11: 122 hits for 'analyst'"
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "Mayo Clinic",
+    "host": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+    "site": "Mayo-US",
+    "note": "Oracle CX; live 2026-10-11: 1,380 openings (558 for 'nurse')"
+   },
+   {
+    "name": "Mount Sinai Health System",
+    "host": "ejis.fa.us6.oraclecloud.com",
+    "site": "CX",
+    "note": "Oracle CX; live 2026-10-11: 603 hits for 'nurse'"
+   },
+   {
+    "name": "UC Health (Cincinnati)",
+    "host": "eswt.fa.us6.oraclecloud.com",
+    "site": "CX_1001",
+    "note": "Oracle CX; live 2026-10-11: 294 hits for 'nurse'"
+   }
+  ]
+ },
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "html_links",
+   "name": "Kaiser Permanente",
+   "base": "https://www.kaiserpermanentejobs.org/search-jobs/{kw}",
+   "href_regex": "^/job/[a-z0-9-]+/[a-z0-9-]+/\\d+/\\d+",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "Radancy search page, server-rendered; live 2026-10-11: 15 job links for 'nurse' (first page); anchor text carries title + location"
+  },
+  {
+   "kind": "html_links",
+   "name": "Cedars-Sinai",
+   "base": "https://careers.cshs.org/search-jobs/{kw}",
+   "href_regex": "^/job/[a-z0-9-]+/[a-z0-9-]+/\\d+/\\d+",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "Radancy search page; live 2026-10-11: 18 job links for 'nurse'"
+  },
+  {
+   "kind": "html_links",
+   "name": "CommonSpirit Health",
+   "base": "https://www.commonspirit.careers/search-jobs/{kw}",
+   "href_regex": "^/job/[a-z0-9-]+/[a-z0-9-]+/\\d+/\\d+",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "Radancy search page (iCIMS behind it; the iCIMS search page itself returns no links); live 2026-10-11: 15 job links for 'nurse'"
+  },
+  {
+   "kind": "html_links",
+   "name": "Children's Hospital Colorado",
+   "base": "https://www.childrenscolorado.org/careers/job-search/?keyword={kw}",
+   "href_regex": "/careers/job-search/[a-z0-9-]+-\\d+/?$",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "server-rendered listing (PeopleSoft behind it, no API); live 2026-10-11: 5 job links for 'nurse' on the first page"
+  },
+  {
+   "kind": "usajobs",
+   "name": "usajobs",
+   "days": 30,
+   "note": "USAJobs search API. NEEDS keys.json usajobs_key + usajobs_email - the person registers the free key at developer.usajobs.gov (onboarding phase 16, only when government jobs interest them). The API answers 401 without a key (verified 2026-10-11); idle until then. Same entry name in every pack so the assembler keeps one copy. organization VATA = Veterans Health Administration (drop the key to search all agencies).",
+   "organization": "VATA"
+  }
+ ],
+ "watch": [
+  {
+   "name": "HCA Healthcare (incl. HealthONE Denver)",
+   "ats": "MANUAL",
+   "slug": "https://careers.hcahealthcare.com/pages/hca-healthone",
+   "watch_for": [
+    "nurse",
+    "RN",
+    "ICU",
+    "educator"
+   ],
+   "note": "careers.hcahealthcare.com answers automation with HTTP 403 (2026-10-11); open it in the browser"
+  },
+  {
+   "name": "UCHealth (Colorado)",
+   "ats": "MANUAL",
+   "slug": "https://careers.uchealth.org/",
+   "watch_for": [
+    "nurse",
+    "RN",
+    "ICU",
+    "educator"
+   ],
+   "note": "HTTP 403 to automated reading (2026-10-11)"
+  },
+  {
+   "name": "NYU Langone Health",
+   "ats": "MANUAL",
+   "slug": "https://jobs.nyulangone.org/job-search-results/",
+   "watch_for": [
+    "nurse",
+    "RN"
+   ],
+   "note": "search results rendered in the browser only (2026-10-11)"
+  },
+  {
+   "name": "UPMC",
+   "ats": "MANUAL",
+   "slug": "https://careers.upmc.com/search/jobs",
+   "watch_for": [
+    "nurse",
+    "RN"
+   ],
+   "note": "search rendered in the browser; the RSS feed returns site pages, not jobs (2026-10-11)"
+  },
+  {
+   "name": "Johns Hopkins Medicine",
+   "ats": "MANUAL",
+   "slug": "https://jobs.hopkinsmedicine.org/",
+   "watch_for": [
+    "nurse",
+    "RN"
+   ],
+   "note": "jobs.jhu.edu (SAP SuccessFactors) answers 403 to automated reading (2026-10-11)"
+  }
+ ]
+}

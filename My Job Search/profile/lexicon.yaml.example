@@ -1,0 +1,14 @@
+# profile/lexicon.yaml - keyword-coverage lexicon for system/engine/tools/keywords.py. Copy to lexicon.yaml.
+# term: {syn: [synonyms that count as present], claim: YES | NEVER | UTIL | ASK}
+#   YES   claimable verbatim (CORE / WORKING in your skills inventory)
+#   UTIL  claimable only with a hedged phrase from approved_claims.yaml -> hedged_phrases (used, not operated)
+#   NEVER never-claim (Article II): reported as an honest gap, never added
+#   ASK   unknown until you confirm it
+# Without this file the engine uses a small generic list of universally claimable business terms only.
+# The onboarding skill seeds it from the skills inventory (phase 8); rows are added per JD afterwards.
+
+# "scale-up":            {syn: ["scale up", "scaleup"], claim: YES}
+# "HPLC":                {syn: ["liquid chromatography"], claim: YES}
+# "NMR":                 {syn: [], claim: UTIL}
+# "Six Sigma":           {syn: ["6 sigma", "DMAIC"], claim: NEVER}
+# "statistical process control": {syn: ["SPC"], claim: ASK}

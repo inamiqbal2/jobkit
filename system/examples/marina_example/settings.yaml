@@ -1,0 +1,100 @@
+# FABRICATED example workspace (see README.md) - "Marina Example", a marine biologist (M.S.) seeking funded PhD positions and
+# paid research jobs in coral-reef science. Shape = My Job Search/settings.yaml.example. Every value below is invented (2026-10-09).
+identity:
+  name: "Marina Example"
+  first_name: "Marina"
+  email: "marina.example@example.com"
+  phone: "808.555.0162"
+  city_state: "Kaneohe, HI"
+  links: ["linkedin.com/in/marina-example", "orcid.org/0000-0000-0000-0000"]
+
+work_authorization:
+  resume_line: "U.S. Citizen"
+  citizenship_only_roles_open: true
+  clearance_possible: true
+  export_controlled_open: true
+  sponsorship_needed: false
+  permanent_resident: false
+
+location:
+  home: "Kaneohe, HI"
+  country: "US"                        # United States incl. HI, PR, GU, VI, AS, MP (system/engine/tools/geo.py counts territories as inside)
+  commute_radius_miles: 40
+  commutable_metros: ["Honolulu HI", "Kaneohe HI", "Oahu"]
+  relocation: "yes"                    # field scientists move to the reef: Florida Keys, Puerto Rico, Guam, Hawaii, California all open
+  tier1_regex: "Honolulu|Kaneohe|Oahu|Hawaii|Hawai.i|\\bHI\\b|Remote"
+  tier2_regex: "Florida|\\bFL\\b|Puerto Rico|\\bPR\\b|Guam|\\bGU\\b|Virgin Islands|\\bVI\\b|Saipan|\\bMP\\b|American Samoa|San Diego|La Jolla|California|\\bCA\\b|Woods Hole|Massachusetts|\\bMA\\b"
+
+lanes:
+  - name: "coral-reef-research"
+    description: "Paid research positions in coral-reef ecology: research assistant, research technician, lab manager, field scientist, program coordinator at universities, marine labs, NOAA partners, state agencies and conservation NGOs"
+    example_titles: ["Research Assistant", "Research Technician", "Laboratory Manager", "Field Scientist", "Marine Biologist", "Coral Restoration Technician", "Program Coordinator", "Benthic Ecologist"]
+    never_claims: ["PhD", "PI on a funded grant", "divemaster instructor rating", "boat captain license (USCG)", "Python"]
+    priority: true
+    packs: ["academic_marine_bio"]
+  - name: "phd-coral"
+    description: "Funded PhD positions, studentships and graduate research assistantships in coral-reef ecology, restoration, symbiosis, reef resilience or benthic ecology (US programs)"
+    example_titles: ["PhD Position", "Graduate Research Assistant", "PhD Studentship", "Doctoral Student", "Graduate Assistantship"]
+    never_claims: ["prior PhD-level publications as first author in Nature/Science"]
+    priority: false
+    packs: ["academic_marine_bio"]
+  - name: "field-biology-transferable"
+    description: "Adjacent field/lab biology roles whose daily work is benthic surveys, water-quality sampling, eDNA/lab techniques, R and GIS analysis (fisheries, seagrass, mangrove, aquaculture research)"
+    example_titles: ["Fisheries Technician", "Biological Scientist", "Environmental Scientist", "Data Technician"]
+    never_claims: ["electrofishing certification", "commercial aquaculture operations"]
+    priority: false
+    packs: []
+
+targets:                               # 2026-10-09 academic path (system/engine/tools/userconfig.py targets())
+  phd_positions: true                  # PhD positions / studentships / graduate research assistantships are IN scope
+  fixed_term_ok: true                  # "temporary" / fixed-term research posts are NOT an eligibility drop
+  hourly_ok: true                      # technician posts are the target: hourly pay / HS-minimum wording is not "below level"
+
+thresholds:
+  build_default_min_rubric: 60
+  commutable_min_rubric: 45
+  auto_skip_below_rubric: 40
+  jd_gate: 0.28                        # FALLBACK; profile/signals.yaml thresholds win (calibrated 2026-10-09, see my-rules.md)
+  band_midpoint_ceiling: null
+  low_band_top: null
+
+exclusions:
+  employers: []
+  role_types: ["aquarist", "aquarium (sales|retail)", "dive (instructor|guide)s?", "boat captains?", "recruit(er|ers|ing|ment)", "sales"]
+  contract_work: false
+  postdocs: false                      # an M.S. holder is not eligible for postdoctoral positions -> postdoc titles are DROPPED
+
+salary:
+  floor: 42000
+  target: 55000
+  currency: "USD"
+
+modules:
+  inbox_sweep: false
+  outreach: false
+
+run:
+  adzuna: false
+  linkedin_guest: true
+  indeed_jobspy: true                  # needs `pip install -r requirements-optional.txt`; feeds.py skips the arm if python-jobspy is absent
+  window_days: 30
+
+build:
+  format: "academic_cv"                # multi-page CV (resume_builder.AcademicCV); "resume" = the one-page industry format
+  cv_filename: "CV_Marina_Example.docx"
+  cv_min_pages: 2
+  cv_max_pages: 3
+  resume_filename: "Resume_Marina_Example.docx"
+  min_experience_entries: 3
+  location_line_default: "Open to relocation"
+
+education:                             # one-page resume lines; the CV uses profile/approved_claims.yaml -> cv.education
+  - institution: "Example Pacific University"
+    dates: "Aug 2021 - May 2023"
+    line: "M.S. in Marine Biology, Honolulu, HI  |  Thesis: Thermal tolerance of Montipora capitata recruits under repeated bleaching"
+  - institution: "Example State University"
+    dates: "Aug 2016 - May 2020"
+    line: "B.S. in Biology (Marine Science concentration), Cum Laude, Tampa, FL"
+
+verification:
+  employer_tokens: ["Example Pacific University", "Example Reef Institute", "Example Keys Restoration Program"]

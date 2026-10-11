@@ -1,0 +1,53 @@
+# profile/critic_rules.yaml - what the adversarial critic and the min-quals screen know about YOUR limits.
+# Copy to critic_rules.yaml. Read by system/engine/tools/critic.py, screen_minquals.py and daily.py.
+# Generic knockouts stay in the engine (eligibility per your work-authorization flags, new-grad gates, contract
+# gigs per exclusions.contract_work, hourly/HS-tier reqs). Everything below is field-specific and starts EMPTY.
+# The onboarding skill fills it in phase 8 (from the skills inventory NEVER CLAIM list) and phase 17 (lane rules).
+
+# ---- critic HOLD classes: a non-negated match anywhere in the JD = HOLD unless the override is logged ----
+# Typical entries: a core duty you have never done ("NEVER-CLAIM CORE: ..."), a wrong domain the JD's spine
+# belongs to ("WRONG DOMAIN: ..."), a lane your outcomes closed ("CLOSED-LANE: ..."). Name + regex.
+hard_checks: []
+#  - name: "NEVER-CLAIM CORE: GMP batch release"
+#    regex: "\\bGMP\\b|batch release|QA release"
+#  - name: "WRONG DOMAIN: clinical / wet lab"
+#    regex: "cell culture|antibody|protein purification"
+
+# ---- soft flags: warn only (a cue that is fine in one framing and fatal in another) ----
+soft_flags: []
+#  - name: "soft: FEA/CFD named - check whether practitioner-core or peripheral"
+#    regex: "ANSYS|COMSOL|Abaqus|\\bCFD\\b"
+
+# ---- instrument-owner profile: N un-operated instruments + method-development verbs = HOLD ----
+# instruments: every instrument/platform your skills inventory marks USED-NOT-OPERATED or NEVER.
+instrument_owner:
+  verbs: "(develop|validate|optimize|maintain|calibrat)\\w*[^.]{0,80}(methods? for|techniques? for)?[^.]{0,80}"
+  instruments: []
+  min_named: 4
+
+# ---- lane rules: JD text -> the state.db Lane label, for the per-lane track record line ----
+lane_rules: []
+#  - {lane: "process-engineering", regex: "process engineer|scale-?up|pilot plant"}
+
+# ---- closed lanes: COMPUTED from tracking/state.db outcomes, never hard-coded ----
+# A lane is CLOSED when it has >= min_applied applications and <= max_positive positive responses
+# (Status interviewing/advanced/closed). action: advisory (print a warning) | hold (critic HOLD).
+# title_hint_regex: queue annotation "lane?" on titles that look like a closed lane - annotation only, never a drop.
+closed_lanes:
+  rule: {min_applied: 5, max_positive: 0}
+  action: advisory
+  title_hint_regex: ""
+
+# ---- hard-check names that are only ADVISORY inside the priority lane (lanes.py), e.g. method lists ----
+priority_advisory: []
+#  - "NEVER-CLAIM CORE: DFT"
+
+# ---- min-quals screen knockouts: in the MINIMUM block = fatal (BLOCKED -> judgment as a flagged STRETCH),
+# in PREFERRED = soft flag. Keys are short labels; "clearance" and "citizen-only" are built in. ----
+screen_block: {}
+#  DFT: "\\bDFT\\b|density functional|ab initio"
+#  bio: "cell culture|antibody|protein|genomic|immunolog|vaccine|GMP|clinical"
+
+# ---- soft-flag keys that auto-exclude a posting from the judgment queue (a domain you have never once applied to) ----
+screen_auto_exclude_soft: []
+#  - bio

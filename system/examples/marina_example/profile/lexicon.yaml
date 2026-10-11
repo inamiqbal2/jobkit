@@ -1,0 +1,29 @@
+# FABRICATED lexicon for Marina Example (phase 8, 2026-10-09). {term: {syn: [...], claim: YES|UTIL|NEVER|ASK}}
+coral reef ecology: {syn: ["coral reef", "reef ecology", "reef ecosystems"], claim: YES}
+coral bleaching: {syn: ["bleaching", "thermal stress"], claim: YES}
+coral restoration: {syn: ["outplanting", "coral nursery", "restoration"], claim: YES}
+benthic surveys: {syn: ["benthic survey", "transect surveys", "photoquadrat", "photo-quadrat"], claim: YES}
+photogrammetry: {syn: ["structure-from-motion", "SfM", "orthomosaic", "Agisoft Metashape"], claim: YES}
+eDNA: {syn: ["environmental DNA", "DNA extraction", "metabarcoding"], claim: YES}
+coral spawning: {syn: ["spawning", "larval rearing", "larval settlement", "recruitment"], claim: YES}
+water quality: {syn: ["water-quality sampling", "nutrient sampling", "YSI"], claim: YES}
+carbonate chemistry: {syn: ["total alkalinity", "pH", "ocean acidification"], claim: YES}
+PAM fluorometry: {syn: ["PAM", "pulse-amplitude modulated", "Diving-PAM", "Fv/Fm"], claim: YES}
+scientific diving: {syn: ["AAUS", "SCUBA", "scientific diver", "dive operations"], claim: YES}
+small boat operations: {syn: ["boat operations", "boat handling", "MOCC", "vessel"], claim: YES}
+first aid: {syn: ["CPR", "DAN O2", "oxygen provider", "first responder"], claim: YES}
+R: {syn: ["RStudio", "tidyverse", "ggplot2", "vegan", "mixed models"], claim: YES}
+GIS: {syn: ["QGIS", "ArcGIS", "ArcGIS Pro", "spatial analysis"], claim: YES}
+data analysis: {syn: ["statistical analysis", "data management", "QA/QC"], claim: YES}
+field biology: {syn: ["field work", "field sampling", "field season"], claim: YES}
+laboratory techniques: {syn: ["lab techniques", "lab protocols", "aquarium husbandry (research)"], claim: YES}
+teaching: {syn: ["teaching assistant", "mentoring", "undergraduate mentoring"], claim: YES}
+Python: {syn: ["pandas", "scripting"], claim: NEVER}
+ROV: {syn: ["remotely operated vehicle", "AUV"], claim: NEVER}
+qPCR: {syn: ["quantitative PCR", "RT-qPCR"], claim: UTIL}
+Illumina sequencing: {syn: ["library prep", "NGS"], claim: UTIL}
+flow cytometry: {syn: ["flow cytometer"], claim: NEVER}
+USCG captain license: {syn: ["OUPV", "captain's license"], claim: NEVER}
+divemaster: {syn: ["dive instructor", "PADI instructor"], claim: NEVER}
+grant writing: {syn: ["proposal writing", "funding proposals"], claim: ASK}
+project management: {syn: ["manage projects", "project schedule"], claim: ASK}

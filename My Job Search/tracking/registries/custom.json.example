@@ -1,0 +1,17 @@
+{
+ "pack": "custom",
+ "description": "Your own employers. Same shape as system/engine/registries/packs/*.json. Copy to custom.json.",
+ "boards": [
+  ["gh", "example-company-greenhouse-slug", "added <date> - why"],
+  ["lever", "example-lever-slug", ""],
+  ["ashby", "example-ashby-slug", ""]
+ ],
+ "workday": [
+  ["examplecorp.wd5", "examplecorp", "External", "Example Corp"]
+ ],
+ "hard": {},
+ "misc": [],
+ "watch": [
+  {"name": "Dream Employer", "ats": "MANUAL", "slug": "https://dream.example.com/careers", "watch_for": ["process engineer", "scale-up"]}
+ ]
+}

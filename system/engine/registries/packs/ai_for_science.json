@@ -1,0 +1,249 @@
+{
+ "pack": "ai_for_science",
+ "description": "AI-for-science labs, scientific-software vendors, materials-informatics startups.",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [
+  [
+   "gh",
+   "lilasciences",
+   129
+  ],
+  [
+   "ashby",
+   "periodic-labs",
+   28
+  ],
+  [
+   "gh",
+   "recursionpharmaceuticals",
+   15
+  ],
+  [
+   "ashby",
+   "cuspai",
+   15
+  ],
+  [
+   "gh",
+   "enthought",
+   6
+  ],
+  [
+   "gh",
+   "schrdinger",
+   21
+  ],
+  [
+   "gh",
+   "deepmind",
+   9
+  ],
+  [
+   "lever",
+   "RadicalAI",
+   2
+  ],
+  [
+   "ashby",
+   "sandboxaq",
+   27
+  ],
+  [
+   "workable",
+   "mat3ra",
+   11
+  ],
+  [
+   "ashby",
+   "orbitalindustries",
+   "AI-materials census 2026-09-03"
+  ],
+  [
+   "workable",
+   "chemix",
+   "AI-materials census 2026-09-03"
+  ],
+  [
+   "smartrecruiters",
+   "MaterialsNexus",
+   "AI-materials census 2026-09-03"
+  ],
+  [
+   "lever",
+   "tri",
+   "AI-materials census 2026-09-03 (Toyota Research Institute)"
+  ]
+ ],
+ "workday": [
+  [
+   "nvidia.wd5",
+   "nvidia",
+   "NVIDIAExternalCareerSite",
+   132
+  ]
+ ],
+ "hard": {},
+ "misc": [
+  {
+   "kind": "wprss",
+   "name": "Aionics",
+   "base": "https://aionics.io/job/feed/"
+  },
+  {
+   "kind": "rippling",
+   "name": "Citrine Informatics",
+   "base": "https://ats.rippling.com/citrine-informatics/jobs"
+  }
+ ],
+ "watch": [
+  {
+   "name": "Radical AI",
+   "ats": "lever",
+   "slug": "RadicalAI",
+   "watch_for": [
+    "material",
+    "computational",
+    "metallurg",
+    "alloy",
+    "characteriz",
+    "scientist",
+    "simulation",
+    "R&D"
+   ]
+  },
+  {
+   "name": "Periodic Labs",
+   "ats": "ashby",
+   "slug": "periodic-labs",
+   "watch_for": [
+    "computational",
+    "simulation",
+    "material",
+    "mechanic",
+    "thermal",
+    "research scientist"
+   ]
+  },
+  {
+   "name": "Orbital Industries",
+   "ats": "ashby",
+   "slug": "orbitalindustries",
+   "watch_for": [
+    "material",
+    "scientist",
+    "research",
+    "characterization",
+    "simulation",
+    "data"
+   ]
+  },
+  {
+   "name": "LinkedIn materials+AI sweep",
+   "ats": "MANUAL",
+   "slug": "linkedin.com/jobs search: \"materials scientist\" AI agents OR \"AI for materials\"",
+   "watch_for": [
+    "materials",
+    "AI",
+    "agents",
+    "research scientist"
+   ]
+  },
+  {
+   "name": "Microsoft AI for Science",
+   "ats": "MANUAL",
+   "slug": "https://jobs.careers.microsoft.com (search: materials AI for science)",
+   "watch_for": [
+    "materials",
+    "scientist",
+    "chemistry",
+    "simulation"
+   ]
+  },
+  {
+   "name": "Meta FAIR Chemistry",
+   "ats": "MANUAL",
+   "slug": "https://www.metacareers.com (search: FAIR chemistry materials)",
+   "watch_for": [
+    "materials",
+    "chemistry",
+    "research scientist"
+   ]
+  },
+  {
+   "name": "Lila Sciences",
+   "ats": "greenhouse",
+   "slug": "lilasciences",
+   "watch_for": [
+    "material",
+    "multiscale",
+    "multiphysics",
+    "simulation",
+    "characteriz",
+    "computational",
+    "mechanic"
+   ]
+  },
+  {
+   "name": "CuspAI",
+   "ats": "ashby",
+   "slug": "cuspai",
+   "watch_for": [
+    "material",
+    "computational",
+    "simulation",
+    "applications",
+    "scientific software",
+    "research engineer"
+   ]
+  },
+  {
+   "name": "Enthought",
+   "ats": "gh",
+   "slug": "enthought",
+   "watch_for": [
+    "material",
+    "scientific software",
+    "simulation",
+    "computational",
+    "data scientist"
+   ]
+  },
+  {
+   "name": "NVIDIA (AI for Science / ALCHEMI)",
+   "ats": "MANUAL",
+   "slug": "https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite (search: material science, chemistry, ALCHEMI, computational)",
+   "watch_for": [
+    "material science",
+    "chemistry",
+    "ALCHEMI",
+    "computational",
+    "applications engineer",
+    "solutions architect"
+   ]
+  },
+  {
+   "name": "Citrine Informatics / Mat3ra / Orbital Materials / Entalpic",
+   "ats": "MANUAL",
+   "slug": "no public JSON board (checked 2026-09-15: gh/lever/ashby all 404) - check company sites directly",
+   "watch_for": [
+    "material",
+    "informatics",
+    "simulation",
+    "applications",
+    "scientific software"
+   ]
+  },
+  {
+   "name": "Schrodinger (Materials Science)",
+   "ats": "MANUAL",
+   "slug": "https://www.schrodinger.com/careers (search: materials science, force field, simulation)",
+   "watch_for": [
+    "material",
+    "force field",
+    "simulation",
+    "computational",
+    "applications scientist"
+   ]
+  }
+ ]
+}

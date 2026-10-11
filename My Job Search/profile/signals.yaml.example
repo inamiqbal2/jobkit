@@ -1,0 +1,64 @@
+# profile/signals.yaml - the match engine's idea of "this JD is talking to me". Copy to signals.yaml.
+# Read by system/engine/tools/match.py (corpus scoring + the title-blind judgment gate) and system/engine/tools/lanes.py.
+# EVERYTHING here is field-specific and belongs to you. An empty file is legal: the engine then ranks on
+# TF-IDF cosine to your profile only, with no signature floor and no lane gates, and prints a warning on
+# every run. The onboarding skill fills this file in phase 17 (first draft) and phase 18 (calibration).
+#
+# How a JD is scored (match.py):
+#   score = 0.55 * min(cosine(profile, JD) / 0.14, 1) + 0.45 * min(max(sig, 0), 40) / 40
+#   sig  = weighted hits of the HOME lane terms (cap 3 hits per term; negatives cap 2)
+#   sigx = weighted hits of the TRANSFERABLE terms (same shape)
+# The judgment gate (one rule for every arm, JD text only, never the title):
+#   PASS if score >= thresholds.jd_gate AND (sig >= sig_min OR (sigx >= sigx_min AND sig > sig_floor))
+#   else, for each lane with role: gate - PASS if the JD is not a stub AND sigx >= gate.sigx_min AND
+#        domain-signature >= gate.domain_min AND cosine(JD, lane_ref text) >= gate.cos_min AND sig > sig_floor
+#
+# Patterns are Python regexes matched case-insensitively against "title + JD text". Weight = specificity:
+# 4 = only my field says this, 2 = common in my field, 1 = weak hint, negative = pushes a domain away.
+
+lanes:
+  # ---- HOME lane(s): "is this JD about my field?" (every lane with role: home is merged into one table) ----
+  my-field:
+    role: home
+    terms:
+      # - {pattern: "\\bpilot plant\\b", weight: 4}
+      # - {pattern: "\\bscale-?up\\b", weight: 3}
+      # - {pattern: "\\bprocess (development|optimization)\\b", weight: 3}
+      # - {pattern: "\\bpython\\b", weight: 1}
+    negatives:
+      # - {pattern: "\\bcell culture|\\bassay\\b|\\bin vivo\\b", weight: -4}
+
+  # ---- TRANSFERABLE lane: "does the work run on my portable strengths, whatever the field?" (optional) ----
+  transferable:
+    role: transferable
+    terms:
+      # - {pattern: "\\bdesign of experiments|\\bdoe\\b", weight: 3}
+      # - {pattern: "\\bstatistical (analysis|model)|\\bstatistics\\b", weight: 1}
+      # - {pattern: "\\bmodel (validation|verification|calibration)", weight: 4}
+    negatives:
+      # - {pattern: "\\bcashier|\\bforklift|\\bcdl\\b", weight: -6}
+
+  # ---- GATE lane(s): a second door for a target field your home profile cannot reach on cosine (optional) ----
+  # other-field:
+  #   role: gate
+  #   lane_ref: profile/lane_ref_other-field.md     # plain description of the REQUIRED WORK (not a claim about you)
+  #   terms:
+  #     - {pattern: "\\bmodel risk\\b", weight: 4}
+  #   negatives:
+  #     - {pattern: "\\bbranch\\b|\\bteller\\b", weight: -6}
+  #   gate: {sigx_min: 8, domain_min: 15, cos_min: 0.05}
+
+thresholds:
+  jd_gate: 0.28      # the bar; RECALIBRATE on your own corpus (onboarding phase 18) - 0.28 was fit to one person's corpus
+  sig_min: 4         # home-signature weight required with the bar (two weight-2 terms or one weight-4)
+  sigx_min: 12       # transferable-signature rescue line (junk JDs score <= 3; genuine transferable roles 12-35)
+  sig_floor: -4      # a JD whose home signature is this negative is never rescued on transferable signal alone
+
+# ---- PRIORITY LANE patterns (lanes.py) - used only when a settings.yaml lane has `priority: true` ----
+# exclude: domains that are never the lane whatever the title says; strong: title alone suffices;
+# weak: generic title words that count only with an anchor word in the JD text; anchor: your domain words.
+priority_patterns:
+  exclude: []
+  strong: []
+  weak: []
+  anchor: []

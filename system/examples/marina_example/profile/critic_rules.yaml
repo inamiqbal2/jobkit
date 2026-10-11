@@ -1,0 +1,36 @@
+# FABRICATED critic rules for Marina Example (steps 6/10, 2026-10-09). The never-claims below are the ones an M.S.-level
+# coral-reef biologist typically cannot claim; the USER completes them during onboarding (every entry here is a placeholder
+# the user must confirm or delete). Generic engine knockouts (eligibility, contract gig, hourly tier) still apply;
+# GRAD-GATE is OFF because settings.yaml targets.phd_positions is true.
+hard_checks:
+  - name: "NEVER-CLAIM CORE: PhD required as a hard minimum (an M.S. cannot apply)"
+    regex: "(?:Ph\\.?D\\.?|doctoral degree|doctorate)[^.\\n]{0,40}(?:is )?required\\b|requires? (?:a )?(?:Ph\\.?D|doctor)|must (?:hold|have) (?:a )?(?:Ph\\.?D|doctor)"
+  - name: "NEVER-CLAIM CORE: USCG captain's license / licensed vessel master as a core duty"
+    regex: "USCG (?:captain|master|OUPV|licen[cs]e)[^.\\n]{0,40}required|licensed (?:boat )?captain required"
+  - name: "NEVER-CLAIM CORE: dive instructor / divemaster rating required"
+    regex: "(?:divemaster|dive instructor|instructor rating)[^.\\n]{0,40}required"
+  - name: "WRONG DOMAIN: software / clinical / aquarium retail core"
+    regex: "software engineer|full[- ]stack|clinical trial|patient care|aquarium (?:sales|retail)"
+soft_flags:
+  - name: "soft: PhD preferred (M.S. may still apply) - check the years bar"
+    regex: "Ph\\.?D\\.?[^.\\n]{0,30}preferred|preferred: Ph\\.?D"
+  - name: "soft: remote-sensing / satellite-only role - field skills may not matter"
+    regex: "satellite (?:imagery|remote sensing)|Landsat|Sentinel-2"
+instrument_owner:
+  verbs: "(develop|validate|optimize|maintain|calibrat)\\w*[^.]{0,80}(methods? for|techniques? for)?[^.]{0,80}"
+  instruments: ["ROV", "AUV", "flow cytometer", "mass spectrometer", "qPCR", "Illumina", "multibeam sonar"]
+  min_named: 3
+lane_rules:
+  - {lane: "coral-reef-research", regex: "coral|reef|bleach|benthic"}
+  - {lane: "phd-coral", regex: "Ph\\.?D (?:position|student|studentship|candidate)|graduate (?:research )?assistant|doctoral"}
+  - {lane: "field-biology-transferable", regex: "fisheries|estuar|seagrass|mangrove|water quality|field technician"}
+closed_lanes:
+  rule: {min_applied: 5, max_positive: 0}
+  action: advisory
+  title_hint_regex: ""
+priority_advisory: ["PhD required"]      # inside the priority lane a PhD-required hit is advisory (some say "PhD or MS + experience")
+screen_block:
+  phd-required: "(?:Ph\\.?D\\.?|doctoral degree|doctorate)[^.\\n]{0,40}(?:is )?required\\b|requires? (?:a )?(?:Ph\\.?D|doctor)"
+  captain-license: "USCG (?:captain|master|OUPV)[^.\\n]{0,40}required"
+  dive-instructor: "(?:divemaster|dive instructor)[^.\\n]{0,40}required"
+screen_auto_exclude_soft: []

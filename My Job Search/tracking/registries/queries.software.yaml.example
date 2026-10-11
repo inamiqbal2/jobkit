@@ -1,0 +1,12 @@
+# EXAMPLE search terms for a SOFTWARE ENGINEER (tech / industry track) - copy to queries.yaml and edit, or let the
+# onboarding interview generate queries.yaml from your own field words in phase 17.
+# Terms are BREADTH only: everything found is judged on the posting's text (match.py) and by two blind scorers; never on a term.
+# Greenhouse / Lever / Ashby boards in the tech_software pack need NO terms (their full text is read every run); the lists
+# below feed the keyword-searched arms only.
+workday_terms: ["software engineer", "backend engineer", "full stack", "platform engineer", "site reliability", "data engineer"]
+hard_ats_terms: ["software engineer", "backend", "platform"]   # the first THREE are used per employer
+board_terms: ["software engineer", "backend engineer", "platform engineer"]
+usajobs: ["software developer", "IT specialist (APPSW)", "computer scientist"]   # only with your USAJobs key (government track)
+adzuna: ['"software engineer"', '"backend engineer"', '"full stack engineer"', '"platform engineer"', '"site reliability engineer"']   # official API, free key
+linkedin: ["software engineer backend", "full stack engineer", "platform engineer", "site reliability engineer"]   # opt-in arm (run.linkedin_guest)
+indeed: ['"software engineer"', '"backend engineer"', '"full stack"']                                             # opt-in arm (run.indeed_jobspy)

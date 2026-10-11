@@ -1,0 +1,61 @@
+{
+ "pack": "custom",
+ "description": "FABRICATED example: Jordan's five target employers as system/engine/tools/discover_boards.py registered them on 2026-10-11 (Workday x2 verified live, one server-rendered listing, one watch entry), plus the one correction the person made when the result was read back: the tool had matched 'UCHealth' to UC Health Cincinnati's Oracle site (eswt.fa.us6.oraclecloud.com/CX_1001, 435 openings) - a namesake - so that entry was removed and UCHealth Colorado became a watch entry (careers.uchealth.org answers 403 to automated reading).",
+ "boards": [],
+ "workday": [
+  [
+   "imh.wd108",
+   "imh",
+   "IntermountainCareers",
+   "added 2026-10-11 by discover_boards: 1449 openings"
+  ],
+  [
+   "denverhealth.wd1",
+   "denverhealth",
+   "DHHA-Main",
+   "added 2026-10-11 by discover_boards: 368 openings"
+  ]
+ ],
+ "hard": {},
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "html_links",
+   "name": "Children's Hospital Colorado",
+   "base": "https://www.childrenscolorado.org/careers/job-search/?keyword={kw}",
+   "href_regex": "/careers/job\\-search/[a-z0-9-]+-\\d{3,}/?$",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "added 2026-10-11 by discover_boards: server-rendered listing, 5 job links under /careers/job-search/ on https://www.childrenscolorado.org/careers/job-search/; keyword param assumed"
+  }
+ ],
+ "watch": [
+  {
+   "name": "HealthONE",
+   "ats": "MANUAL",
+   "slug": "https://careers.hcahealthcare.com/pages/hca-healthone",
+   "watch_for": [
+    "registered nurse",
+    "ICU nurse",
+    "critical care",
+    "clinical educator"
+   ],
+   "note": "added 2026-10-11 by discover_boards: no verifiable job-board API found (https://careers.hcahealthcare.com/pages/hca-healthone did not answer (HTTPError: HTTP Error 403: Forbidden); Phenom https://www.myhealthone.com: HTTPError; careers page https://www.myhealthone.com/: ValueError)"
+  },
+  {
+   "name": "UCHealth (Colorado)",
+   "ats": "MANUAL",
+   "slug": "https://careers.uchealth.org/",
+   "watch_for": [
+    "registered nurse",
+    "ICU nurse",
+    "critical care",
+    "clinical educator"
+   ],
+   "note": "added 2026-10-11 by hand after the read-back: discover_boards found the Cincinnati namesake (removed); the Colorado careers site answers HTTP 403 to automation"
+  }
+ ]
+}

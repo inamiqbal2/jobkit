@@ -1,0 +1,84 @@
+{
+ "pack": "business_marketing_sales",
+ "description": "Marketing, sales, operations, finance, HR and general business roles: a small set of large employers' Workday job sites that post generically. Deliberately small - for these roles the discovery arms (Adzuna with its free official key; LinkedIn/Indeed if you opt in) and your own target employers (discover_boards.py) find most of the volume.",
+ "source": "built 2026-10-11 for jobkit v0.3; every tenant answered the Workday CXS search that day (hits for 'analyst' in the note). Not on a reachable Workday tenant under the obvious names that day: Accenture, Deloitte, American Express, Capital One, Walmart, Nike, Marriott, Hilton, Bank of America, Wells Fargo (myworkdaysite form - see finance_quant), PepsiCo, Johnson & Johnson, GE, Starbucks, McDonald's, UPS, FedEx, Verizon, AT&T, Comcast.",
+ "boards": [],
+ "workday": [
+  [
+   "salesforce.wd12",
+   "salesforce",
+   "External_Career_Site",
+   "Salesforce - CXS live 2026-10-11: 129 hits for 'analyst'"
+  ],
+  [
+   "pg.wd5",
+   "pg",
+   "1000",
+   "Procter & Gamble - CXS live 2026-10-11: 362 hits for 'analyst'"
+  ],
+  [
+   "target.wd5",
+   "target",
+   "targetcareers",
+   "Target - CXS live 2026-10-11: 35 hits for 'analyst'"
+  ],
+  [
+   "homedepot.wd5",
+   "homedepot",
+   "CareerDepot",
+   "The Home Depot - CXS live 2026-10-11: 220 hits for 'analyst'"
+  ],
+  [
+   "mastercard.wd1",
+   "mastercard",
+   "CorporateCareers",
+   "Mastercard - CXS live 2026-10-11: 126 hits for 'analyst'"
+  ],
+  [
+   "visa.wd5",
+   "visa",
+   "Visa",
+   "Visa - CXS live 2026-10-11: 135 hits for 'analyst'"
+  ],
+  [
+   "paypal.wd1",
+   "paypal",
+   "jobs",
+   "PayPal - CXS live 2026-10-11: 217 hits for 'analyst'"
+  ],
+  [
+   "disney.wd5",
+   "disney",
+   "disneycareer",
+   "The Walt Disney Company - CXS live 2026-10-11: 36 hits for 'analyst'"
+  ],
+  [
+   "tmobile.wd1",
+   "tmobile",
+   "External",
+   "T-Mobile - CXS live 2026-10-11: 63 hits for 'analyst'"
+  ],
+  [
+   "3m.wd1",
+   "3m",
+   "Search",
+   "3M - CXS live 2026-10-11: 229 hits for 'analyst'"
+  ],
+  [
+   "truist.wd1",
+   "truist",
+   "Careers",
+   "Truist - CXS live 2026-10-11: 302 hits for 'analyst'"
+  ],
+  [
+   "pnc.wd5",
+   "pnc",
+   "External",
+   "PNC - CXS live 2026-10-11: 216 hits for 'analyst'"
+  ]
+ ],
+ "hard": {},
+ "misc": [],
+ "feeds": [],
+ "watch": []
+}

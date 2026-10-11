@@ -1,0 +1,222 @@
+{
+ "pack": "finance_quant",
+ "description": "Trading firms, banks, asset managers, insurers and exchanges (model validation / quant analytics / quant research).",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [
+  [
+   "gh",
+   "akunacapital",
+   41
+  ],
+  [
+   "gh",
+   "jumptrading",
+   109
+  ],
+  [
+   "gh",
+   "point72",
+   215
+  ],
+  [
+   "gh",
+   "imc",
+   174
+  ],
+  [
+   "gh",
+   "virtu",
+   46
+  ],
+  [
+   "gh",
+   "wehrtyou",
+   90
+  ],
+  [
+   "gh",
+   "squarepointcapital",
+   89
+  ],
+  [
+   "gh",
+   "towerresearchcapital",
+   93
+  ],
+  [
+   "gh",
+   "flowtraders",
+   47
+  ],
+  [
+   "gh",
+   "aqr",
+   53
+  ],
+  [
+   "gh",
+   "worldquant",
+   95
+  ],
+  [
+   "gh",
+   "schonfeld",
+   67
+  ],
+  [
+   "gh",
+   "oldmissioncapital",
+   38
+  ],
+  [
+   "gh",
+   "janestreet",
+   233
+  ],
+  [
+   "gh",
+   "drweng",
+   178
+  ],
+  [
+   "gh",
+   "optiverus",
+   161
+  ],
+  [
+   "gh",
+   "dvtrading",
+   69
+  ],
+  [
+   "gh",
+   "pdtpartners",
+   10
+  ],
+  [
+   "gh",
+   "fiveringsllc",
+   17
+  ],
+  [
+   "gh",
+   "xtxmarketstechnologies",
+   8
+  ],
+  [
+   "gh",
+   "mangroup",
+   54
+  ],
+  [
+   "gh",
+   "exoduspoint",
+   2
+  ],
+  [
+   "lever",
+   "belvederetrading",
+   20
+  ],
+  [
+   "ashby",
+   "voleon",
+   58
+  ]
+ ],
+ "workday": [
+  [
+   "blackrock.wd1",
+   "blackrock",
+   "BlackRock_Professional",
+   "BlackRock"
+  ],
+  [
+   "statestreet.wd1",
+   "statestreet",
+   "Global",
+   "State Street"
+  ],
+  [
+   "vanguard.wd5",
+   "vanguard",
+   "vanguard_external",
+   "Vanguard"
+  ],
+  [
+   "pru.wd5",
+   "pru",
+   "Careers",
+   "Prudential"
+  ],
+  [
+   "travelers.wd5",
+   "travelers",
+   "External",
+   "Travelers"
+  ],
+  [
+   "capitalone.wd12",
+   "capitalone",
+   "Capital_One",
+   "Capital One"
+  ],
+  [
+   "spgi.wd5",
+   "spgi",
+   "SPGI_Careers",
+   "S&P Global"
+  ],
+  [
+   "nasdaq.wd1",
+   "nasdaq",
+   "Global_External_Site",
+   "Nasdaq"
+  ],
+  [
+   "db.wd3",
+   "db",
+   "DBWebsite",
+   "Deutsche Bank"
+  ],
+  [
+   "wd1.myworkdaysite.com",
+   "wf",
+   "WellsFargoJobs",
+   "Wells Fargo"
+  ],
+  [
+   "wd1.myworkdaysite.com",
+   "fmr",
+   "FidelityCareers",
+   "Fidelity"
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "JPMorgan Chase",
+    "host": "jpmc.fa.oraclecloud.com",
+    "site": "CX_1001",
+    "note": "2026-10-07 finance-quant lane: live 706 hits 'model validation' (global; geo filtered downstream). Job URL hcmUI/CandidateExperience/en/sites/CX_1001/job/<Id> verified 200."
+   }
+  ],
+  "eightfold": [
+   {
+    "name": "Morgan Stanley",
+    "base": "https://morganstanley.eightfold.ai",
+    "domain": "morganstanley.com",
+    "note": "2026-10-07 finance-quant lane: 39 hits 'model validation', 195 'quantitative' (global; geo filtered downstream)."
+   }
+  ],
+  "icims_html": [
+   {
+    "name": "Susquehanna International Group (SIG)",
+    "tenant": "sig",
+    "note": "2026-10-07 finance-quant lane: 20 job links for 'quantitative'; titles come from URL slugs (fallback regex)."
+   }
+  ]
+ },
+ "misc": [],
+ "watch": []
+}

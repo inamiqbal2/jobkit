@@ -1,0 +1,123 @@
+# settings.yaml - EVERYTHING personal about the job search lives here (and in profile/).
+# setup.py copies this file to settings.yaml; the onboarding interview fills it in, one phase at a time. Values written
+# as <like this> are placeholders: the engine treats them as "not filled in yet" (userconfig.validate) and will not
+# search, judge or build on them. Nothing in this file assumes a field: a nurse, a software engineer, a teacher and a
+# field biologist fill the same keys with their own words. A fully filled, commented example of this file (a fictional
+# person) is system/examples/sam_example/settings.yaml; three complete example workspaces are next to it.
+# Every field is documented. Fields marked (required) must be filled before daily.py or a build runs.
+
+identity:                              # (required) used by resume_builder.py and verify_resume.py
+  name: "<your name>"                  # full name as it should print at the top of the resume
+  first_name: "<first name>"           # used by the resume parse test (must survive docx->pdf->text)
+  email: "<email>"
+  phone: "<phone>"                     # printed verbatim; the parse test looks for this exact string
+  city_state: "<city, state>"          # ATS location prefill; OFF the contact line by default (see build)
+  links: []                            # printed in this order on the contact line; [] for none
+                                       # e.g. ["linkedin.com/in/<you>", "github.com/<you>", "orcid.org/0000-0000-0000-0000"]
+
+work_authorization:                    # (required) Article I.2 - the engine never assumes a status; phase 3 asks
+  resume_line: "<work status as it should print, or empty>"   # printed verbatim on the resume contact line ("" to omit)
+  citizenship_only_roles_open: false   # true if "must be a U.S. citizen" roles are open to you
+  clearance_possible: false            # true if you can obtain/hold a security clearance
+  export_controlled_open: false        # true if ITAR / "U.S. person" / export-controlled roles are open
+  sponsorship_needed: false            # true if you need visa sponsorship (adds a knockout for "no sponsorship")
+  permanent_resident: false            # true if you hold permanent residency: postings that explicitly admit
+                                       # permanent residents are then OPEN even when citizenship_only_roles_open is false
+
+location:                              # (required) phase 4
+  home: "<city, state>"
+  country: "<two-letter code>"         # ONE country of search (US | CA | UK have built-in geography tables in system/engine/tools/geo.py;
+                                       # any other code: set the three regex overrides below or every location counts as inside)
+  # in_country_regex: ""               # optional override: a location string that reads as INSIDE the country (strict; corpus arm)
+  # in_country_regex_loose: ""         # optional override: same, loose (Workday/hard-ATS placeholders like "3 Locations")
+  # foreign_regex_extra: ""            # optional override: extra foreign-place cues to drop (e.g. "United States|USA" for a non-US user)
+  commute_radius_miles: 0
+  commutable_metros: []                # plain words for the judgment agent and the rubric profile, e.g. ["Denver CO", "Boulder CO"]
+  relocation: "case-by-case"           # yes | no | case-by-case  (case-by-case = present, state location first)
+  tier1_regex: "Remote"                # commutable places + remote, as a pattern, e.g. "Denver|Boulder|Colorado|\\bCO\\b|Remote"
+  tier2_regex: ""                      # nearby places you would consider; "" for none
+
+lanes: []                              # (required) 1-6 target lanes in PLAIN WORDS, written in phase 5; packs pick job boards.
+                                       # The JD-text signature terms for each lane live in profile/signals.yaml (not here).
+                                       # Each lane looks like this (see system/examples/sam_example/settings.yaml):
+                                       #   - name: "<short-slug>"              short canonical label (state.db Lane column warns on anything else)
+                                       #     description: "<the work in one or two sentences>"
+                                       #     example_titles: ["<title>", "<title>"]
+                                       #     never_claims: []                   things people in this lane claim that you must never claim
+                                       #     priority: false                    true = the lane is screened FOR and never auto-skipped
+                                       #                                        (patterns: profile/signals.yaml priority_patterns)
+                                       #     packs: []                          job-board packs from system/engine/registries/packs/
+                                       #                                        (tech_software, healthcare_clinical, government_public,
+                                       #                                        nonprofit_social, education_general, business_marketing_sales,
+                                       #                                        academic_marine_bio, materials_semiconductor, ...; [] = none)
+
+targets:                               # (optional) what KINDS of positions are in scope, and who you would love to work for
+  track: "<industry | academic | government | nonprofit | mix>"   # onboarding phase 5; decides which questions are asked
+                                       # and whether the USAJobs key step runs
+  phd_positions: false                 # true = funded PhD positions / studentships / graduate research assistantships are
+                                       #        targets: the new-grad/campus title drop and the critic's GRAD-GATE are OFF
+  fixed_term_ok: false                 # true = "temporary" / fixed-term titles are not an eligibility drop (academic / grant posts)
+  hourly_ok: false                     # true = hourly-paid / high-school-minimum postings are NOT flagged "BELOW LEVEL" by the
+                                       #        critic (technician, nursing and trades posts are routinely hourly)
+  employers: []                        # up to ~10 employers you would be glad to work for, by name. system/engine/tools/discover_boards.py
+                                       # finds each one's job board (Greenhouse / Lever / Ashby / Workday / Oracle / NEOGOV / ...),
+                                       # verifies it live and registers it in tracking/registries/custom.json; the rest become watch entries.
+                                       # e.g. ["Mayo Clinic", "Denver Health"] / ["Stripe", "Notion"] / ["US Fish and Wildlife Service"]
+
+thresholds:
+  build_default_min_rubric: 60         # dual-blind average at/above this = build by default
+  commutable_min_rubric: 45            # inside commutable_metros, build from this line (user asked for stretches)
+  auto_skip_below_rubric: 40           # below this, both scorers agreeing, non-stub JD -> auto-ledger SKIP
+  jd_gate: 0.28                        # FALLBACK only: profile/signals.yaml thresholds.jd_gate wins when present
+  band_midpoint_ceiling: null          # e.g. 140000 -> critic prints an ADVISORY above it; null = off
+  low_band_top: null                   # e.g. 90000 -> queue tags LOWBAND below it; null = off
+
+exclusions:
+  employers: []                        # regex or plain names, matched on SOURCE/URL only, never JD text
+  role_types: ["recruit(er|ers|ing|ment)"]   # title-level eligibility drops (regexes, word-bounded, case-insensitive).
+                                       # Intern/co-op/new-grad/temp/contract are built in. Phase 5 adds yours.
+  contract_work: false                 # false = contract/1099/freelance/contract-to-hire postings are OUT
+  postdocs: false                      # false = postdoctoral positions are OUT (postdoc TITLES are dropped by eligibility.py)
+
+salary:
+  floor: null                          # lowest yearly pay you would accept (a number, e.g. 85000); judgment notes only, never a silent filter
+  target: null
+  currency: "USD"
+
+modules:
+  inbox_sweep: false                   # Gmail read-only sweep. OFF by default. Requires the agent's Gmail tool.
+  outreach: false                      # outreach drafting charter. OFF by default.
+
+run:                                   # discovery arms. Employer boards (packs + custom.json) always run; these are extras.
+  adzuna: false                        # OFFICIAL free API (developer.adzuna.com) - the recommended aggregator; true needs
+                                       # adzuna_id/adzuna_key in keys.json (onboarding phase 16 offers it)
+  linkedin_guest: false                # OPT-IN. Public guest cards scraped from linkedin.com; LinkedIn's terms of service restrict
+                                       # automated access, the endpoint is unversioned and rate-limited (degrades to zero results).
+                                       # Turn on only if you accept that (system/docs/DEVELOPER.md).
+  indeed_jobspy: false                 # OPT-IN, same caveat (Indeed's terms); needs python-jobspy (requirements-optional.txt)
+  window_days: 30                      # recency window on UPDATED date (see charters/search.md)
+  # ---- cost knobs (v0.5): how much of each run the two blind scorers read. Lower = cheaper run, fewer postings scored ----
+  judge_top_n: 40                      # only the top N postings by the deterministic match score go to the two blind scorers
+                                       # each run; the rest are recorded "not scored - below the top N" and come back next run
+                                       # if still open (0 = score everything). 40 postings is roughly 2 x 90k input tokens.
+  jd_text_cap_chars: 6000              # the scorers read at most this many characters of each posting (the requirements block is
+                                       # always kept whole); long postings are trimmed, not dropped
+
+build:
+  format: "resume"                     # "resume" = one-page industry resume (resume_builder.Resume, verify = 1 page, 90-93% fill)
+                                       # "academic_cv" = multi-page CV (resume_builder.AcademicCV; verify = cv_min_pages..cv_max_pages;
+                                       #   audit_claims checks EVERY line against approved_claims.yaml incl. its `cv:` block)
+  resume_filename: "Resume.docx"       # every built resume uses this exact filename (phase 5 sets "Resume_<First>_<Last>.docx")
+  cv_filename: "CV.docx"               # academic_cv only: the CV filename (must start with "CV" for the audit's CV mode)
+  cv_min_pages: 2                      # academic_cv: page range verify_resume enforces
+  cv_max_pages: 3
+  min_experience_entries: 3            # resume_builder warns below this
+  location_line_default: "Open to relocation"   # contact-line text for roles outside commutable_metros
+
+education: []                          # printed by resume_builder.education(); newest first; phase 7 writes it. Each entry:
+                                       #   - institution: "<school>"
+                                       #     dates: "<Sep 2018 - May 2022>"
+                                       #     line: "<degree> in <field>, <city, state>  |  Thesis: <title>"
+
+verification:                          # verify_resume.py parse test: tokens that must survive docx->pdf->text
+  employer_tokens: []                  # the employer names on your resume (phase 13 writes them); checked only when the resume mentions them

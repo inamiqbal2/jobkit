@@ -1,0 +1,96 @@
+# FABRICATED approved claims for Taylor Example (see ../README.md). Shape = My Job Search/profile/approved_claims.yaml.example.
+summaries:
+  power-systems: "Power systems engineer (M.S., EIT) with four years of distribution planning, protection coordination and interconnection studies, including graduate research; automates planning workflows in Python and SQL."
+  grid-analytics: "Grid analytics engineer (M.S. Power Systems) with four years of feeder modeling, hosting-capacity analysis and Python/SQL automation on utility SCADA data, including graduate research."
+  test-engineering: "Test engineer (M.S. Electrical Engineering) with four years of power-systems work including test-plan authorship and a Python validation harness for a commercial load-flow engine."
+
+tenure:
+  line: "four years of power systems engineering experience (2020-present, including graduate research)"
+  short: "four years of power systems experience (2020-present, incl. M.S.)"
+  years: 4
+
+experience:
+  - key: FRU
+    org: "Front Range Utility"
+    dates: "Jun 2022 - Present"
+    role: "Power Systems Engineer II"
+    loc: "Denver, CO"
+    always_include: true
+    evidence: "front_range_utility.md"
+    nda: "no customer names, no feeder identifiers, no outage-cause specifics"
+    bullets:
+      B_FRU_STUDIES: "Run annual load-flow, short-circuit and hosting-capacity studies for ~120 distribution feeders in PSS/E and CYME, recommending reconductoring and protection changes adopted on two feeders in 2024."
+      B_FRU_INTERCONNECT: "Screen ~40 commercial solar and battery interconnection requests per year against IEEE 1547 and utility criteria, documenting mitigation where screens fail."
+      B_FRU_SCRIPT: "Cut the annual planning-study cycle from 11 weeks to 7, by writing the Python and SQL scripts that pull SCADA load history into the planning models."
+      B_FRU_PROTECTION: "Set overcurrent and recloser coordination on 12 feeders after a 2024 reconductoring program, confirmed by field testing."
+    keywords: "distribution planning load flow short circuit hosting capacity PSS/E CYME interconnection IEEE 1547 protection coordination recloser Python SQL SCADA"
+  - key: GRIDSENSE
+    org: "GridSense"
+    dates: "Jun 2021 - May 2022"
+    role: "Applications Engineer (part-time)"
+    loc: "Boulder, CO"
+    evidence: "gridsense.md"
+    frozen: true
+    bullets:
+      B_GS_TESTPLAN: "Wrote the 28-case test plan and the Python harness that validates a commercial load-flow engine against OpenDSS reference runs on IEEE 13-, 34- and 123-bus feeders."
+      B_GS_DEFECT: "Found a per-unit conversion defect in the three-phase unbalanced load flow through the IEEE 123-bus comparison, documented it for the development team and verified the fix."
+      B_GS_PILOTS: "Supported two utility pilot deployments of a DER hosting-capacity analytics product, explaining results to planning engineers."
+    keywords: "test plan validation harness OpenDSS load flow IEEE feeders pilot deployment hosting capacity"
+  - key: THESIS
+    org: "Example State University"
+    dates: "Aug 2020 - May 2022"
+    role: "Graduate Research Assistant"
+    loc: "Fort Collins, CO"
+    evidence: "ms_thesis.md"
+    bullets:
+      B_THESIS_MC: "Estimated hosting capacity for six distribution feeders by Monte Carlo placement of rooftop PV in OpenDSS (10,000 placements each), with a regression model predicting it from feeder features."
+      B_THESIS_PAPER: "First-authored a peer-reviewed conference paper on hosting-capacity estimation for high-PV feeders (2022)."
+    keywords: "hosting capacity Monte Carlo OpenDSS PV penetration regression conference paper"
+
+entry_variants:
+  FRU_ANALYST: {base: FRU, role: "Power Systems Engineer II (Distribution Planning Analytics)"}
+
+projects:
+  scada_import:
+    title: "SCADA-to-planning-model import pipeline"
+    bullet: "Python/SQL pipeline that replaced a manual 11-week data assembly with a scripted 7-week study cycle (in use since 2024)."
+    evidence: "front_range_utility.md"
+
+skills_lines:
+  POWER: ["Power Systems", "Distribution planning, load flow, short circuit, hosting capacity, protection coordination (overcurrent, reclosers), interconnection screening (IEEE 1547)"]
+  TOOLS: ["Tools", "PSS/E, CYME, OpenDSS (hands-on); PSCAD vendor models used in studies (not built); MATLAB"]
+  DATA: ["Programming & Data", "Python (pandas, numpy, scikit-learn regression), SQL (SQL Server), Git, test-plan authorship, Monte Carlo analysis"]
+
+publications:
+  line: "1 peer-reviewed conference paper (first author), Example Conf. on Power Systems 2022"
+  short: "1 peer-reviewed conference paper (first author)"
+  counts: {published_peer_reviewed: 1, under_review: 0, in_preparation: 0, total: 1}
+
+hedged_phrases:
+  - "used in studies"
+  - "vendor models used"
+
+never_claims:
+  forbidden_terms: ["PE license", "Professional Engineer", "NERC certified", "PyTorch", "TensorFlow", "deep learning", "PowerFactory", "ETAP", "SEL AcSELerator", "EMC"]
+  operator_patterns:
+    - "\\b(built|developed|programmed)\\b[^.;]{0,30}\\bPSCAD\\b"
+    - "hands-on[^.;]{0,30}\\b(PSCAD|relay programming|SCADA)\\b"
+    - "\\b(programmed|configured)\\b[^.;]{0,30}\\brelays?\\b"
+
+retired_claims:
+  - "led a team of \\d+"
+  - "\\b9 weeks\\b"
+
+banned_words: ["local"]
+
+consistency_items:
+  - label: "GridSense bullets"
+    kind: entry_bullets
+    match: ["gridsense"]
+  - label: "Publications line"
+    kind: line_startswith
+    match: ["publications"]
+
+pending:
+  - claim: "reduced interconnection screen turnaround by 30%"
+    question: "What was the baseline and where is it recorded? Not usable until answered."

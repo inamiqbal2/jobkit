@@ -1,0 +1,92 @@
+# FABRICATED example workspace (see README.md) - "Jordan Example", a registered nurse (BSN; 4 years med-surg/telemetry,
+# 2 years medical ICU) in Denver seeking ICU / critical-care staff nurse or clinical educator roles at hospital systems.
+# Shape = My Job Search/settings.yaml.example. Every value below is invented (2026-10-11).
+identity:
+  name: "Jordan Example"
+  first_name: "Jordan"
+  email: "jordan.example@example.com"
+  phone: "720.555.0133"
+  city_state: "Denver, CO"
+  links: ["linkedin.com/in/jordan-example"]
+
+work_authorization:
+  resume_line: "U.S. Citizen"
+  citizenship_only_roles_open: true
+  clearance_possible: true
+  export_controlled_open: true
+  sponsorship_needed: false
+  permanent_resident: false
+
+location:
+  home: "Denver, CO"
+  country: "US"
+  commute_radius_miles: 35
+  commutable_metros: ["Denver CO", "Aurora CO", "Lakewood CO", "Littleton CO", "Englewood CO", "Westminster CO", "Boulder CO"]
+  relocation: "no"                     # stays in the Denver metro; remote does not apply to bedside nursing
+  tier1_regex: "Denver|Aurora|Lakewood|Littleton|Englewood|Westminster|Thornton|Broomfield|Boulder|Parker|Highlands Ranch|Colorado|\\bCO\\b"
+  tier2_regex: "Fort Collins|Colorado Springs|Loveland|Greeley|Castle Rock"
+
+lanes:
+  - name: "icu-staff-nurse"
+    description: "Staff registered nurse in an adult ICU, step-down or progressive care unit at a hospital: ventilated and vasoactive patients, CRRT, arterial lines, 1:2 ratios, Epic charting, 12-hour shifts"
+    example_titles: ["ICU Registered Nurse", "Critical Care RN", "MICU RN", "Registered Nurse - Intensive Care", "Step-Down RN", "Progressive Care RN"]
+    never_claims: ["nurse practitioner", "ECMO specialist", "PICC insertion", "flight nurse", "charge nurse (permanent)"]
+    priority: true
+    packs: ["healthcare_clinical"]
+  - name: "clinical-educator"
+    description: "Unit-based clinical nurse educator or nurse residency / onboarding educator: precepting, competency validation, simulation, skills days, evidence-based practice rollouts"
+    example_titles: ["Clinical Nurse Educator", "Nurse Educator - Critical Care", "Clinical Education Specialist", "Nurse Residency Coordinator", "Professional Development Specialist"]
+    never_claims: ["MSN", "nursing faculty appointment", "NPD-BC certification"]
+    priority: false
+    packs: ["healthcare_clinical"]
+
+targets:
+  track: "industry"                    # hospital systems (private and public); not academic, not government-only
+  phd_positions: false
+  fixed_term_ok: false
+  hourly_ok: true                      # bedside nursing is paid hourly; "$45/hour" wording is not "below level"
+  employers: ["UCHealth", "HealthONE", "Intermountain Health", "Denver Health", "Children's Hospital Colorado"]
+
+thresholds:
+  build_default_min_rubric: 60
+  commutable_min_rubric: 45
+  auto_skip_below_rubric: 40
+  jd_gate: 0.28                        # FALLBACK; profile/signals.yaml thresholds win (phase 18 calibration pending, see my-rules)
+  band_midpoint_ceiling: null
+  low_band_top: 85000                  # queue tags LOWBAND below the salary floor
+
+exclusions:
+  employers: []
+  role_types: ["travel nurse", "per diem", "\\bPRN\\b", "home health", "hospice", "\\bLPN\\b", "\\bCNA\\b", "nursing assistant", "recruit(er|ers|ing|ment)", "sales"]
+  contract_work: false                 # no agency / travel contracts
+  postdocs: false
+
+salary:
+  floor: 85000
+  target: 98000
+  currency: "USD"
+
+modules:
+  inbox_sweep: false
+  outreach: false
+
+run:
+  adzuna: false                        # no key in this example
+  linkedin_guest: false                # opt-in arm, left off
+  indeed_jobspy: false                 # opt-in arm, left off
+  window_days: 30
+
+build:
+  format: "resume"
+  resume_filename: "Resume_Jordan_Example.docx"
+  cv_filename: "CV_Jordan_Example.docx"
+  min_experience_entries: 3
+  location_line_default: "Denver, CO"
+
+education:
+  - institution: "Example State University, College of Nursing"
+    dates: "Aug 2015 - May 2019"
+    line: "Bachelor of Science in Nursing (BSN), Denver, CO"
+
+verification:
+  employer_tokens: ["Example Regional Medical Center", "Example Community Hospital"]

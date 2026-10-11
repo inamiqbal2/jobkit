@@ -1,0 +1,7 @@
+{
+  "_readme": "Copy to keys.json (git-ignored). Only API keys live here. Leave a key empty to disable that arm. usajobs_*: a FREE key YOU register at https://developer.usajobs.gov/ (the engine never registers one); usajobs_email must be the e-mail the key was issued to (it is sent as the User-Agent header, nowhere else).",
+  "adzuna_id": "",
+  "adzuna_key": "",
+  "usajobs_key": "",
+  "usajobs_email": ""
+}

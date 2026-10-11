@@ -1,0 +1,28 @@
+# FABRICATED critic rules for Taylor Example (onboarding phases 8 and 14). Mostly empty on purpose: the generic engine
+# knockouts (eligibility, grad gate, contract gig, hourly tier) are enough to start; rules grow from outcomes.
+hard_checks:
+  - name: "NEVER-CLAIM CORE: licensed PE required as a core duty"
+    regex: "(?:must|required to) (?:be|hold|have) (?:a )?(?:licensed )?(?:professional engineer|P\\.?E\\.? license)|PE license (?:is )?required"
+  - name: "WRONG DOMAIN: RF / PCB / chip design core"
+    regex: "RF design|antenna design|PCB layout|FPGA|ASIC|analog circuit design"
+soft_flags:
+  - name: "soft: transmission-level (>115 kV) planning named - check whether distribution experience is enough"
+    regex: "\\b(?:230|345|500) ?kV\\b|transmission planning"
+instrument_owner:
+  verbs: "(develop|validate|optimize|maintain|calibrat)\\w*[^.]{0,80}(methods? for|techniques? for)?[^.]{0,80}"
+  instruments: ["PowerFactory", "ETAP", "AcSELerator", "SCADA", "EMS"]
+  min_named: 3
+lane_rules:
+  - {lane: "power-systems", regex: "distribution planning|protection|interconnection|load flow"}
+  - {lane: "grid-analytics", regex: "analytics|forecast|data (scientist|engineer)"}
+  - {lane: "test-engineering", regex: "test (plan|engineer|procedure)|validation engineer"}
+closed_lanes:
+  rule: {min_applied: 5, max_positive: 0}
+  action: advisory
+  title_hint_regex: ""
+priority_advisory: []
+screen_block:
+  PE-license: "\\bP\\.?E\\.? (license|licensed|registration)\\b|professional engineer(ing)? license"
+  RF-PCB: "\\bRF\\b design|antenna|PCB layout|FPGA|ASIC"
+  deep-learning: "PyTorch|TensorFlow|deep learning|neural network"
+screen_auto_exclude_soft: []

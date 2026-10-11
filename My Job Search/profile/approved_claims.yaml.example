@@ -1,0 +1,89 @@
+# profile/approved_claims.yaml - the ONLY phrasings a build script may put on a resume, CV, letter or statement.
+# setup.py copies this file to approved_claims.yaml; onboarding phase 13 fills it, one confirmed sentence at a time.
+# It ships EMPTY on purpose: a fresh install has no bullets, so nothing can reach a document before you confirmed it.
+# tools/approved_claims.py loads this file; tools/audit_claims.py enforces it on every built .docx: a resume / CV line
+# that is not in this file FAILS the audit (whitelist), and never_claims / retired_claims / pending fail wherever they appear.
+# A fully filled, commented example (a fictional person) is system/examples/sam_example/profile/approved_claims.yaml;
+# see also system/examples/jordan_example/profile/approved_claims.yaml (nurse) and marina_example (academic CV with `cv:`).
+#
+# Rules of this file:
+#   - facts only; phrasing may be re-emphasized per posting but never changed in substance
+#   - every numeric claim carries `evidence:` (file name under profile/evidence/, Status: CONFIRMED-BY-USER)
+#   - anything you have NOT confirmed stays under `pending:` and is never used
+
+summaries: {}                           # one per lane: {<lane-name>: "<one approved summary sentence>"}; the build script may
+                                        # prefix it with the posting's role noun ("<role noun> candidate: <summary>")
+
+tenure:                                 # honest years line for postings with a numeric years bar (optional)
+  line: ""                              # e.g. "four years of process engineering experience (2022-present, including graduate research)"
+  short: ""
+  years: null                           # no tenure line on postings whose bar exceeds this (charters/build.md)
+
+experience: []                          # entries available to the builder; 3-5 chosen per posting. Each entry:
+                                        #   - key: ACME                     importable name (approved_claims.ACME -> (org, dates, role, loc))
+                                        #     org: "<employer>"
+                                        #     dates: "<Jun 2022 - Present>"
+                                        #     role: "<title>"
+                                        #     loc: "<city, state>"
+                                        #     always_include: true          entry_scorer always keeps this one (the current / anchor job)
+                                        #     evidence: "<file>.md"         profile/evidence/<file>.md, CONFIRMED-BY-USER
+                                        #     nda: "<what must not be disclosed>"
+                                        #     frozen: false                 true = every bullet under this employer must equal one below verbatim
+                                        #     bullets:                      named so build scripts and the audit can reference them
+                                        #       B_ACME_ONE: "<one approved bullet, exactly as confirmed>"
+                                        #     keywords: "<words for entry_scorer>"
+                                        #     section: research             academic CV only: research | professional | field | teaching
+
+projects: {}                            # {<key>: {title: "<title>", bullet: "<approved bullet>", evidence: "<file>.md"}}
+
+skills_lines: {}                        # {LABEL: ["<label as printed>", "<approved text>"]}; hands-on vs used wording is fixed here
+                                        # e.g. CLINICAL: ["Clinical", "Ventilator management (hands-on); CRRT (hands-on); ECMO patients nursed at the bedside (circuit run by the specialist)"]
+
+publications:                           # only if profile/publications.md says you have any
+  line: ""                              # e.g. "2 peer-reviewed journal articles; 1 manuscript under review"
+  short: ""
+  counts: {published_peer_reviewed: 0, under_review: 0, in_preparation: 0, total: 0}
+
+hedged_phrases: []                      # phrases that make a non-operator instrument / tool mention acceptable, e.g. "data used in R&D"
+
+never_claims:                           # Article II. Hard audit failures wherever they appear in any document.
+  forbidden_terms: []                   # e.g. ["Six Sigma", "nurse practitioner", "Kubernetes administration"]
+  operator_patterns: []                 # regexes: operator-implying phrasing for tools only USED, never run
+                                        # e.g. "\\b(performed|operated|ran)\\b[^.;]{0,30}\\b(NMR|MS)\\b"
+
+retired_claims: []                      # regexes: claims that were once on a resume and are now known false / unverifiable
+                                        # e.g. "led a team of \\d+"
+
+banned_words: ["local"]                 # never on a resume (reads as "won't relocate" to ATS parsers)
+
+consistency_items: []                   # tools/consistency.py: story lines that must match across resumes to one employer
+                                        #   - {label: "<name>", kind: entry_bullets | bullet_contains | line_startswith, match: ["<substring>"]}
+
+pending: []                             # NOT usable until you confirm and move them above; the audit fails any document that
+                                        # carries one of these:  - {claim: "<the claim>", question: "<what must be checked first>"}
+
+# ---- optional sections -------------------------------------------------------------------------------------
+# entry_variants: {ACME_ENG: {base: ACME, role: "<other title read for the same job>"}}   same facts, same dates
+# bullet_bank:    {B_THESIS: "<approved bullet not tied to one entry>"}
+# constants:      {COURSE_STATS: "<approved snippet>", SKILL_TEACHING: ["Teaching", "<approved text>"]}
+
+# ---- academic CV sections (optional; read by resume_builder.AcademicCV when settings.yaml build.format is academic_cv) ----
+# Every item is confirmed text the CV prints VERBATIM; audit_claims.py fails any CV line that is not here.
+# cv:
+#   education:
+#     - {institution: "<school>", dates: "<Sep 2020 - May 2022>", degree: "<M.S. in ...>", loc: "<city, state>",
+#        details: ["Thesis: <title> (advisor: Dr. X)", "<teaching assistantship line>"]}
+#   publications:                       # numbered, newest first; counts must agree with profile/publications.md
+#     - {citation: "<citation exactly as it should print>", status: published, evidence: "publications.md"}
+#   presentations:
+#     - {text: "<citation>", evidence: "publications.md"}
+#   field_experience:                   # expeditions, cruises, field seasons, plant campaigns
+#     - {title: "<campaign>", org: "<org>", dates: "<dates>", loc: "<place>", evidence: "<file>.md", bullets: ["<approved bullet>"]}
+#   certifications:
+#     - {text: "<certification, years, count>", evidence: "skills-inventory.md"}
+#   technical_skills: {LABEL: [label, text]}     # defaults to skills_lines when absent
+#   teaching:                           # dict items become dated entries; strings a plain list
+#     - {org: "<school>", dates: "<dates>", role: "<Teaching Assistant, ...>", loc: "<place>", bullets: ["<approved bullet>"]}
+#   grants_awards: [{text: "<award, year, amount>", evidence: "<file>.md"}]
+#   service: [{text: "<service line>", evidence: "<file>.md"}]
+#   references: "Available upon request"

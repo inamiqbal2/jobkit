@@ -1,0 +1,24 @@
+# jobkit: every text file is stored and checked out with LF line endings on every OS, so the engine manifest
+# (system/engine/MANIFEST.sha256) and "revert to original" agree on Windows as well as macOS / Linux.
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
+*.sh text eol=lf
+*.example text eol=lf
+# binary files: never converted
+*.docx binary
+*.dotx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.db binary
+*.sqlite binary
+*.pyc binary

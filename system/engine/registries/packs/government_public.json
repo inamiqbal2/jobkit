@@ -1,0 +1,433 @@
+{
+ "pack": "government_public",
+ "description": "Public-sector jobs: federal through USAJobs (your free key), state and city/county NEOGOV portals (governmentjobs.com, one JSON call per search term), New York State and NYC listings, Maryland JobAps, Oregon's Workday, Florida's SAP site, Philadelphia's SmartRecruiters. The big states/cities that run their own portals (California, Texas, Chicago, Phoenix, Dallas, Austin, Virginia) are watch entries.",
+ "source": "built 2026-10-11 for jobkit v0.3; every NEOGOV tenant answered loadJobsOnMaps that day (postings on the board in the note). Not on NEOGOV / not reachable that day: California (CalCareers, ASP.NET), Texas (CAPPS Taleo), New York State (own site, registered as html_links), NYC (own site, html_links), Chicago (Taleo), Phoenix, Dallas, Austin, Miami-Dade, Maricopa, San Francisco, Atlanta, Milwaukee, Charlotte, Tampa, Orlando, Jacksonville, Salt Lake City, Boise, Kansas City, Omaha, Tulsa, Oklahoma City, Baltimore (no public NEOGOV tenant under the obvious names).",
+ "boards": [
+  [
+   "smartrecruiters",
+   "CityofPhiladelphia",
+   "live 2026-10-11: 63 openings"
+  ]
+ ],
+ "workday": [
+  [
+   "oregon.wd5",
+   "oregon",
+   "SOR_External_Career_Site",
+   "State of Oregon - CXS live 2026-10-11: 70 hits for 'analyst'"
+  ]
+ ],
+ "hard": {
+  "sap_html": [
+   {
+    "name": "State of Florida (People First)",
+    "base": "https://jobs.myflorida.com",
+    "note": "SAP SuccessFactors search page; live 2026-10-09 (39 links for 'marine'); same recipe as the academic pack"
+   }
+  ]
+ },
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "neogov",
+   "name": "State of Washington",
+   "host": "www.governmentjobs.com",
+   "agency": "washington",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 745 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "State of Colorado",
+   "host": "www.governmentjobs.com",
+   "agency": "colorado",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 518 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "State of Michigan",
+   "host": "www.governmentjobs.com",
+   "agency": "michigan",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 526 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "State of Hawaii",
+   "host": "www.governmentjobs.com",
+   "agency": "hawaii",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 463 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Commonwealth of Massachusetts",
+   "host": "www.governmentjobs.com",
+   "agency": "massachusetts",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 82 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Commonwealth of Pennsylvania",
+   "host": "www.governmentjobs.com",
+   "agency": "pabureau",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 583 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Los Angeles County",
+   "host": "www.governmentjobs.com",
+   "agency": "lacounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 409 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Los Angeles",
+   "host": "www.governmentjobs.com",
+   "agency": "lacity",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 52 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Houston",
+   "host": "www.governmentjobs.com",
+   "agency": "houston",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 104 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of San Antonio",
+   "host": "www.governmentjobs.com",
+   "agency": "sanantoniotx",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 60 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of San Diego",
+   "host": "www.governmentjobs.com",
+   "agency": "sandiego",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 37 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "County of San Diego",
+   "host": "www.governmentjobs.com",
+   "agency": "sdcounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 75 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of San Jose",
+   "host": "www.governmentjobs.com",
+   "agency": "sanjoseca",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 36 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Oakland",
+   "host": "www.governmentjobs.com",
+   "agency": "oaklandca",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 37 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Sacramento",
+   "host": "www.governmentjobs.com",
+   "agency": "sacramento",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 97 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Seattle",
+   "host": "www.governmentjobs.com",
+   "agency": "seattle",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 65 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "King County WA",
+   "host": "www.governmentjobs.com",
+   "agency": "kingcounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 150 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Portland OR",
+   "host": "www.governmentjobs.com",
+   "agency": "portlandor",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 31 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Boston",
+   "host": "www.governmentjobs.com",
+   "agency": "boston",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 64 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City and County of Honolulu",
+   "host": "www.governmentjobs.com",
+   "agency": "honolulu",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 75 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "District of Columbia",
+   "host": "www.governmentjobs.com",
+   "agency": "dc",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 50 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Detroit",
+   "host": "www.governmentjobs.com",
+   "agency": "detroit",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 40 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Metro Nashville",
+   "host": "www.governmentjobs.com",
+   "agency": "nashville",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 89 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Columbus OH",
+   "host": "www.governmentjobs.com",
+   "agency": "columbusoh",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 24 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Indianapolis / Marion County",
+   "host": "www.governmentjobs.com",
+   "agency": "indianapolis",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 65 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Louisville Metro",
+   "host": "www.governmentjobs.com",
+   "agency": "louisvilleky",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 43 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Raleigh",
+   "host": "www.governmentjobs.com",
+   "agency": "raleighnc",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 46 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Albuquerque",
+   "host": "www.governmentjobs.com",
+   "agency": "cabq",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 75 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Cleveland",
+   "host": "www.governmentjobs.com",
+   "agency": "cleveland",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 47 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Cincinnati",
+   "host": "www.governmentjobs.com",
+   "agency": "cincinnati",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 27 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Pittsburgh",
+   "host": "www.governmentjobs.com",
+   "agency": "pittsburgh",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 32 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Minneapolis",
+   "host": "www.governmentjobs.com",
+   "agency": "minneapolismn",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 16 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "City of Las Vegas",
+   "host": "www.governmentjobs.com",
+   "agency": "lasvegas",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 29 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Harris County TX",
+   "host": "www.governmentjobs.com",
+   "agency": "harriscountytx",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 205 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Travis County TX",
+   "host": "www.governmentjobs.com",
+   "agency": "traviscounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 101 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "San Bernardino County",
+   "host": "www.governmentjobs.com",
+   "agency": "sanbernardino",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 245 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Riverside County",
+   "host": "www.governmentjobs.com",
+   "agency": "riverside",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 100 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Contra Costa County",
+   "host": "www.governmentjobs.com",
+   "agency": "contracosta",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 76 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Santa Clara County",
+   "host": "www.governmentjobs.com",
+   "agency": "santaclara",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 51 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Fairfax County VA",
+   "host": "www.governmentjobs.com",
+   "agency": "fairfaxcounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 65 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Montgomery County MD",
+   "host": "www.governmentjobs.com",
+   "agency": "montgomerycountymd",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 57 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Hennepin County MN",
+   "host": "www.governmentjobs.com",
+   "agency": "hennepin",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 26 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Clark County NV",
+   "host": "www.governmentjobs.com",
+   "agency": "clarkcounty",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 31 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "Broward County FL",
+   "host": "www.governmentjobs.com",
+   "agency": "broward",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-11: 30 postings on the board; descriptions cached at ingest"
+  },
+  {
+   "kind": "html_links",
+   "name": "New York State (StateJobsNY)",
+   "base": "https://statejobs.ny.gov/public/vacancyTable.cfm",
+   "href_regex": "vacancyDetailsView\\.cfm\\?id=\\d+",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "whole-board vacancy table, server-rendered; live 2026-10-11: 1,761 vacancy links (the JD gate decides)"
+  },
+  {
+   "kind": "html_links",
+   "name": "City of New York (NYC Jobs)",
+   "base": "https://cityjobs.nyc.gov/jobs?q={kw}",
+   "href_regex": "^/job/.*-jid-\\d+",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "keyword search, server-rendered; live 2026-10-11: 16 postings for 'nurse' on the first page"
+  },
+  {
+   "kind": "html_links",
+   "name": "State of Maryland (JobAps)",
+   "base": "https://www.jobapscloud.com/MD/",
+   "href_regex": "bulpreview\\.asp\\?b=&(?:amp;)?R1=",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   },
+   "note": "whole-board bulletin list; live 2026-10-11: ~300 bulletins; first anchor per bulletin is the title"
+  },
+  {
+   "kind": "usajobs",
+   "name": "usajobs",
+   "days": 30,
+   "note": "USAJobs search API. NEEDS keys.json usajobs_key + usajobs_email - the person registers the free key at developer.usajobs.gov (onboarding phase 16, only when government jobs interest them). The API answers 401 without a key (verified 2026-10-11); idle until then. Same entry name in every pack so the assembler keeps one copy."
+  }
+ ],
+ "watch": [
+  {
+   "name": "State of California (CalCareers)",
+   "ats": "MANUAL",
+   "slug": "https://www.calcareers.ca.gov/CalHrPublic/Search/JobSearchResults.aspx",
+   "watch_for": [],
+   "note": "ASP.NET search, not readable without a browser (2026-10-11)"
+  },
+  {
+   "name": "State of Texas (CAPPS)",
+   "ats": "MANUAL",
+   "slug": "https://capps.taleo.net/careersection/ex/jobsearch.ftl",
+   "watch_for": [],
+   "note": "Taleo (2026-10-11)"
+  },
+  {
+   "name": "City of Chicago",
+   "ats": "MANUAL",
+   "slug": "https://chicago.taleo.net/careersection/2/jobsearch.ftl",
+   "watch_for": [],
+   "note": "Taleo (2026-10-11)"
+  },
+  {
+   "name": "Commonwealth of Virginia",
+   "ats": "MANUAL",
+   "slug": "https://jobs.virginia.gov/",
+   "watch_for": [],
+   "note": "PageUp; certificate chain failed automated reading (2026-10-11)"
+  },
+  {
+   "name": "City of Phoenix",
+   "ats": "MANUAL",
+   "slug": "https://www.phoenix.gov/hr/jobs",
+   "watch_for": [],
+   "note": "no NEOGOV tenant under the obvious names (2026-10-11)"
+  },
+  {
+   "name": "City of Dallas",
+   "ats": "MANUAL",
+   "slug": "https://dallascityhall.com/departments/humanresources/Pages/default.aspx",
+   "watch_for": [],
+   "note": "(2026-10-11)"
+  },
+  {
+   "name": "City of Austin",
+   "ats": "MANUAL",
+   "slug": "https://www.austincityjobs.org/",
+   "watch_for": [],
+   "note": "(2026-10-11)"
+  }
+ ]
+}

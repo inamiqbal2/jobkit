@@ -1,0 +1,35 @@
+{
+ "pack": "life_sciences_pharma",
+ "description": "Pharma / med-device Workday tenants (solid-state and process roles).",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [],
+ "workday": [
+  [
+   "stryker.wd1",
+   "stryker",
+   "strykercareers",
+   1176
+  ],
+  [
+   "abbott.wd5",
+   "abbott",
+   "abbottcareers",
+   2000
+  ],
+  [
+   "amgen.wd1",
+   "amgen",
+   "Careers",
+   1716
+  ],
+  [
+   "pfizer.wd1",
+   "pfizer",
+   "pfizercareers",
+   543
+  ]
+ ],
+ "hard": {},
+ "misc": [],
+ "watch": []
+}

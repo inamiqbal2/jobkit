@@ -1,0 +1,11 @@
+{
+ "pack": "custom",
+ "description": "FABRICATED example: Taylor's own target employers (shape = My Job Search/tracking/registries/custom.json.example). Slugs below are placeholders and are NOT live boards.",
+ "boards": [],
+ "workday": [],
+ "hard": {},
+ "misc": [],
+ "watch": [
+  {"name": "Example Grid Software Co", "ats": "MANUAL", "slug": "https://careers.example.com", "watch_for": ["power systems", "grid analytics", "test engineer"]}
+ ]
+}

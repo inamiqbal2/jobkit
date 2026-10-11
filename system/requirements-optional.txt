@@ -1,0 +1,5 @@
+# jobkit OPTIONAL dependencies - install only if you turn the arm on in settings.yaml
+#   system/.venv/bin/pip install -r requirements-optional.txt
+python-jobspy>=1.1.80  # feeds.py indeed() arm (run.indeed_jobspy: true); pulls pandas, curl_cffi, beautifulsoup4.
+                       # If the install fails on your platform, leave run.indeed_jobspy false - feeds.py prints
+                       # 'indeed arm: python-jobspy not installed - skipping' and the rest of the run is unaffected.

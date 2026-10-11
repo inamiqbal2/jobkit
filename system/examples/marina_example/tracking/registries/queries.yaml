@@ -1,0 +1,9 @@
+# FABRICATED search terms for Marina Example (coral-reef research lanes). Terms are BREADTH only; fit = JD gate + rubric.
+# Shipped examples for other lives: My Job Search/tracking/registries/queries.{nurse,software,biologist}.yaml.example.
+workday_terms: ["coral", "marine biology", "reef", "marine research", "benthic", "research technician"]
+hard_ats_terms: ["coral", "marine", "reef"]
+board_terms: ["coral", "marine", "reef"]              # keyword-searched boards (Nature/Science RSS, PageUp, PeopleAdmin, NEOGOV)
+usajobs: ["coral reef", "marine biologist", "fishery biologist", "ecologist marine"]   # USAJobs API (needs the user's key)
+adzuna: ['"coral reef"', '"marine biologist"', '"reef ecology"', '"coral restoration"', '"research assistant" marine', '"marine ecology" technician']
+linkedin: ["coral reef", "marine biologist", "reef ecology", "coral restoration", "research assistant marine", "marine ecology technician", "benthic", "PhD position coral"]
+indeed: ['"coral reef"', '"marine biologist"', '"coral restoration"', '"marine ecology"', '"research technician" marine', '"benthic"']

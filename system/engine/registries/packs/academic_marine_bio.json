@@ -1,0 +1,452 @@
+{
+ "pack": "academic_marine_bio",
+ "description": "Academic / research lanes in marine and coral-reef science (US + territories): academic job boards, listserv archives, state and university HR systems, marine labs and conservation NGOs. Every active entry was live-fetched on 2026-10-09 (counts in `note`).",
+ "source": "built 2026-10-09 for the first external jobkit user (marine biologist, MS; funded PhD positions + paid research jobs); geography = United States incl. HI, PR, GU, VI, AS, MP",
+ "boards": [],
+ "workday": [
+  [
+   "whoi.wd5",
+   "whoi",
+   "WHOI-External",
+   "Woods Hole Oceanographic Institution - CXS search live 2026-10-09 (7 hits for 'marine')"
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "University of South Florida",
+    "host": "jobs.usf.edu",
+    "site": "CX_1",
+    "note": "Oracle CX; live 2026-10-09: 10 reqs for 'marine' (St. Petersburg marine campus, Key West)"
+   }
+  ],
+  "adp": [
+   {
+    "name": "Ocean Conservancy",
+    "cid": "4786a4ca-9800-4db8-98cb-8bc9baad2b0d",
+    "ccId": "19000101_000001",
+    "note": "ADP WorkforceNow; live 2026-10-09 (~20 reqs)"
+   }
+  ],
+  "phenom": [
+   {
+    "name": "University of Miami (incl. Rosenstiel)",
+    "base": "https://careers.miami.edu",
+    "locale": "us/en",
+    "note": "Phenom widgets API; live 2026-10-09: 4 hits for 'marine' (RSMAS lecturer + marine biology faculty)"
+   }
+  ],
+  "sap_html": [
+   {
+    "name": "State of Florida (FWC, DEP, FDACS)",
+    "base": "https://jobs.myflorida.com",
+    "note": "SAP SuccessFactors search page; live 2026-10-09: 39 job links for 'marine' (FWC marine fisheries, OPS biological scientist)"
+   }
+  ]
+ },
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "rss",
+   "name": "Nature Careers",
+   "base": "https://www.nature.com/naturecareers/jobsrss/?keywords={kw}",
+   "note": "keyword RSS; live 2026-10-09: 2 items for 'coral'; loc_regex takes the trailing 'City, State (US)' of the description so non-US items are dropped by geography (international board)",
+   "loc_regex": "((?:\\b[A-Z][A-Za-z'.-]+,?\\s*){1,5}(?:\\((?:US|UK)\\))?)\\s*$"
+  },
+  {
+   "kind": "rss",
+   "name": "Science Careers (AAAS)",
+   "base": "https://jobs.sciencecareers.org/jobsrss/?keywords={kw}",
+   "note": "keyword RSS; live 2026-10-09: 13 items for 'marine'; loc_regex takes the trailing 'City, State (US)' of the description so non-US items are dropped by geography (international board)",
+   "loc_regex": "((?:\\b[A-Z][A-Za-z'.-]+,?\\s*){1,5}(?:\\((?:US|UK)\\))?)\\s*$"
+  },
+  {
+   "kind": "rss",
+   "name": "Conservation Job Board",
+   "base": "https://www.conservationjobboard.com/rss",
+   "note": "whole-board RSS (no keyword filter; the JD gate decides); live 2026-10-09: 222 items"
+  },
+  {
+   "kind": "rss",
+   "name": "AcademicJobsOnline",
+   "base": "https://academicjobsonline.org/ajo?joblist-0-0-0-----rss--",
+   "note": "whole-board RSS 1.0 (gzip); live 2026-10-09: 360 items, every field - mostly physics/math/CS, biology appears"
+  },
+  {
+   "kind": "rss",
+   "name": "HigherEdJobs - Biology",
+   "base": "https://www.higheredjobs.com/rss/categoryFeed.cfm?catID=100",
+   "loc_regex": "\\(([^()]+)\\)\\s*$",
+   "note": "category RSS (the /rss/ index page is Incapsula-walled; catID mapped by feed title); live 2026-10-09: 324 items; needs a full browser User-Agent (the bare engine UA gets an Incapsula page -> 0 items)",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  },
+  {
+   "kind": "rss",
+   "name": "HigherEdJobs - Geography/Earth",
+   "base": "https://www.higheredjobs.com/rss/categoryFeed.cfm?catID=103",
+   "loc_regex": "\\(([^()]+)\\)\\s*$",
+   "note": "live 2026-10-09: 55 items; needs a full browser User-Agent (the bare engine UA gets an Incapsula page -> 0 items)",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  },
+  {
+   "kind": "rss",
+   "name": "HigherEdJobs - Other Science Faculty",
+   "base": "https://www.higheredjobs.com/rss/categoryFeed.cfm?catID=108",
+   "loc_regex": "\\(([^()]+)\\)\\s*$",
+   "note": "live 2026-10-09: 32 items; needs a full browser User-Agent (the bare engine UA gets an Incapsula page -> 0 items); 0 items on the 2026-10-09 run (Incapsula challenge after a category-ID scan from this IP) - re-check",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  },
+  {
+   "kind": "pipermail",
+   "name": "ES_JOBS_NET (UCAR earth/ocean-science jobs list archive)",
+   "base": "https://mailman.ucar.edu/pipermail/es_jobs_net/",
+   "strip_regex": "^\\s*(?:\\[[^\\]]+\\]\\s*)+",
+   "note": "read-only Mailman archive, current month date.html; live 2026-10-09: 21 subjects in 2026-October. Same recipe Coral-List and ECOLOG-L will use when their archives are reachable again (see watch)"
+  },
+  {
+   "kind": "neogov",
+   "name": "University of Hawaii (incl. HIMB / UH Manoa / UH Hilo)",
+   "host": "www.schooljobs.com",
+   "agency": "hawaiiedu",
+   "note": "NEOGOV loadJobsOnMaps JSON; live 2026-10-09: 734 postings on the board, 3 for 'marine'; descriptions cached at ingest"
+  },
+  {
+   "kind": "neogov",
+   "name": "State of Hawaii (DLNR / DAR)",
+   "host": "www.governmentjobs.com",
+   "agency": "hawaii",
+   "note": "NEOGOV; live 2026-10-09: 469 postings on the board"
+  },
+  {
+   "kind": "json_list",
+   "name": "Florida International University",
+   "base": "https://us-east1-fiu-careers.cloudfunctions.net/jobs",
+   "root": "JOB_POSTINGS",
+   "fields": {
+    "title": "POSTING_TITLE",
+    "loc": "LOCATION",
+    "url": "URL",
+    "posted": "OPEN_DT",
+    "desc": "DESCRIPTION",
+    "id": "JOB_OPENING_ID"
+   },
+   "note": "FIU careers cloud function (gzip JSON, PeopleSoft deep links); live 2026-10-09: 795 postings incl. Aquarius Reef Base, Key Largo; descriptions cached"
+  },
+  {
+   "kind": "html_links",
+   "name": "University of Florida",
+   "base": "https://explore.jobs.ufl.edu/en-us/search/?search-keyword={kw}",
+   "href_regex": "/en-us/job/\\d+",
+   "note": "PageUp keyword search, server-rendered; live 2026-10-09: 14 links for 'marine' (Whitney Lab, FMNH ichthyology)"
+  },
+  {
+   "kind": "html_links",
+   "name": "Nova Southeastern University",
+   "base": "https://nsucareers.nova.edu/en-us/listing/",
+   "href_regex": "/en-us/job/\\d+",
+   "note": "PageUp listing (keyword search path 404s). INTERMITTENT: 18 links on the first live fetch 2026-10-09, an AWS WAF challenge page (HTTP 202, 2 KB) on the two re-runs the same afternoon; degrades to zero, keep and re-check"
+  },
+  {
+   "kind": "html_links",
+   "name": "University of Guam (incl. UOG Marine Lab)",
+   "base": "https://uog.peopleadmin.com/postings/search?query={kw}",
+   "href_regex": "^/postings/\\d+$",
+   "note": "PeopleAdmin, server-rendered; live 2026-10-09: 2 postings for 'marine' (eDNA post-doc, Marine Lab research associate)"
+  },
+  {
+   "kind": "custom_html",
+   "name": "Texas A&M Natural Resources Job Board (RWFM)",
+   "base": "https://jobs.rwfm.tamu.edu/search/",
+   "card_regex": "id=job-(?P<id>\\d+) role=\"tabpanel\"[^>]*>\\s*<div class=\"my-3\">\\s*<div>\\s*<h3>(?P<title>[^<]+)</h3>(?:(?!id=job-\\d+ role).){0,12000}?Published:\\s*</div>\\s*<div[^>]*>\\s*(?P<posted>\\d\\d/\\d\\d/\\d{4})(?:(?!id=job-\\d+ role).){0,12000}?Location:\\s*</div>\\s*<div[^>]*>\\s*(?P<loc>[^<\\n]+)",
+   "url_template": "https://jobs.rwfm.tamu.edu/view-job/?id={id}",
+   "posted_format": "%m/%d/%Y",
+   "note": "formerly wfscjobs.tamu.edu (now redirects); server-rendered detail panels, 10 newest postings per fetch (pagination is client-side); live 2026-10-09: 10"
+  },
+  {
+   "kind": "custom_html",
+   "name": "UC San Diego academic recruitments (UC Recruit: Scripps project scientists, postdocs, researchers)",
+   "base": "https://apol-recruit.ucsd.edu/apply",
+   "card_regex": "aria-label=\"More information about (?P<id>JPF\\d+): (?P<title>[^\"]+)\"\\s+href=\"(?P<url>/JPF\\d+)\"",
+   "loc_default": "La Jolla, CA",
+   "note": "UC Recruit open-recruitments table; live 2026-10-09: ~200 rows campus-wide (JD gate decides)"
+  },
+  {
+   "kind": "custom_html",
+   "name": "Mote Marine Laboratory",
+   "base": "https://mote.org/about/employment-opportunities/",
+   "card_regex": "<h2 class=\"h3 mb-3\">(?P<title>[^<]+)</h2>",
+   "loc_default": "Sarasota / Florida Keys, FL",
+   "note": "one careers page, no per-job URL (apply links go to Indeed); jobs link to the page anchor; live 2026-10-09: 9 positions incl. 2 postdoc fellowships, Keys boat captain. Cloudflare rate-limits repeated hits: one fetch per run; full browser UA (Cloudflare 403s the bare UA; repeated probing on 2026-10-09 got this IP blocked for a while)",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  },
+  {
+   "kind": "custom_html",
+   "name": "Coral Restoration Foundation",
+   "base": "https://coralrestoration.org/careers/",
+   "card_regex": "<h1 class=\"text-dh1[^\"]*\">(?P<title>[^<]+)</h1>\\s*<span class=\"wysiwyg-editor\"><p>[^<]*<a href=\"(?P<url>[^\"]+)\"",
+   "loc_default": "Key Largo, FL",
+   "note": "careers page with one heading + PDF link per opening; live 2026-10-09: 1 opening (Accounting Associate); full browser UA (Cloudflare 403s the bare UA; repeated probing on 2026-10-09 got this IP blocked for a while)",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  },
+  {
+   "kind": "usajobs",
+   "name": "usajobs",
+   "days": 30,
+   "note": "federal (NOAA incl. CRCP / sanctuaries, USGS, NPS, FWS, Smithsonian). NEEDS keys.json usajobs_key + usajobs_email - the user registers the free key at developer.usajobs.gov; verified 2026-10-09 that the API answers 401 without one. Idle until the key exists"
+  }
+ ],
+ "watch": [
+  {
+   "name": "RCUH (Research Corporation of the University of Hawaii - HIMB project staff)",
+   "ats": "MANUAL",
+   "slug": "https://www.rcuh.com/opportunities/job-openings/",
+   "watch_for": [
+    "coral",
+    "marine",
+    "research associate",
+    "technician"
+   ],
+   "note": "PeopleSoft applicant portal, no public listing endpoint found 2026-10-09"
+  },
+  {
+   "name": "The Nature Conservancy",
+   "ats": "MANUAL",
+   "slug": "https://www.nature.org/en-us/about-us/careers/",
+   "watch_for": [
+    "coral",
+    "marine",
+    "reef",
+    "Hawaii",
+    "Florida"
+   ],
+   "note": "PeopleSoft fluid search (careers.nature.org redirects); no listing endpoint 2026-10-09"
+  },
+  {
+   "name": "UC San Diego staff jobs (Scripps staff / research technicians)",
+   "ats": "MANUAL",
+   "slug": "https://employment.ucsd.edu/jobs",
+   "watch_for": [
+    "Scripps",
+    "marine",
+    "research"
+   ],
+   "note": "Paradox-rendered (client side), no public JSON found 2026-10-09; academic titles ARE covered by the UC Recruit feed"
+  },
+  {
+   "name": "Smithsonian (SMS Fort Pierce, NMNH, STRI) - trust positions",
+   "ats": "MANUAL",
+   "slug": "https://www.si.edu/ohr/jobs",
+   "watch_for": [
+    "marine",
+    "coral",
+    "research"
+   ],
+   "note": "si.edu answers 403 to scripted fetches; federal SI positions arrive through the usajobs feed once a key is set"
+  },
+  {
+   "name": "Reef Check Foundation",
+   "ats": "MANUAL",
+   "slug": "https://www.reefcheck.org/get-involved/career-opportunities/",
+   "watch_for": [
+    "reef",
+    "scientist",
+    "coordinator"
+   ],
+   "note": "plain WordPress page; 'no open employment positions' on 2026-10-09"
+  },
+  {
+   "name": "Coral Reef Alliance",
+   "ats": "MANUAL",
+   "slug": "https://coral.org/job-opportunities/",
+   "watch_for": [
+    "coral",
+    "program",
+    "scientist"
+   ],
+   "note": "'no open roles' 2026-10-09; Cloudflare rate-limits scripted fetches"
+  },
+  {
+   "name": "WWF-US",
+   "ats": "MANUAL",
+   "slug": "https://careers-wwfus.icims.com/jobs/search?ss=1",
+   "watch_for": [
+    "coral",
+    "marine",
+    "ocean"
+   ],
+   "note": "iCIMS list is rendered client-side (the engine's icims_html recipe found no rows 2026-10-09)"
+  },
+  {
+   "name": "Society for Conservation Biology careers",
+   "ats": "MANUAL",
+   "slug": "https://careers.conbio.org/jobs/",
+   "watch_for": [
+    "marine",
+    "coral",
+    "reef"
+   ],
+   "note": "AWS WAF challenge page (HTTP 202, empty) 2026-10-09"
+  },
+  {
+   "name": "Sea Grant careers (NOAA Sea Grant + state programs)",
+   "ats": "MANUAL",
+   "slug": "https://seagrant.noaa.gov/opportunities/careers/",
+   "watch_for": [
+    "coral",
+    "coastal",
+    "fellow"
+   ],
+   "note": "AWS WAF challenge (202 empty / 403) 2026-10-09; the site-wide /feed/ is news, not jobs"
+  },
+  {
+   "name": "ASLO positions board",
+   "ats": "MANUAL",
+   "slug": "https://aslo.users.membersuite.com/community/career-center/",
+   "watch_for": [
+    "marine",
+    "reef",
+    "benthic"
+   ],
+   "note": "MemberSuite Angular portal 2026-10-09; aslo.org/page/jobs 404"
+  },
+  {
+   "name": "AAUS (scientific-diving jobs)",
+   "ats": "MANUAL",
+   "slug": "https://www.aaus.org/",
+   "watch_for": [
+    "dive",
+    "diving safety",
+    "scientific diver"
+   ],
+   "note": "no public job-board page found 2026-10-09; postings circulate by e-mail (aaus@disl.org)"
+  },
+  {
+   "name": "Marine Technology Society",
+   "ats": "MANUAL",
+   "slug": "https://www.mtsociety.org/",
+   "watch_for": [
+    "marine",
+    "ocean"
+   ],
+   "note": "career-center paths 404/500 on 2026-10-09"
+  },
+  {
+   "name": "FindAPhD (US-filtered)",
+   "ats": "MANUAL",
+   "slug": "https://www.findaphd.com/phds/?Keywords=coral",
+   "watch_for": [
+    "coral",
+    "reef",
+    "marine"
+   ],
+   "note": "Cloudflare challenge (403) to every scripted fetch 2026-10-09; browse by hand"
+  },
+  {
+   "name": "ECOLOG-L (ESA listserv archive, read-only)",
+   "ats": "MANUAL",
+   "slug": "https://listserv.umd.edu/cgi-bin/wa?A0=ECOLOG-L",
+   "watch_for": [
+    "coral",
+    "marine",
+    "reef",
+    "PhD"
+   ],
+   "note": "listserv.umd.edu refused connections from two networks on 2026-10-09; when it is back, a `pipermail`-like LISTSERV recipe can be added (archives only, never subscribe/post from the engine)"
+  },
+  {
+   "name": "Coral-List (NOAA CHAMP listserv archive, read-only)",
+   "ats": "MANUAL",
+   "slug": "https://coral.aoml.noaa.gov/pipermail/coral-list/",
+   "watch_for": [
+    "job",
+    "position",
+    "PhD",
+    "postdoc",
+    "technician"
+   ],
+   "note": "pipermail archive 301-redirects to the AOML program page since (at least) 2026-10-09 - archive offline; re-check and switch to the `pipermail` kind when it returns"
+  }
+ ],
+ "international": {
+  "_note": "INACTIVE (not read by registries.py): kept for a later non-US scope. Probed 2026-10-09.",
+  "feeds": [
+   {
+    "kind": "html_links",
+    "name": "jobs.ac.uk",
+    "base": "https://www.jobs.ac.uk/search/?keywords={kw}",
+    "href_regex": "/job/[A-Z0-9]+/",
+    "note": "HTML search works (200); UK-centric"
+   },
+   {
+    "kind": "html_links",
+    "name": "EURAXESS",
+    "base": "https://euraxess.ec.europa.eu/jobs/search?keywords={kw}",
+    "href_regex": "/jobs/\\d+",
+    "note": "HTML search works (82 links for 'coral'); /api/jobs 404"
+   },
+   {
+    "kind": "html_links",
+    "name": "James Cook University",
+    "base": "https://careers.jcu.edu.au/jobs/search",
+    "href_regex": "/jobs/",
+    "note": "careers.jcu.edu.au/jobs/search 200 (41 links)"
+   },
+   {
+    "kind": "custom_html",
+    "name": "KAUST",
+    "base": "https://careers.kaust.edu.sa/",
+    "card_regex": "",
+    "note": "page 200, structure not mapped"
+   }
+  ],
+  "watch": [
+   {
+    "name": "Australian Institute of Marine Science",
+    "ats": "MANUAL",
+    "slug": "https://www.aims.gov.au/",
+    "watch_for": [
+     "coral"
+    ],
+    "note": "timed out from the US on 2026-10-09"
+   },
+   {
+    "name": "University of Queensland",
+    "ats": "MANUAL",
+    "slug": "https://about.uq.edu.au/careers",
+    "watch_for": [
+     "coral"
+    ],
+    "note": "jobs.uq.edu.au DNS gone; careers page 200"
+   },
+   {
+    "name": "Great Barrier Reef Foundation",
+    "ats": "MANUAL",
+    "slug": "https://www.barrierreef.org/",
+    "watch_for": [
+     "reef"
+    ],
+    "note": "/careers 404"
+   }
+  ]
+ }
+}

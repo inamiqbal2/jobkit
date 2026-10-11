@@ -1,0 +1,8 @@
+{
+ "pack": "custom",
+ "description": "FABRICATED example: Marina's own target employers (shape = My Job Search/tracking/registries/custom.json.example). Placeholder only.",
+ "boards": [], "workday": [], "hard": {}, "misc": [],
+ "watch": [
+  {"name": "Example Reef Institute", "ats": "MANUAL", "slug": "https://careers.example.com", "watch_for": ["coral", "reef", "technician"]}
+ ]
+}

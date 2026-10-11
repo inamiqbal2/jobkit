@@ -1,0 +1,52 @@
+# FABRICATED signals for Marina Example (coral-reef ecology). First draft 2026-10-09 (phase 17), thresholds calibrated the
+# same day on the first live corpus (phase 18; table in my-rules.md). Shape = My Job Search/profile/signals.yaml.example.
+lanes:
+  coral-reef-research:
+    role: home
+    terms:
+      - {pattern: "\\bcoral(s|line)?\\b|\\breef(s)?\\b", weight: 4}
+      - {pattern: "\\bbleach(ing|ed)?\\b|\\bsymbio(nt|sis|tic)|\\bSymbiodini", weight: 4}
+      - {pattern: "\\b(coral|reef) restoration\\b|\\bout-?plant|\\b(coral|in-water|fragment) nurser(y|ies)|\\bnursery (tree|fragment|coral)", weight: 4}
+      - {pattern: "\\bbenthic (survey|cover|communit|ecolog)|\\bphoto-?quadrat|\\btransect", weight: 3}
+      - {pattern: "\\bphotogrammetr|\\bstructure[- ]from[- ]motion|\\bSfM\\b|\\borthomosaic", weight: 3}
+      - {pattern: "\\beDNA\\b|\\benvironmental DNA\\b|\\bmetabarcod", weight: 2}
+      - {pattern: "\\blarva(e|l)\\b|\\b(coral|larval|juvenile) recruit(ment|s)|\\brecruitment (rate|survey|pulse)|\\bspawn(ing)?\\b|\\blarval settlement\\b", weight: 3}
+      - {pattern: "\\bwater quality\\b|\\bcarbonate chemistry\\b|\\bocean acidification\\b|\\btotal alkalinity\\b", weight: 2}
+      - {pattern: "\\bSCUBA\\b|\\bscientific div(er|ing)\\b|\\bAAUS\\b|\\bdive (operations|team|log)", weight: 3}
+      - {pattern: "\\bsmall[- ]boat\\b|\\bboat (operations|handling)|\\bvessel operations", weight: 2}
+      - {pattern: "\\bPAM\\b|\\bpulse[- ]amplitude|\\bfluorometr", weight: 3}
+      - {pattern: "\\bmarine (biolog|ecolog|scien)|\\bmarine lab", weight: 2}
+      - {pattern: "\\bbenthic\\b|\\bintertidal\\b|\\bseagrass\\b|\\bmangrove", weight: 1}
+      - {pattern: "\\b\\bR\\b (?:and|/|,) (?:GIS|QGIS|ArcGIS)|\\bQGIS\\b|\\bArcGIS\\b|\\bGIS\\b", weight: 1}
+      - {pattern: "\\bNOAA\\b|\\bCoral Reef Conservation Program\\b|\\bsanctuar(y|ies)\\b", weight: 1}
+    negatives:
+      - {pattern: "\\baquarium (sales|retail|display)|\\baquarist\\b|\\bpet (store|hospital)", weight: -4}
+      - {pattern: "\\bclinical\\b|\\bpatient|\\bnursing\\b|\\bpharmac", weight: -4}
+      - {pattern: "\\bsoftware (engineer|developer)|\\bfull[- ]stack|\\bJavaScript\\b|\\bKubernetes\\b", weight: -4}
+      - {pattern: "\\bcruise (line|ship)|\\byacht\\b|\\bshipboard\\b|\\bcall center", weight: -4}
+      - {pattern: "\\bforestry\\b|\\bbotan(ist|y)\\b|\\bvegetation (survey|specialist|monitoring)|\\brangeland|\\bwildfire|\\btimber\\b", weight: -3}
+      - {pattern: "\\bstudent (assistant|employee|worker)\\b|\\bwork[- ]study\\b|\\bfederal work study", weight: -4}
+  field-biology-transferable:
+    role: transferable
+    terms:
+      - {pattern: "\\bfield (work|season|sampling|surveys?|biolog|technician|research|site|station)", weight: 3}
+      - {pattern: "\\bwetland|\\bsalt ?marsh|\\bmarsh\\b|\\bcoastal ecosystem", weight: 2}
+      - {pattern: "\\blab(oratory)? (technique|work|protocol|manager|management)", weight: 2}
+      - {pattern: "\\bdata (analysis|management|QA/QC|quality)|\\bstatistical analysis", weight: 2}
+      - {pattern: "\\b\\bR\\b\\b|\\bRStudio\\b|\\btidyverse\\b|\\bmixed[- ]effects|\\bmultivariate", weight: 2}
+      - {pattern: "\\bfisheries\\b|\\bestuar|\\bcoastal (ecolog|monitoring|restoration)", weight: 2}
+      - {pattern: "\\bwater (sampling|quality)|\\bnutrient analysis|\\bYSI\\b|\\bCTD\\b", weight: 2}
+      - {pattern: "\\bPCR\\b|\\bDNA extraction|\\bmicroscop|\\bhistolog", weight: 2}
+      - {pattern: "\\bprogram coordinat|\\boutreach\\b|\\bvolunteer (coordination|management)", weight: 1}
+    negatives:
+      - {pattern: "\\bcashier|\\bforklift|\\bCDL\\b|\\bretail\\b|\\bwarehouse", weight: -6}
+thresholds:
+  jd_gate: 0.30       # calibrated 2026-10-09 on 20 hand-labelled JDs (see my-rules.md)
+  sig_min: 6
+  sigx_min: 10
+  sig_floor: -4
+priority_patterns:    # coral-reef-research is priority: true
+  exclude: ["\\baquarist\\b", "\\bsales\\b", "\\bcruise\\b", "\\byacht\\b", "\\bsoftware engineer\\b", "\\bpostdoc"]
+  strong: ["\\bcoral\\b", "\\breef\\b", "\\bbenthic ecolog"]
+  weak: ["\\bresearch (assistant|technician|associate)\\b", "\\blab(oratory)? manager\\b", "\\bfield (scientist|technician|biologist)\\b", "\\bmarine biologist\\b", "\\bprogram coordinator\\b"]
+  anchor: ["\\bcoral", "\\breef", "\\bmarine", "\\bbenthic", "\\bbleach"]

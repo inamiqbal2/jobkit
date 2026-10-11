@@ -1,0 +1,192 @@
+{
+ "pack": "nonprofit_social",
+ "description": "Nonprofits, foundations, advocacy, think tanks, civic tech and NGOs: public Greenhouse / Lever / SmartRecruiters boards, a few Workday and ADP job sites found by discover_boards.py, and the Chronicle of Philanthropy keyword feed. Program, development, communications, policy, operations and direct-service roles. Idealist, Work for Good and Bridgespan render in the browser only and are watch entries.",
+ "source": "built 2026-10-11 for jobkit v0.3; every active entry live-fetched that day. Found by discover_boards.py the same day: American Red Cross (Workday), Teach For America (Workday), Habitat for Humanity International (Workday), United Way Worldwide (ADP), Doctors Without Borders USA (Greenhouse), Planned Parenthood (one Lever board per affiliate; only the federation board ships here - add your region's with discover_boards). Not reachable / no API that day (watch entries): Idealist (no RSS, browser app), Work for Good (board replaced by a weekly post), Bridgespan (browser app), Foundation List (no feed items), International Rescue Committee (timeouts), Mercy Corps, Save the Children, Feeding America, World Wildlife Fund (iCIMS, client-rendered).",
+ "boards": [
+  [
+   "gh",
+   "aclu",
+   "ACLU - live 2026-10-11: 18 openings"
+  ],
+  [
+   "gh",
+   "wikimedia",
+   "Wikimedia Foundation - live 2026-10-11: 11 openings"
+  ],
+  [
+   "gh",
+   "mozilla",
+   "Mozilla - live 2026-10-11: 95 openings"
+  ],
+  [
+   "gh",
+   "codeforamerica",
+   "Code for America - live 2026-10-11: 7 openings"
+  ],
+  [
+   "gh",
+   "givedirectly",
+   "GiveDirectly - live 2026-10-11: 32 openings"
+  ],
+  [
+   "gh",
+   "humanrightswatch",
+   "Human Rights Watch - live 2026-10-11: 14 openings"
+  ],
+  [
+   "gh",
+   "rti",
+   "RTI International - live 2026-10-11: 13 openings"
+  ],
+  [
+   "gh",
+   "sunrise",
+   "Sunrise Movement - live 2026-10-11: 15 openings"
+  ],
+  [
+   "gh",
+   "propublica",
+   "ProPublica - live 2026-10-11: 5 openings"
+  ],
+  [
+   "gh",
+   "msfcareers",
+   "Doctors Without Borders / MSF-USA - live 2026-10-11: 3 openings"
+  ],
+  [
+   "lever",
+   "ppfa",
+   "Planned Parenthood Federation of America - live 2026-10-11: 19 openings"
+  ],
+  [
+   "lever",
+   "charitywater",
+   "charity: water - live 2026-10-11: 4 openings"
+  ],
+  [
+   "lever",
+   "brookings",
+   "Brookings Institution - live 2026-10-11: 6 openings"
+  ],
+  [
+   "lever",
+   "sierraclub",
+   "Sierra Club - live 2026-10-11: 7 openings"
+  ],
+  [
+   "lever",
+   "commoncause",
+   "Common Cause - live 2026-10-11: 2 openings"
+  ],
+  [
+   "smartrecruiters",
+   "BoysGirlsClubsofAmerica",
+   "Boys & Girls Clubs of America - live 2026-10-11: 1 opening (national office; local clubs post elsewhere)"
+  ]
+ ],
+ "workday": [
+  [
+   "americanredcross.wd1",
+   "americanredcross",
+   "American_Red_Cross_Careers",
+   "American Red Cross - CXS live 2026-10-11: 363 openings"
+  ],
+  [
+   "teachforamerica.wd1",
+   "teachforamerica",
+   "TFA_Careers",
+   "Teach For America - CXS live 2026-10-11: 17 openings"
+  ],
+  [
+   "habitat.wd12",
+   "habitat",
+   "External",
+   "Habitat for Humanity International - CXS live 2026-10-11: 8 openings"
+  ]
+ ],
+ "hard": {
+  "adp": [
+   {
+    "name": "United Way Worldwide",
+    "cid": "1c855259-2e9a-41b6-bae7-a5e5db263080",
+    "ccId": "19000101_000001",
+    "note": "ADP WorkforceNow; found and verified by discover_boards.py 2026-10-11: 2 openings"
+   }
+  ]
+ },
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "rss",
+   "name": "Chronicle of Philanthropy Jobs",
+   "base": "https://jobs.philanthropy.com/jobsrss/?keywords={kw}",
+   "loc_regex": "((?:\\b[A-Z][A-Za-z'.-]+,?\\s*){1,5}(?:\\((?:US|UK)\\))?)\\s*$",
+   "note": "keyword RSS; live 2026-10-11: 20 items per term"
+  }
+ ],
+ "watch": [
+  {
+   "name": "Idealist",
+   "ats": "MANUAL",
+   "slug": "https://www.idealist.org/en/jobs",
+   "watch_for": [],
+   "note": "browser app, no RSS or public API (2026-10-11)"
+  },
+  {
+   "name": "Work for Good",
+   "ats": "MANUAL",
+   "slug": "https://workforgood.org/jobs-of-the-week/",
+   "watch_for": [],
+   "note": "the board redirects to a weekly roundup post (2026-10-11)"
+  },
+  {
+   "name": "Bridgespan nonprofit jobs",
+   "ats": "MANUAL",
+   "slug": "https://www.bridgespan.org/jobs",
+   "watch_for": [],
+   "note": "browser app (2026-10-11)"
+  },
+  {
+   "name": "Foundation List",
+   "ats": "MANUAL",
+   "slug": "https://www.foundationlist.org/jobs/",
+   "watch_for": [],
+   "note": "WordPress job board; its feed returned no items (2026-10-11)"
+  },
+  {
+   "name": "International Rescue Committee",
+   "ats": "MANUAL",
+   "slug": "https://careers.rescue.org/",
+   "watch_for": [],
+   "note": "timed out on 2026-10-11"
+  },
+  {
+   "name": "Mercy Corps",
+   "ats": "MANUAL",
+   "slug": "https://www.mercycorps.org/careers",
+   "watch_for": [],
+   "note": "no API found 2026-10-11"
+  },
+  {
+   "name": "Save the Children US",
+   "ats": "MANUAL",
+   "slug": "https://www.savethechildren.org/us/about-us/careers",
+   "watch_for": [],
+   "note": "no API found 2026-10-11"
+  },
+  {
+   "name": "Feeding America",
+   "ats": "MANUAL",
+   "slug": "https://www.feedingamerica.org/about-us/careers",
+   "watch_for": [],
+   "note": "no API found 2026-10-11"
+  },
+  {
+   "name": "WWF-US",
+   "ats": "MANUAL",
+   "slug": "https://www.worldwildlife.org/about/careers",
+   "watch_for": [],
+   "note": "iCIMS list rendered client-side (2026-10-09)"
+  }
+ ]
+}

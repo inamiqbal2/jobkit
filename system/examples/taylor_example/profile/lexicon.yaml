@@ -1,0 +1,24 @@
+# FABRICATED lexicon seeded from the skills inventory (onboarding phase 8).
+"load flow":              {syn: ["power flow", "loadflow"], claim: YES}
+"short circuit":          {syn: ["fault analysis", "fault current"], claim: YES}
+"hosting capacity":       {syn: ["DER hosting"], claim: YES}
+"protection coordination": {syn: ["relay coordination", "overcurrent coordination"], claim: YES}
+"interconnection":        {syn: ["interconnection study", "IEEE 1547"], claim: YES}
+"PSS/E":                  {syn: ["PSSE"], claim: YES}
+"CYME":                   {syn: ["CYMDIST"], claim: YES}
+"OpenDSS":                {syn: [], claim: YES}
+"PSCAD":                  {syn: [], claim: UTIL}
+"PowerFactory":           {syn: ["DIgSILENT"], claim: NEVER}
+"ETAP":                   {syn: [], claim: NEVER}
+"relay programming":      {syn: ["AcSELerator", "relay settings upload"], claim: NEVER}
+"SCADA":                  {syn: ["EMS"], claim: UTIL}
+"Python":                 {syn: ["pandas", "numpy"], claim: YES}
+"SQL":                    {syn: ["SQL Server"], claim: YES}
+"MATLAB":                 {syn: [], claim: YES}
+"test plan":              {syn: ["test plans", "test procedures", "test cases"], claim: YES}
+"Monte Carlo":            {syn: [], claim: YES}
+"machine learning":       {syn: ["PyTorch", "TensorFlow", "deep learning"], claim: NEVER}
+"PE license":             {syn: ["professional engineer"], claim: NEVER}
+"NERC":                   {syn: ["NERC CIP", "NERC standards"], claim: ASK}
+"Simulink":               {syn: [], claim: ASK}
+"PowerWorld":             {syn: [], claim: ASK}

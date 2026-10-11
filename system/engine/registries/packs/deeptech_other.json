@@ -1,0 +1,363 @@
+{
+ "pack": "deeptech_other",
+ "description": "Robotics, autonomy, quantum, climate, energy, AI infrastructure and other hardware startups that fit no lane above; review before enabling.",
+ "source": "split from the original project's registries on 2026-10-08; every entry was live-verified by that project at some point - re-verify before relying on it",
+ "boards": [
+  [
+   "gh",
+   "ionq",
+   105
+  ],
+  [
+   "gh",
+   "psiquantum",
+   74
+  ],
+  [
+   "gh",
+   "lightmatter",
+   70
+  ],
+  [
+   "gh",
+   "rondoenergy",
+   17
+  ],
+  [
+   "ashby",
+   "kognitos",
+   6
+  ],
+  [
+   "gh",
+   "lattice",
+   8
+  ],
+  [
+   "gh",
+   "togetherai",
+   62
+  ],
+  [
+   "gh",
+   "waymo",
+   353
+  ],
+  [
+   "ashby",
+   "crusoe",
+   363
+  ],
+  [
+   "gh",
+   "kodiak",
+   71
+  ],
+  [
+   "gh",
+   "nuro",
+   102
+  ],
+  [
+   "gh",
+   "lucidmotors",
+   324
+  ],
+  [
+   "gh",
+   "coreweave",
+   272
+  ],
+  [
+   "lever",
+   "zoox",
+   244
+  ],
+  [
+   "lever",
+   "atomcomputing",
+   25
+  ],
+  [
+   "ashby",
+   "base-power",
+   182
+  ],
+  [
+   "ashby",
+   "gecko-robotics",
+   20
+  ],
+  [
+   "gh",
+   "foundenergy",
+   1
+  ],
+  [
+   "gh",
+   "pathrobotics",
+   49
+  ],
+  [
+   "ashby",
+   "davidenergy",
+   2
+  ],
+  [
+   "lever",
+   "brightmachines",
+   11
+  ],
+  [
+   "lever",
+   "charmindustrial",
+   7
+  ],
+  [
+   "lever",
+   "exowatt",
+   16
+  ],
+  [
+   "ashby",
+   "graphyte",
+   1
+  ],
+  [
+   "lever",
+   "dexterity",
+   33
+  ],
+  [
+   "lever",
+   "rigetti",
+   11
+  ],
+  [
+   "gh",
+   "captura",
+   1
+  ],
+  [
+   "ashby",
+   "heirloomcarbon",
+   2
+  ],
+  [
+   "ashby",
+   "skydio",
+   128
+  ],
+  [
+   "lever",
+   "waabi",
+   81
+  ],
+  [
+   "ashby",
+   "vaulted-deep",
+   6
+  ],
+  [
+   "gh",
+   "agilityrobotics",
+   63
+  ],
+  [
+   "gh",
+   "figureai",
+   127
+  ],
+  [
+   "gh",
+   "apptronik",
+   82
+  ],
+  [
+   "lever",
+   "ambirobotics",
+   6
+  ],
+  [
+   "gh",
+   "neuralink",
+   75
+  ],
+  [
+   "gh",
+   "arborenergy",
+   14
+  ],
+  [
+   "gh",
+   "quaise",
+   10
+  ],
+  [
+   "gh",
+   "magicleap",
+   4
+  ],
+  [
+   "gh",
+   "amperesand",
+   40
+  ],
+  [
+   "lever",
+   "zerocarbonsystems",
+   7
+  ],
+  [
+   "lever",
+   "roadrunner-studios",
+   14
+  ],
+  [
+   "lever",
+   "zeeco",
+   96
+  ],
+  [
+   "lever",
+   "canopy-ad",
+   23
+  ],
+  [
+   "lever",
+   "dodmg",
+   15
+  ],
+  [
+   "lever",
+   "until",
+   18
+  ],
+  [
+   "lever",
+   "penumbrainc",
+   89
+  ],
+  [
+   "lever",
+   "Gantri",
+   9
+  ],
+  [
+   "ashby",
+   "union-tech",
+   12
+  ],
+  [
+   "ashby",
+   "inertia",
+   8
+  ],
+  [
+   "ashby",
+   "Ridealso",
+   42
+  ],
+  [
+   "smartrecruiters",
+   "Continental",
+   873
+  ]
+ ],
+ "workday": [
+  [
+   "cat.wd5",
+   "cat",
+   "CaterpillarCareers",
+   0
+  ]
+ ],
+ "hard": {
+  "oracle": [
+   {
+    "name": "Emerson Electric",
+    "host": "hdjq.fa.us2.oraclecloud.com",
+    "site": "CX_1"
+   }
+  ],
+  "phenom": [
+   {
+    "name": "Baker Hughes",
+    "base": "https://careers.bakerhughes.com"
+   }
+  ]
+ },
+ "misc": [],
+ "watch": [
+  {
+   "name": "Exowatt",
+   "ats": "lever",
+   "slug": "exowatt",
+   "watch_for": [
+    "material",
+    "metallurg",
+    "thermal",
+    "process engineer",
+    "characteriz",
+    "R&D",
+    "corrosion",
+    "coatings"
+   ]
+  },
+  {
+   "name": "YC Work-at-a-Startup sweep",
+   "ats": "MANUAL",
+   "slug": "https://www.workatastartup.com/companies?query=materials",
+   "watch_for": [
+    "materials",
+    "scientist",
+    "simulation",
+    "characterization",
+    "AI for science"
+   ]
+  },
+  {
+   "name": "ats-scrapers CSV refresh",
+   "ats": "MANUAL",
+   "slug": "https://github.com/kalil0321/ats-scrapers → ats-companies/{oracle,workday}.csv",
+   "watch_for": [
+    "nuclear",
+    "materials",
+    "instrument",
+    "metals",
+    "energy",
+    "AI"
+   ]
+  }
+ ],
+ "feeds": [
+  {
+   "kind": "getro",
+   "name": "lux",
+   "base": "https://jobs.luxcapital.com",
+   "note": "VC portfolio board; searched with queries.yaml board_terms"
+  },
+  {
+   "kind": "getro",
+   "name": "khosla",
+   "base": "https://jobs.khoslaventures.com"
+  },
+  {
+   "kind": "getro",
+   "name": "bev",
+   "base": "https://jobs.breakthroughenergy.org"
+  },
+  {
+   "kind": "getro",
+   "name": "dcvc",
+   "base": "https://jobs.dcvc.com"
+  },
+  {
+   "kind": "ats_links",
+   "name": "a16z",
+   "base": "https://jobs.a16z.com/jobs",
+   "query_param": "q",
+   "note": "server-rendered; job hrefs point at GH/Lever/Ashby"
+  }
+ ]
+}

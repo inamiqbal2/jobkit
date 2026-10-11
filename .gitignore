@@ -1,0 +1,79 @@
+# ---- the person's area: My Job Search/ (only templates, examples and READMEs are committed) ----
+My Job Search/keys.json
+My Job Search/settings.yaml
+My Job Search/settings.json
+My Job Search/my-rules.md
+My Job Search/ONBOARDING_STATUS.md
+My Job Search/tracker.csv
+My Job Search/profile/*.md
+My Job Search/profile/*.yaml
+My Job Search/profile/evidence/*
+!My Job Search/profile/evidence/_TEMPLATE.md
+!My Job Search/profile/*.TEMPLATE.md
+!My Job Search/profile/*.example
+My Job Search/reports/*
+!My Job Search/reports/.gitkeep
+My Job Search/applications/*
+!My Job Search/applications/.gitkeep
+# intake: the person's own documents and the extracted text never leave their computer
+My Job Search/intake/*
+!My Job Search/intake/README.md
+!My Job Search/intake/.gitkeep
+
+# state, caches, corpus, built output
+My Job Search/tracking/*.db
+My Job Search/tracking/*.db-*
+My Job Search/tracking/*.jsonl
+My Job Search/tracking/*.json
+My Job Search/tracking/*.csv
+My Job Search/tracking/*.txt
+My Job Search/tracking/*.log
+My Job Search/tracking/*.md
+My Job Search/tracking/jds/
+My Job Search/tracking/rubric/
+My Job Search/tracking/audit/
+My Job Search/tracking/scheduled_runs/
+My Job Search/tracking/registries/*.json
+My Job Search/tracking/registries/*.jsonl
+My Job Search/tracking/registries/*.yaml
+My Job Search/tracking/registries/*.bak-*
+!My Job Search/tracking/.gitkeep
+!My Job Search/tracking/*.example
+!My Job Search/tracking/registries/README.md
+!My Job Search/tracking/registries/custom.json.example
+!My Job Search/tracking/registries/queries.yaml.example
+!My Job Search/tracking/registries/queries.*.yaml.example
+
+# ---- system/: the program. The venv and run artifacts never ship ----
+system/.venv/
+system/.venv.broken-*/
+# example workspaces (fabricated people, committed on purpose): hand-written data files only, no run artifacts
+system/examples/*/tracking/*.jsonl
+system/examples/*/tracking/*.json
+system/examples/*/tracking/*.db
+system/examples/*/tracking/*.db-*
+system/examples/*/tracking/*.csv
+system/examples/*/tracking/*.txt
+system/examples/*/tracking/*.md
+system/examples/*/tracking/*.log
+system/examples/*/tracking/jds/
+system/examples/*/tracking/rubric/
+system/examples/*/tracking/registries/*.json
+system/examples/*/tracking/registries/*.jsonl
+system/examples/*/tracking/registries/*.bak-*
+!system/examples/*/tracking/registries/custom.json
+system/examples/*/applications/*/JobDescription.txt
+system/examples/*/applications/**/*.docx
+system/examples/*/applications/*/AUDIT_PASS.json
+system/examples/*/keys.json
+system/examples/*/tracker.csv
+system/examples/*/intake/
+
+# python / os
+__pycache__/
+*.pyc
+.venv/
+.venv.broken-*/
+venv/
+*.bak*
+.DS_Store

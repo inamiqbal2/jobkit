@@ -1,0 +1,108 @@
+{
+ "pack": "education_general",
+ "description": "Teaching, research, student-services and administrative jobs at colleges and universities (AcademicJobsOnline whole board, Chronicle and Inside Higher Ed keyword feeds, University of Hawaii NEOGOV), charter-school networks with public APIs, and federal education jobs through USAJobs with your key. K-12 district boards (SchoolSpring, K12JobSpot, EdJoin) render in the browser only and are watch entries. Any field: the JD gate decides.",
+ "source": "built 2026-10-11 for jobkit v0.3; every active entry live-fetched that day. HigherEdJobs: its category RSS feeds work with a browser User-Agent (catID=100 Biology etc., see the academic_marine_bio pack) but the feed INDEX is Incapsula-walled and the site blocked this IP after a category scan on 2026-10-11, so no general HigherEdJobs feed ships here - add the category you want with the recipe in `_howto` once you have its catID from a browser.",
+ "_howto": {
+  "higheredjobs_category_feed": {
+   "kind": "rss",
+   "name": "HigherEdJobs - <category>",
+   "base": "https://www.higheredjobs.com/rss/categoryFeed.cfm?catID=<ID from https://www.higheredjobs.com/rss/ opened in a browser>",
+   "loc_regex": "\\(([^()]+)\\)\\s*$",
+   "headers": {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+   }
+  }
+ },
+ "boards": [
+  [
+   "smartrecruiters",
+   "kipp",
+   "KIPP Public Schools - live 2026-10-11: 508 openings"
+  ],
+  [
+   "smartrecruiters",
+   "uncommonschools",
+   "Uncommon Schools - live 2026-10-11: 102 openings"
+  ],
+  [
+   "gh",
+   "achievementfirst",
+   "Achievement First - live 2026-10-11: 62 openings"
+  ],
+  [
+   "gh",
+   "khanacademy",
+   "Khan Academy - live 2026-10-11: 6 openings"
+  ]
+ ],
+ "workday": [],
+ "hard": {},
+ "misc": [],
+ "feeds": [
+  {
+   "kind": "rss",
+   "name": "AcademicJobsOnline",
+   "base": "https://academicjobsonline.org/ajo?joblist-0-0-0-----rss--",
+   "note": "whole-board RSS 1.0 (gzip); live 2026-10-11: 343 items, every field (the JD gate decides)"
+  },
+  {
+   "kind": "rss",
+   "name": "Chronicle of Higher Education Jobs",
+   "base": "https://jobs.chronicle.com/jobsrss/?keywords={kw}",
+   "loc_regex": "((?:\\b[A-Z][A-Za-z'.-]+,?\\s*){1,5}(?:\\((?:US|UK)\\))?)\\s*$",
+   "note": "keyword RSS; live 2026-10-11: 20 items per term; loc_regex takes the trailing 'City, State (US)'"
+  },
+  {
+   "kind": "rss",
+   "name": "Inside Higher Ed Careers",
+   "base": "https://careers.insidehighered.com/jobsrss/?keywords={kw}",
+   "loc_regex": "((?:\\b[A-Z][A-Za-z'.-]+,?\\s*){1,5}(?:\\((?:US|UK)\\))?)\\s*$",
+   "note": "keyword RSS; live 2026-10-11: 20 items per term"
+  },
+  {
+   "kind": "neogov",
+   "name": "University of Hawaii system",
+   "host": "www.schooljobs.com",
+   "agency": "hawaiiedu",
+   "note": "NEOGOV (schooljobs.com) JSON; live 2026-10-11: 723 postings on the board"
+  },
+  {
+   "kind": "usajobs",
+   "name": "usajobs",
+   "days": 30,
+   "note": "USAJobs search API. NEEDS keys.json usajobs_key + usajobs_email - the person registers the free key at developer.usajobs.gov (onboarding phase 16, only when government jobs interest them). The API answers 401 without a key (verified 2026-10-11); idle until then. Same entry name in every pack so the assembler keeps one copy."
+  }
+ ],
+ "watch": [
+  {
+   "name": "SchoolSpring (K-12, national)",
+   "ats": "MANUAL",
+   "slug": "https://www.schoolspring.com/",
+   "watch_for": [],
+   "note": "browser-rendered app, no public listing endpoint (2026-10-11)"
+  },
+  {
+   "name": "K12JobSpot (Frontline, K-12)",
+   "ats": "MANUAL",
+   "slug": "https://www.k12jobspot.com/",
+   "watch_for": [],
+   "note": "browser-rendered (2026-10-11)"
+  },
+  {
+   "name": "EdJoin (California K-12)",
+   "ats": "MANUAL",
+   "slug": "https://www.edjoin.org/Home/Jobs",
+   "watch_for": [],
+   "note": "listing is a browser template fed by a private API (2026-10-11)"
+  },
+  {
+   "name": "HigherEdJobs",
+   "ats": "MANUAL",
+   "slug": "https://www.higheredjobs.com/search/",
+   "watch_for": [],
+   "note": "category feeds work (recipe in _howto); the site walls automated index reads (2026-10-11)"
+  }
+ ]
+}

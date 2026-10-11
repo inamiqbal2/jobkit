@@ -1,0 +1,107 @@
+# FABRICATED approved claims for Jordan Example (registered nurse). Shape = My Job Search/profile/approved_claims.yaml.example.
+# Every line was "confirmed" in this invented world on 2026-10-11; nothing here is a template to copy facts from.
+summaries:
+  icu-staff-nurse: "ICU registered nurse (BSN, CCRN) with six years of hospital nursing, two of them in a 24-bed medical ICU: ventilated and vasoactive patients, CRRT, arterial and central lines, sepsis bundle care; precepts new-graduate nurses and takes relief charge."
+  clinical-educator: "Critical-care registered nurse (BSN, CCRN) with six years of bedside nursing who has precepted eleven new-graduate and travel nurses and co-led unit sepsis-bundle education for about 45 nurses; seeking a unit-based clinical educator role."
+
+tenure:
+  line: "six years of hospital nursing experience (2019-present), including two years in a medical ICU"
+  short: "six years of hospital nursing (2019-present, two in a medical ICU)"
+  years: 6
+
+experience:
+  - key: ERMC
+    org: "Example Regional Medical Center"
+    dates: "Jul 2023 - Present"
+    role: "Registered Nurse, Medical ICU (MICU), nights"
+    loc: "Denver, CO"
+    always_include: true
+    evidence: "example_regional_medical_center.md"
+    nda: "no patient details; unit metrics only as on the unit dashboard"
+    bullets:
+      B_ERMC_CARE: "Provide nursing care for one to two critically ill adults per shift on a 24-bed medical ICU: ventilated patients, vasoactive and sedation drips titrated to protocol, arterial and central lines."
+      B_ERMC_TTM: "Run targeted temperature management (Arctic Sun) after cardiac arrest, pacing rewarming to protocol."
+      B_ERMC_CRRT: "Set up, run and troubleshoot CRRT (Prismaflex) circuits as the bedside nurse, with unit competency signed in 2024."
+      B_ERMC_PRECEPT: "Precepted six new-graduate nurses across the 2024 and 2025 residency cohorts and three travel nurses, from orientation to independent assignment."
+      B_ERMC_SEPSIS: "Co-led the unit's 2024 sepsis-bundle education, four skills-day sessions for about 45 nurses; unit 3-hour bundle compliance rose from 71% to 88% that year alongside other measures."
+      B_ERMC_CHARGE: "Serve as relief charge nurse about two shifts a month since March 2025: assignments, bed flow and rapid-response coordination."
+      B_ERMC_ECMO: "Nursed ECMO and IABP patients at the bedside as the primary RN; circuits were run by the ECMO specialist and the CVICU team."
+    keywords: "ICU critical care ventilator vasoactive sedation CRRT Prismaflex arterial line central line targeted temperature management Arctic Sun sepsis bundle precept new graduate residency charge nurse Epic"
+  - key: ECH
+    org: "Example Community Hospital"
+    dates: "Jul 2019 - Jun 2023"
+    role: "Registered Nurse, Medical-Surgical / Telemetry"
+    loc: "Aurora, CO"
+    evidence: "example_community_hospital.md"
+    bullets:
+      B_ECH_CARE: "Direct patient care for four to six medical-surgical and telemetry patients per shift on a 36-bed unit: post-operative, heart failure, COPD, diabetes; insulin and heparin drips per protocol."
+      B_ECH_TELE: "Interpreted continuous telemetry and escalated rhythm changes, initiating rapid-response calls when indicated."
+      B_ECH_SKIN: "Unit skin-integrity champion 2021-2023; hospital-acquired pressure injuries fell from nine to four per year between 2021 and 2022, a team result."
+      B_ECH_PRECEPT: "Precepted two new-graduate nurses in 2022."
+    keywords: "med-surg telemetry rapid response heparin insulin drip wound care pressure injury champion precept Epic"
+  - key: BSN
+    org: "Example State University, College of Nursing"
+    dates: "Aug 2015 - May 2019"
+    role: "BSN student; senior practicum, surgical ICU"
+    loc: "Denver, CO"
+    evidence: "bsn_capstone.md"
+    bullets:
+      B_BSN_PRACTICUM: "Completed a 180-hour senior practicum on a surgical ICU under a preceptor."
+      B_BSN_CAPSTONE: "Evidence-based-practice capstone on early mobility of ventilated patients, presented as a poster at the college's 2019 showcase."
+    keywords: "practicum surgical ICU evidence-based practice early mobility capstone"
+
+entry_variants:
+  ERMC_EDU: {base: ERMC, role: "Registered Nurse, Medical ICU (preceptor; relief charge)"}
+
+projects:
+  sepsis_education:
+    title: "MICU sepsis-bundle education (2024)"
+    bullet: "Four skills-day sessions co-led for about 45 nurses; 3-hour bundle compliance 71% to 88% over the year with other unit measures."
+    evidence: "example_regional_medical_center.md"
+  practice_council:
+    title: "MICU unit practice council"
+    bullet: "Member of the unit practice council, the nurse-led body that reviewed the sepsis-bundle rollout and the unit's CRRT competency sign-off."
+    evidence: "example_regional_medical_center.md"
+
+skills_lines:
+  CLINICAL: ["Critical Care", "Ventilated patients, vasoactive and sedation titration, CRRT (Prismaflex), arterial and central lines, targeted temperature management, sepsis bundle, rapid response, telemetry"]
+  DEVICES: ["Equipment & Systems", "Alaris IV pumps, Prismaflex, Arctic Sun, telemetry monitors (hands-on); ECMO and IABP patients nursed at the bedside (circuits run by the specialist team); Epic"]
+  TEACHING: ["Precepting & Education", "Precepted eleven new-graduate and travel nurses; co-led unit sepsis-bundle skills days; relief charge nurse; unit practice council"]
+  CREDENTIALS: ["Licenses & Certifications", "Registered Nurse, Colorado DORA license (multistate compact), active; BLS/CPR and ACLS (AHA), current; CCRN (AACN), 2025"]
+
+publications:
+  line: ""
+  short: ""
+  counts: {published_peer_reviewed: 0, under_review: 0, in_preparation: 0, total: 0}
+
+hedged_phrases:
+  - "run by the ECMO specialist"
+  - "circuits run by the specialist team"
+  - "nursed at the bedside"
+  - "managed by the CVICU team"
+
+never_claims:
+  forbidden_terms: ["nurse practitioner", "APRN", "MSN", "NPD-BC", "PICC insertion", "intubat", "flight nurse", "TNCC", "CEN", "charge nurse manager"]
+  operator_patterns:
+    - "\\b(ran|operated|managed|initiated)\\b[^.;]{0,30}\\b(ECMO|IABP)\\b"
+    - "hands-on[^.;]{0,30}\\b(ECMO|IABP|PICC)\\b"
+    - "\\b(am|as|an|a|certified|trained as)\\s+(?:an? )?ECMO specialist"   # the person is NOT one; "run by the ECMO specialist" is the approved hedge
+    - "\\b(placed|inserted)\\b[^.;]{0,20}\\b(PICC|central line|arterial line)s?\\b"
+
+retired_claims:
+  - "reduced CLABSI"
+  - "\\b1,?100 patient"
+
+banned_words: ["local"]
+
+consistency_items:
+  - label: "Sepsis education numbers"
+    kind: bullet_contains
+    match: ["sepsis-bundle education"]
+  - label: "Credentials line"
+    kind: line_startswith
+    match: ["licenses & certifications"]
+
+pending:
+  - claim: "contributed to a CLABSI reduction on the MICU"
+    question: "What was the baseline and the period, and where is it recorded? Not usable until answered."

@@ -1,0 +1,10 @@
+# EXAMPLE search terms for a REGISTERED NURSE (hospital / clinical track) - copy to queries.yaml and edit, or let the
+# onboarding interview generate queries.yaml from your own field words in phase 17.
+# Terms are BREADTH only: everything found is judged on the posting's text (match.py) and by two blind scorers; never on a term.
+workday_terms: ["registered nurse", "RN", "ICU", "critical care", "clinical educator", "nurse educator"]
+hard_ats_terms: ["registered nurse", "ICU", "critical care"]   # the first THREE are used per employer (Oracle / Phenom / iCIMS / SAP sites)
+board_terms: ["registered nurse", "ICU nurse", "critical care", "clinical educator"]   # keyword-searched boards (Radancy careers sites, NEOGOV, RSS)
+usajobs: ["registered nurse", "nurse educator", "critical care nurse"]                 # only with your USAJobs key (VA hospitals; government track)
+adzuna: ['"registered nurse" ICU', '"critical care" nurse', '"clinical nurse educator"', '"ICU RN"']   # official API, free key
+linkedin: ["ICU registered nurse", "critical care RN", "clinical nurse educator", "nurse educator"]   # opt-in arm (run.linkedin_guest)
+indeed: ['"ICU" "registered nurse"', '"critical care" RN', '"clinical educator" nurse']               # opt-in arm (run.indeed_jobspy)

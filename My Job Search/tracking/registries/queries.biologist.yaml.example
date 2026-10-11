@@ -1,0 +1,10 @@
+# EXAMPLE search terms for a FIELD BIOLOGIST on an academic / agency track (copy to queries.yaml and edit; or let the
+# onboarding interview generate queries.yaml from your own field words in phase 17).
+# Terms are BREADTH only: everything found is judged on the posting's text (match.py) and by two blind scorers; never on a term.
+workday_terms: ["wildlife biologist", "field biologist", "ecologist", "research technician", "fisheries", "conservation"]
+hard_ats_terms: ["biologist", "ecology", "wildlife"]          # the first THREE are used per employer
+board_terms: ["biologist", "ecology", "wildlife"]             # keyword-searched boards (Chronicle, Inside Higher Ed, NEOGOV, Science/Nature RSS)
+usajobs: ["wildlife biologist", "fish biologist", "ecologist", "biological science technician"]   # only with your USAJobs key (government track)
+adzuna: ['"wildlife biologist"', '"field biologist"', '"ecologist"', '"research technician" biology', '"conservation" biologist']   # official API, free key
+linkedin: ["wildlife biologist", "field biologist", "ecologist", "research technician ecology", "conservation biologist"]           # opt-in arm (run.linkedin_guest)
+indeed: ['"wildlife biologist"', '"field biologist"', '"ecologist"', '"biological technician"']                                   # opt-in arm (run.indeed_jobspy)

@@ -1,0 +1,129 @@
+# FABRICATED approved_claims.yaml for "Sam Example" (fictional process engineer): the annotated reference for every key
+# tools/approved_claims.py reads and tools/audit_claims.py enforces. Copy the SHAPE; every fact below is invented.
+# The shipped template My Job Search/profile/approved_claims.yaml.example is empty on purpose (phase 13 fills it).
+
+summaries:                              # pick one and open it with the JD's role noun (charters/build.md)
+  default: "Process engineer (M.S.) with four years of scale-up and pilot-plant experience in specialty chemicals, ..."
+  data: "R&D data analyst with ..."
+
+tenure:                                 # honest years line for JDs with a numeric years bar
+  line: "four years of process engineering experience (2022-present, including graduate research)"
+  short: "four years of process engineering experience (2022-present, incl. M.S.)"
+  years: 4                              # no tenure line on reqs whose bar exceeds this (build.md)
+
+experience:                             # entries available to the builder; 3-5 chosen per JD
+  - key: ACME                           # importable name (approved_claims.ACME -> (org, dates, role, loc))
+    org: "Acme Chemical"
+    dates: "Jun 2022 - Present"
+    role: "Process Engineer"
+    loc: "Springfield, IL"
+    always_include: true                # entry_scorer always keeps this one (the current/anchor job)
+    evidence: "acme.md"
+    nda: "no customer names, no batch sizes"   # disclosure rule copied from the evidence file header
+    bullets:                            # named so build scripts and the audit can reference them
+      B_ACME_SCALEUP: "Scaled a two-step synthesis from 5 L to 500 L, by designing the pilot campaign and owning the batch records."
+      B_ACME_DOE: "Cut cycle time 18%, by a 2^4 design of experiments on temperature, feed rate, agitation and hold time."
+    keywords: "scale-up pilot plant batch records DOE cycle time specialty chemical"   # entry_scorer text
+  - key: STATEU
+    org: "State University"
+    dates: "Sep 2020 - May 2022"
+    role: "Graduate Research Assistant"
+    loc: "Springfield, IL"
+    evidence: "stateu.md"
+    bullets:
+      B_STATEU_KINETICS: "Measured reaction kinetics ... "
+    keywords: "kinetics reactor modeling MATLAB"
+  - key: INTERN
+    org: "Big Pharma Inc."
+    dates: "Jun 2021 - Aug 2021"
+    role: "Process Development Intern"
+    loc: "Chicago, IL"
+    evidence: "bigpharma.md"
+    frozen: true                        # every bullet under this employer heading must equal one of these verbatim
+    bullets:
+      B_INTERN_1: "Supported tech transfer of ... (NDA-generic wording confirmed by the user)."
+    keywords: "tech transfer cGMP documentation"
+
+projects:
+  pilot_plant:
+    title: "Pilot Plant Commissioning"
+    bullet: "Commissioned a 500 L pilot line ..."
+    evidence: "acme.md"
+
+skills_lines:                           # label: text. Hands-on vs used-but-not-operated wording is fixed here.
+  PROCESS: ["Process Engineering", "Scale-up, pilot-plant operation (hands-on), batch records, DOE, cycle-time reduction"]
+  ANALYTICAL: ["Analytical", "HPLC and GC (hands-on); NMR and MS data used in R&D (not operated)"]
+  PROGRAMMING: ["Programming & Data", "Python (pandas, SciPy), MATLAB, JMP, Minitab, Git"]
+
+publications:
+  line: "2 peer-reviewed journal articles (Ind. Eng. Chem. Res., Chem. Eng. J.); 1 manuscript under review"
+  short: "2 peer-reviewed journal articles; 1 under review"
+  counts: {published_peer_reviewed: 2, under_review: 1, in_preparation: 0, total: 3}
+
+hedged_phrases:                         # phrases that make a non-operator instrument mention acceptable
+  - "used in R&D"
+  - "data used in R&D"
+
+never_claims:                           # Article II. Hard audit failures wherever they appear on a resume.
+  forbidden_terms: ["Six Sigma", "ASME Section VIII", "PyTorch", "TensorFlow", "cGMP auditor"]
+  operator_patterns:                    # regex: operator-implying phrasing for instruments only USED, never run
+    - "hands-on[^.;]{0,40}\\b(NMR|MS)\\b"
+    - "\\b(performed|operated|ran)\\b[^.;]{0,30}\\b(NMR|MS)\\b"
+
+retired_claims:                         # regex: claims that were once on a resume and are now known false/unverifiable
+  - "\\b30% (yield|throughput)"         # example: an unverifiable metric
+  - "led a team of \\d+"                # example: the user confirmed it was an IC role
+
+banned_words: ["local"]                 # never on a resume (reads as "won't relocate" to ATS parsers)
+
+consistency_items:                      # tools/consistency.py: story lines that must match across resumes to one employer
+  - label: "Big Pharma bullets"
+    kind: entry_bullets                 # bullets under the entry whose heading contains any `match`
+    match: ["big pharma"]
+  - label: "Teaching bullet"
+    kind: bullet_contains
+    match: ["teaching assistant"]
+  - label: "Publications line"
+    kind: line_startswith
+    match: ["publications"]
+
+pending:                                # NOT usable until the user confirms and moves them above
+  - claim: "reduced solvent use 40%"
+    question: "What was the baseline and where is the number recorded?"
+
+# ---- optional sections -------------------------------------------------------------------------------------
+entry_variants:                         # the same employer with a different TITLE READ (same facts, same dates)
+  ACME_ENG: {base: ACME, role: "Process Engineer"}   # -> approved_claims.ACME_ENG = (org, dates, role, loc)
+
+bullet_bank:                            # approved bullets not tied to one entry (thesis / publication bullets)
+  B_THESIS: "Measured ... (M.S. thesis; published in ...)."
+
+constants:                              # approved text snippets build scripts may reuse verbatim
+  COURSE_STATS: "graduate coursework in applied statistics"
+  SKILL_TEACHING: ["Teaching", "Teaching assistant, Unit Operations Laboratory (two semesters)"]
+
+# ---- academic CV sections (optional; read by resume_builder.AcademicCV when settings.yaml build.format is academic_cv) ----
+# Every item is confirmed text the CV prints VERBATIM; audit_claims.py (CV mode) fails any CV line that is not here.
+# Items may be plain strings or {text|citation, evidence}. experience[] entries may carry `section: research |
+# professional | field | teaching` (default research) so the CV groups them. See system/examples/marina_example/.
+# cv:
+#   education:
+#     - {institution: "State University", dates: "Sep 2020 - May 2022", degree: "M.S. in Chemical Engineering", loc: "Springfield, IL",
+#        details: ["Thesis: <title> (advisor: Dr. X)", "Teaching assistant, Unit Operations Laboratory (two semesters)"]}
+#   publications:                       # numbered, newest first; counts must agree with profile/publications.md
+#     - {citation: "Author, A., Example, J. (2024). Title. Journal 12(3): 101-112.", status: published, evidence: "publications.md"}
+#   presentations:
+#     - {text: "Example, J. (2024). Title. Oral, Conference, City.", evidence: "publications.md"}
+#   field_experience:                   # expeditions, cruises, field seasons, plant campaigns
+#     - {title: "Pilot campaign", org: "Acme Chemical", dates: "Jun 2024 - Aug 2024", loc: "Springfield, IL", evidence: "acme.md",
+#        bullets: ["Ran the 500 L pilot campaign (12 batches) ..."]}
+#   certifications:
+#     - {text: "AAUS Scientific Diver (2021 - current), 300+ logged dives", evidence: "skills-inventory.md"}
+#   technical_skills: {LABEL: [label, text]}     # defaults to skills_lines when absent
+#   teaching:                           # dict items become dated entries; strings a plain list
+#     - {org: "State University", dates: "Sep 2020 - May 2022", role: "Teaching Assistant, Unit Operations Lab", loc: "Springfield, IL",
+#        bullets: ["Taught two semesters ..."]}
+#   grants_awards: [{text: "Graduate Research Award, 2023 ($1,500)", evidence: "stateu.md"}]
+#   service: [{text: "Reviewer, Example Journal (2025)", evidence: "stateu.md"}]
+#   references: "Available upon request"
+

@@ -1,0 +1,6 @@
+{
+ "_readme": "Only used when settings.yaml modules.inbox_sweep is true. Employer name (lower-case, as in state.db Company) -> mailbox from: token(s). Use domain-form tokens for employers whose name is also a surname or a consumer brand so personal mail never matches. Copy to inbox_sender_tokens.json.",
+ "acme chemical": "acmechem.com OR acmechemical",
+ "apple": "apple.com",
+ "parker hannifin": "parker.com OR parkerhannifin"
+}

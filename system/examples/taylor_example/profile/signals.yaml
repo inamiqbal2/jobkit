@@ -1,0 +1,39 @@
+# FABRICATED, minimally seeded signals for a power-systems profile (onboarding phase 17 draft; phase 18 calibration NOT done).
+lanes:
+  power-systems:
+    role: home
+    terms:
+      - {pattern: "\\bpower (system|flow)s?\\b|\\bload[- ]flow\\b", weight: 4}
+      - {pattern: "\\bdistribution (planning|system|feeder)s?\\b|\\btransmission planning\\b", weight: 4}
+      - {pattern: "\\bprotection (coordination|engineer|relay)|\\brelay (setting|coordination)", weight: 4}
+      - {pattern: "\\binterconnection (stud|request|screen)|\\bieee 1547\\b", weight: 4}
+      - {pattern: "\\bhosting capacity\\b|\\bDER\\b|\\bdistributed energy", weight: 3}
+      - {pattern: "\\bpss/?e\\b|\\bcyme\\b|\\bopendss\\b|\\bpscad\\b|\\bpowerworld\\b", weight: 3}
+      - {pattern: "\\bshort[- ]circuit\\b|\\bfault (current|stud)", weight: 2}
+      - {pattern: "\\bsubstation|\\bfeeder|\\bswitchgear|\\btransformer", weight: 2}
+      - {pattern: "\\butility\\b|\\bISO\\b|\\bRTO\\b|\\bNERC\\b|\\bFERC\\b", weight: 1}
+      - {pattern: "\\bpython\\b|\\bsql\\b", weight: 1}
+    negatives:
+      - {pattern: "\\bRF\\b|\\bantenna|\\bPCB (design|layout)|\\bFPGA\\b|\\bASIC\\b", weight: -3}
+      - {pattern: "\\bcell culture|\\bassay\\b|\\bclinical\\b", weight: -4}
+  grid-analytics:
+    role: transferable
+    terms:
+      - {pattern: "\\bload forecast|\\boutage (analytic|predict)|\\btime[- ]series", weight: 3}
+      - {pattern: "\\bdata pipeline|\\bETL\\b|\\bsql\\b", weight: 2}
+      - {pattern: "\\bpandas\\b|\\bnumpy\\b|\\bpython\\b", weight: 2}
+      - {pattern: "\\bmonte carlo\\b|\\bregression (model|analysis)|\\bstatistical (analysis|model)", weight: 2}
+      - {pattern: "\\btest plan|\\btest (case|harness|procedure)s?|\\bvalidation (plan|test)", weight: 3}
+      - {pattern: "\\binverter|\\bsmart meter|\\bgrid[- ]edge|\\bmicrogrid", weight: 2}
+    negatives:
+      - {pattern: "\\bcashier|\\bforklift|\\bcdl\\b|\\bretail\\b", weight: -6}
+thresholds:
+  jd_gate: 0.28
+  sig_min: 4
+  sigx_min: 10
+  sig_floor: -4
+priority_patterns:
+  exclude: ["\\bsales\\b", "\\bmarketing\\b", "\\bfield technician", "\\blineman"]
+  strong: ["\\bgrid analytics\\b", "\\bhosting[- ]capacity (tool|software|platform)", "\\bDER (analytics|software|platform)"]
+  weak: ["\\bdata (scientist|engineer|analyst)\\b", "\\bsoftware engineer\\b", "\\bapplications? engineer\\b"]
+  anchor: ["\\bgrid\\b", "\\bdistribution (system|feeder)", "\\butility\\b", "\\bDER\\b", "\\bload[- ]flow", "\\bpower system"]
