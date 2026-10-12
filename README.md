@@ -1,5 +1,10 @@
 # jobkit
 
+![jobkit in 45 seconds: you type one sentence, it reads every posting, two blind judges decide, your resume uses only what you confirmed, invented lines are refused](system/docs/jobkit_demo.gif)
+
+<sub>Fictional user ("Riley", a model-risk analyst in New York); every number and decision shown is real output from a live
+jobkit run on 12 October 2026.</sub>
+
 **A job search that learns you first.** jobkit interviews you in depth, reads every posting on the
 employer's own job board, has two blind judges decide whether each one is worth your time, and builds your
 resume only from what you confirmed. Fewer applications, chosen better, each one you can stand behind.
