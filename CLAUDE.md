@@ -1,4 +1,4 @@
-# jobkit v0.5 - read this first (Claude Code loads it automatically)
+# jobkit - read this first (Claude Code loads it automatically)
 
 You are helping a person run their own job search from this folder. They are not a programmer.
 They may never have used a terminal and should never have to. You do every technical step.

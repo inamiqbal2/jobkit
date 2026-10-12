@@ -1,11 +1,88 @@
-# jobkit v0.5
+# jobkit
 
-jobkit helps you look for a job without doing the tedious parts yourself. You talk to Claude in plain
-English; Claude searches job boards, judges how well each posting fits you, writes an honest resume (or
-academic CV) and cover letters from facts you confirm, and tells you what to look at. You decide, and you apply.
+**A job search that learns you first.** jobkit interviews you in depth, reads every posting on the
+employer's own job board, has two blind judges decide whether each one is worth your time, and builds your
+resume only from what you confirmed. Fewer applications, chosen better, each one you can stand behind.
 
-It works for any field: a nurse, a software engineer, a field biologist, a teacher, a sales manager, a city
-planner. It never applies for you, never sends anything, and never reads your email.
+It runs inside the Claude desktop app. You talk to it in plain English; no programming, ever. It works for
+any field: nursing, software, field biology, teaching, sales, city planning.
+
+## Why job searching broke
+
+- **Applying got easy, so everyone applies to everything.** Applications per hire went from about 100 in
+  2021 to 319 in 2024, and the share of applications that reach an interview fell from 7-8% to under 5%.[^1]
+  Nearly half of job seekers say they "spray and pray" regularly, and three in four would apply more
+  selectively if they had a signal for where to aim.[^2]
+- **Stretched resumes get caught.** 65% of hiring managers say they have caught applicants using AI
+  deceptively.[^3] A resume that beats the filter but not the interview costs everyone time, yours most.
+- **Listings are not all what they seem.** About one listing in five is a "ghost job" that is not really
+  being filled.[^4]
+- **Fit and tailoring are what still work.** Resumes tailored to the posting convert to responses about 1.6
+  times as often as generic ones.[^5]
+
+Tools that help you send more applications, or stretch your resume past the keyword filter, feed the same
+loop: more noise, lower odds, harder interviews. jobkit is built for the other direction.
+
+## What jobkit does differently
+
+**1. It learns you before it searches.** Setup is a real conversation, two to four hours in as many sittings
+as you like (shorter if you drop in your old resumes and papers; it reads them and reads everything back to
+you). For every job you have held it asks what you did yourself versus only used, which numbers you can
+defend and where they come from, and one story you would tell in an interview. Every skill is tagged
+hands-on, used, or never. Then it shows you about 20 real postings and learns from your honest yes or no.
+
+**2. It matches on what the job asks, not what it is called.** Titles mislead: the same work hides under a
+dozen names, and the same title means different work at different employers. jobkit reads the full text of
+every posting against your profile and ignores the title, except to drop roles you are not eligible for.
+
+**3. Two blind judges decide whether it is worth your time.** The best-matching postings are each scored
+twice, separately, by judges that see only your profile and the posting, nothing else. Skills,
+experience level, location and whether the role would use your real strengths all count. The two scores are
+averaged; when they disagree, the posting gets a closer look.
+
+**4. It tells you what to skip, and why.** A job that needs a license you do not hold, a clearance you
+cannot get, or experience you never had is set aside with the reason in one plain line. Jobs above your line
+get documents built for you, with an honest read of the fit and the gaps. Your hours go where an interview is
+realistic.
+
+**5. It goes to the employers' own job boards.** Out of the box: 265 company boards on Greenhouse, Lever,
+Ashby, SmartRecruiters and Workable; 79 Workday career sites; 40 large-employer systems (Oracle, SAP,
+iCIMS, Phenom and others); and 47 government job portals, in 14 field packs you pick from. Name any employer
+and jobkit finds its board and adds it to your search. Every link it gives you is the employer's own posting.
+
+**6. Your real experience, in the posting's terms. Never invented.** For each posting jobkit picks and
+orders your most relevant confirmed experience and checks the posting's keywords against your skills: what
+you have is used, what you have never done is shown to you as a gap and never added. Every resume line must
+match a statement you approved, word for word, or the program refuses the document. No keyword stuffing, no
+hidden text, no numbers without a source.
+
+**7. It becomes your own tool.** Add rules in plain words ("never show me night-shift jobs", "always flag
+relocation"). The program itself is locked and fingerprinted so nothing changes it by accident; ask for a
+change with `modify:` and it explains, waits for your yes, records it, and can undo it with `revert to
+original`.
+
+**And it never** applies for you, sends anything, or reads your email. You decide, and you apply.
+
+## What you need
+The [Claude desktop app](https://claude.ai/download) and a Claude subscription; jobkit runs on it, and each
+search run uses part of your usage. jobkit itself is free and open source (MIT).
+
+**Status: early.** Its first users are trying it now, so there are no outcome numbers yet; real ones will go
+here when there are. Built and tested on macOS; Windows and Linux are supported but not yet tried by a real
+user. Problems and ideas: open an issue.
+
+## Get it
+Go to **Releases** (right side of this page), download `jobkit.zip` from the newest release, unzip it, and
+follow **Getting started** below. Use the release zip rather than the green "Code" button: the release copy
+includes the program history that `modify:` and `revert to original` need.
+
+[^1]: Ashby, *Talent Trends Report*, April 2026 (109 million applications).
+[^2]: Monster, *Job Application Behavior Report*, March 2026 (1,006 US job seekers).
+[^3]: Greenhouse, *AI in Hiring Report*, November 2025, as reported by Fortune, Nov 18 2025.
+[^4]: Greenhouse CEO Daniel Chait, interview with Fortune, Apr 9 2025.
+[^5]: Huntr, *2025 Annual Job Search Trends Report* (1.78 million applications): 5.8% vs 3.73%.
+
+---
 
 ## What is in the folder
 ```
