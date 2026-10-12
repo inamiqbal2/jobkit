@@ -1,6 +1,6 @@
 # jobkit
 
-![jobkit in 45 seconds: you type one sentence, it reads every posting, two blind judges decide, your resume uses only what you confirmed, invented lines are refused](system/docs/jobkit_demo.gif)
+![jobkit in under a minute: it interviews you in depth, you type one sentence, it reads every posting, two blind judges decide, your resume uses only what you confirmed, invented lines are refused](system/docs/jobkit_demo.gif)
 
 <sub>Fictional user ("Riley", a model-risk analyst in New York); every number and decision shown is real output from a live
 jobkit run on 12 October 2026.</sub>
