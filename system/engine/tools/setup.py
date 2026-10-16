@@ -483,7 +483,7 @@ def engine_status():
 def table():
     w = max(len(r[0]) for r in ROWS) + 1
     say("\n" + "=" * 100)
-    say(f"jobkit {VERSION} setup {'(quick check) ' if QUICK else ''}- {TODAY}")
+    say(f"jobkit setup {'(quick check) ' if QUICK else ''}- {TODAY} (program {VERSION})")
     say("=" * 100)
     for item, state, note in ROWS:
         mark = {OK: "[ok]     ", DONE: "[done]   ", WARN: "[note]   ", MISSING: "[MISSING]"}[state]
@@ -502,7 +502,7 @@ def main():
         n = _manifest.unlock(); say(f"system/engine unlocked ({n} entries writable). Re-lock with --lock or by running setup.py."); sys.exit(0)
     if "--lock" in sys.argv:
         n = _manifest.lock(); say(f"system/engine locked ({n} entries read-only). " + _manifest.status_line()); sys.exit(0)
-    say(f"jobkit {VERSION} setup: workspace = {WS}")
+    say(f"jobkit setup (program {VERSION}): workspace = {WS}")
     if not check_python():
         table(); sys.exit(1)
     if not ensure_venv():

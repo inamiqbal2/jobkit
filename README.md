@@ -153,7 +153,7 @@ sittings as you like.
 ## The program is locked; you can ask for changes and undo them
 Everything under `system/` is the program. After setup it is read-only on your disk and checked against a
 list of fingerprints, so nothing changes it by accident; the status Claude prints says "Engine: original
-(v0.5)". If you want it to behave differently ("stop showing me night-shift jobs in the report", "put the
+(v0.6)". If you want it to behave differently ("stop showing me night-shift jobs in the report", "put the
 summary before the skills"), say **`modify: <what you want>`**. Claude explains in one paragraph what it would
 change, waits for your yes, makes the change, records it, and locks the program again; the status then says
 "Engine: MODIFIED - 2 files". **`show my modifications`** lists every change in plain words, and **`revert to

@@ -66,7 +66,7 @@ application stands.
 
 ## The program is locked, and changeable on request
 After setup, everything under `system/` is read-only and checked against a fingerprint list; Claude's status
-line says "Engine: original (v0.5)". Want it to behave differently? Say `modify: <what>`: Claude explains the
+line says "Engine: original (v0.6)". Want it to behave differently? Say `modify: <what>`: Claude explains the
 change in one paragraph, waits for your yes, makes it, records it, and locks the program again (the status then
 says "MODIFIED - n files"). `show my modifications` lists every change in plain words; `revert to original` puts
 the program back exactly as shipped. Your own folder is never touched by any of this.
