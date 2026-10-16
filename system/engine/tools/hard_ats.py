@@ -78,14 +78,16 @@ def sap(e):
         except Exception: pass
     return out
 def icims(e):
-    out=[]
+    # 2026-10-16 port: iCIMS sites are not always careers-<tenant>.icims.com (uscareers-, jobs-, external-...). A registry entry
+    # may give the full "host"; job links are matched on any *.icims.com host.
+    out=[]; host=e.get('host') or f"careers-{e['tenant']}.icims.com"
     for kw in KW[:3]:
         try:
-            h=get(f"https://careers-{e['tenant']}.icims.com/jobs/search?ss=1&searchKeyword={urllib.parse.quote(kw)}&in_iframe=1&pr=0")
-            for m in re.finditer(r'href="(https://careers-[^"]+/jobs/\d+/[^"]+/job)[^"]*"[^>]*>\s*<h\d[^>]*>([^<]+)<',h) or []:
+            h=get(f"https://{host}/jobs/search?ss=1&searchKeyword={urllib.parse.quote(kw)}&in_iframe=1&pr=0")
+            for m in re.finditer(r'href="(https://[a-z0-9-]+\.icims\.com/jobs/\d+/[^"]+/job)[^"]*"[^>]*>\s*<h\d[^>]*>([^<]+)<',h) or []:
                 out.append((e['name'],html.unescape(m.group(2)).strip(),"",m.group(1),""))
             if not out:
-                for m in re.finditer(r'<a[^>]+href="(https://careers-[^"]+/jobs/\d+/[^"]+/job)[^"]*"[^>]*(?:title="([^"]+)")?',h):
+                for m in re.finditer(r'<a[^>]+href="(https://[a-z0-9-]+\.icims\.com/jobs/\d+/[^"]+/job)[^"]*"[^>]*(?:title="([^"]+)")?',h):
                     out.append((e['name'],html.unescape(m.group(2) or m.group(1).split('/')[-2].replace('-',' ')).strip(),"",m.group(1),""))
         except Exception: pass
     return out

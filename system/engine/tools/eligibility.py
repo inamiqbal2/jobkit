@@ -30,7 +30,8 @@ if not _TG["phd_positions"]:
     _ELIG_PARTS += [r"\b20\d\d start\b|\(20\d\d start\)",  # "(2027 Start)" graduate-programme titles
                     r"\bnew[- ](college[- ])?grad(uate)?s?\b|\b(university|college) (grad|graduate|hire)s?\b|\bcampus (hire|recruit\w*)\b"]
 if not _TG["fixed_term_ok"]:
-    _ELIG_PARTS += [r"\btemp\b|\btemporary\b"]
+    # 2026-10-16 port: "High Temp Metallics" / "Low-Temp Furnace" are materials words, not a temporary job
+    _ELIG_PARTS += [r"(?<!high )(?<!high-)(?<!low )(?<!low-)(?<!ultra )(?<!ultra-)\btemp\b(?![- ]?(?:metal|alloy|material|ceramic|furnace|sensor|control|superconduct))|\btemporary\b"]
 if not _EXC["postdocs"]:
     _ELIG_PARTS += [r"\bpost[- ]?doc(toral|s)?\b|\bpost[- ]?doctoral\b"]   # "Postdoc", "Post-doctoral", "Post Doctoral Researcher"
 _GENERIC_ELIG = "|".join(_ELIG_PARTS)
@@ -103,11 +104,19 @@ NONUS_URL = re.compile(r"(?:Remote|Hybrid)[-_ ]+(?:Germany|UK|Europe|EMEA|Canada
 # (e.g. "United States|USA" for a Canadian user) is added. Declared assumption: one country of search per workspace.
 import geo as _geo
 _HOME = re.compile(rf"\b{re.escape(_geo.COUNTRY_NAME)}\b|\b{re.escape(_geo.country_code())}\b", re.I) if _geo.country_code() != "US" else None
+# 2026-10-16 port: a multi-site posting whose FIRST listed site is in the United States ("New York, NY; London; Bangalore",
+# "Charlotte, NC, US and 2 more") is a US job with offices abroad - keep it. Only the primary (first) site decides.
+_US_STATES = ("AL|AK|AZ|AR|CA|CO|CT|DE|DC|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY")
+_US_PRIMARY = re.compile(rf"^\s*(?:[^,;|/\n]+,\s*(?:{_US_STATES})\b|[^;|/\n]*\b(?:United States|USA|U\.S\.A?\.?)\b|Remote[- ,(]*(?:US|USA|United States)\b)")
+def _us_primary(loc):
+    first = re.split(r"\s*(?:;|\||\n| and \d+ (?:more|other)| \+\d+)\s*", loc or "", maxsplit=1)[0]
+    return bool(_US_PRIMARY.search(first))
 def non_us(loc="", url="", title=""):
     """Eligibility-only geo test (never fit): True if the posting is outside the user's country by location text,
     URL path or title. The function keeps its historical name; it means "not in the country of search"."""
     loc = loc or ""; url = url or ""; title = title or ""
     if _HOME and (_HOME.search(loc) or _HOME.search(title)): return False
+    if not _HOME and _geo.country_code() == "US" and _us_primary(loc) and not NONUS_TEXT.search(title): return False
     if _geo.FOREIGN_EXTRA and (_geo.FOREIGN_EXTRA.search(loc) or _geo.FOREIGN_EXTRA.search(title)): return True
     if NONUS_TEXT.search(loc) or NONUS_TEXT.search(title): return True
     try:

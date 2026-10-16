@@ -67,7 +67,47 @@ def _generic_fetch(url):
     except Exception as e:
         return f"__FETCHFAIL {e}"
 
+# 2026-10-16 port: a posting already in tracking/corpus.jsonl (full text from the board's own API) is never fetched again.
+_CORPUS=None; _CORPUS_LOCK=_th.Lock()
+def _corpus_text(url):
+    global _CORPUS
+    with _CORPUS_LOCK:
+        if _CORPUS is None:
+            _CORPUS={}
+            p=os.path.join(_WS,"tracking","corpus.jsonl")
+            if os.path.exists(p):
+                for line in open(p,encoding="utf-8",errors="ignore"):
+                    try: r=json.loads(line)
+                    except Exception: continue
+                    if r.get("url") and len(r.get("text") or "")>300: _CORPUS[r["url"]]=r["text"]
+    return _CORPUS.get(url)
+
+# 2026-10-16 port: Adzuna's landing pages sit behind a bot wall that answers bursts with blocks. Throttle to one page
+# every 3.5 s, and after 5 failures stop trying for the rest of the run (screen() then falls back to the API snippet).
+_ADZ_LOCK=_th.Lock(); _ADZ_LAST=[0.0]; _ADZ_FAILS=[0]; _ADZ_MAX_FAILS=5; _ADZ_GAP=3.5
+def _adzuna_blocked(): return _ADZ_FAILS[0]>=_ADZ_MAX_FAILS
+def _adzuna_fetch(url):
+    m=re.search(r"adzuna\.[a-z.]+/(?:land/ad|details)/(\d+)",url)
+    if not m or _adzuna_blocked(): return None
+    with _ADZ_LOCK:
+        wait=_ADZ_LAST[0]+_ADZ_GAP-_time.time()
+        if wait>0: _time.sleep(wait)
+        _ADZ_LAST[0]=_time.time()
+    try:
+        h=_open(urllib.request.Request(f"https://www.adzuna.com/details/{m.group(1)}",
+            headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
+                     'Accept':'text/html','Accept-Language':'en-US,en;q=0.9'}),timeout=25,tries=2).read().decode('utf-8','ignore')
+        d=re.search(r'<section[^>]*class="[^"]*adp-body[^"]*"[^>]*>(.*?)</section>',h,re.S)
+        t=_strip(d.group(1)) if d else _strip(h)
+        if len(t)>400: return t
+    except Exception:
+        pass
+    _ADZ_FAILS[0]+=1
+    return None
+
 def fetch(url):
+    _ct=_corpus_text(url)
+    if _ct: return _ct
     # 2026-10-09: a listing that came with its description (feeds.py neogov / json_list / usajobs) was cached at ingest
     import hashlib as _hl
     _fc=os.path.join(_WS,"tracking","jds","feed_"+_hl.md5(url.encode()).hexdigest()[:16]+".txt")
@@ -95,6 +135,13 @@ def fetch(url):
             for j in json.load(_open(urllib.request.Request(
                 f"https://api.ashbyhq.com/posting-api/job-board/{m.group(1)}",headers={'User-Agent':'Mozilla/5.0'}),timeout=20))['jobs']:
                 if m.group(2) in j['jobUrl']: return _strip(j['descriptionHtml'])
+        if ".myworkdaysite.com/" in url:   # 2026-10-16 port: shared Workday host (wdN.myworkdaysite.com/<lang>/recruiting/<tenant>/<site>/job/...)
+            m=re.search(r"https://(wd\d+\.myworkdaysite\.com)/(?:[a-z]{2}-[A-Z]{2}/)?recruiting/([^/]+)/([^/]+)(/job/[^?#]*)",url)
+            if m:
+                host,ten,site,path=m.groups()
+                d=json.load(_open(urllib.request.Request(f"https://{host}/wday/cxs/{ten}/{site}{path}",
+                    headers={'User-Agent':'Mozilla/5.0','Accept':'application/json'}),timeout=20))
+                return _strip(d['jobPostingInfo']['jobDescription'])
         if "myworkdayjobs.com" in url:
             m=re.search(r"https://([^.]+)\.([^.]+)\.myworkdayjobs\.com/en-US/([^/]+)(/job/.*)",url)
             if m:
@@ -112,6 +159,16 @@ def fetch(url):
                     headers={'User-Agent':'Mozilla/5.0'}),timeout=25))
                 it=d.get('items',[{}])[0]
                 return _strip((it.get('ExternalDescriptionStr') or '')+' '+(it.get('ExternalQualificationsStr') or '')+' '+(it.get('ExternalResponsibilitiesStr') or ''))
+        if ".eightfold.ai/" in url:   # 2026-10-16 port: the careers page is an app shell (CSS/JSON config, no job text); the PCSX API has the posting
+            m=re.search(r"https://([a-z0-9.-]+\.eightfold\.ai)/[^?#]*\?(?:[^#]*&)?pid=(\d+)",url); dm=re.search(r"[?&]domain=([a-z0-9.-]+)",url)
+            if m:
+                q=f"position_id={m.group(2)}"+(f"&domain={dm.group(1)}" if dm else "")
+                d=json.load(_open(urllib.request.Request(f"https://{m.group(1)}/api/pcsx/position_details?{q}",
+                    headers={'User-Agent':'Mozilla/5.0','Accept':'application/json'}),timeout=25))
+                dd=d.get('data') or {}
+                t=_strip(dd.get('jobDescription') or '')
+                if len(t)>200: return f"{dd.get('name','')}\n{dd.get('location','')}\n\n{t}"
+            return "__FETCHFAIL eightfold position not found"
         if "workforcenow.adp.com" in url:
             m=re.search(r"cid=([0-9a-f-]+).*?ccId=([0-9_]+)",url); j=re.search(r"jobId=(\d+)",url)
             if m and j:
@@ -135,15 +192,10 @@ def fetch(url):
                 if os.path.exists(p): return open(p,encoding='utf-8',errors='ignore').read()
         # 2026-10-05 fetch-fail audit: 270 of 1,580 screened items (17%) were never read - Adzuna /land/ad/ redirects
         # 403, iCIMS renders the JD inside an iframe, BambooHR loads it from a JSON endpoint.
-        if "adzuna.com/land/ad/" in url or "adzuna.com/details/" in url:
-            m=re.search(r"adzuna\.com/(?:land/ad|details)/(\d+)",url)
-            if m:
-                h=_open(urllib.request.Request(f"https://www.adzuna.com/details/{m.group(1)}",
-                    headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
-                             'Accept':'text/html','Accept-Language':'en-US,en;q=0.9'}),timeout=25).read().decode('utf-8','ignore')
-                d=re.search(r'<section[^>]*class="[^"]*adp-body[^"]*"[^>]*>(.*?)</section>',h,re.S)
-                t=_strip(d.group(1)) if d else _strip(h)
-                if len(t)>400: return t
+        if "adzuna." in url and ("/land/ad/" in url or "/details/" in url):
+            t=_adzuna_fetch(url)
+            if t: return t
+            return "__FETCHFAIL adzuna page blocked"
         if ".icims.com/jobs/" in url and "in_iframe" not in url:
             r=_generic_fetch(url.split("?")[0]+"?in_iframe=1")
             if not r.startswith("__"): return r
@@ -249,6 +301,8 @@ _HARD_ELIG=r"(?:all )?(?:candidates|applicants|employees) must be u\.?s\.? citiz
 _GC_ELIGIBLE=re.compile(r"(?:green[- ]card holders?|(?:lawful )?permanent residents?)[^.;]{0,90}\b(?:are|is)\s+eligible(?:\s+to\s+apply)?",re.I)
 def screen(rec):
     txt=fetch(rec['url'])
+    if txt.startswith("__") and len(str(rec.get('desc') or ''))>150:   # 2026-10-16 port: page unreadable -> the listing's own snippet
+        txt=str(rec['desc']); rec=dict(rec,snippet_only=True)
     if txt.startswith("__"): return dict(rec,verdict="FETCHFAIL",minq="",pref="",flags=[txt])
     # persist the full JD so downstream steps (critic, build) run on the same text deterministically
     import hashlib
@@ -269,7 +323,7 @@ def screen(rec):
     if _WA["clearance_possible"]: flags=[x for x in flags if x!="clearance"]
     if _WA["sponsorship_needed"] and _hit(_NO_SPONSOR,txt): flags.append("no-sponsorship")
     softflags=[k for k,p in BLOCK.items() if pf and _hit(p,pf) and k not in flags]
-    yrs=sorted({int(x) for x in YRS.findall(scope)})
+    yrs=sorted({int(x) for x in YRS.findall(scope) if int(x)<=25})   # 2026-10-16 port: "over 80 years" is a company blurb, not an experience bar
     waiver=bool(PHD_WAIVER.search(txt))
     # employer EXPLICITLY lists permanent residents as eligible next to a clearance line ("Only U.S. Citizens, Green
     # Card holders ... are eligible to apply. Security Clearance eligibility is required.") -> the clearance line is the

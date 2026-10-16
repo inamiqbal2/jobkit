@@ -7,7 +7,7 @@ Every board and every search term here is WORKSPACE data; this file only knows H
              GH/Lever/Ashby)  rss (RSS 2.0 / RSS 1.0 feed, optional {kw} placeholder, optional loc_regex on the
              description)  html_links (anchor scan of a server-rendered listing: title_regex and/or href_regex select the
              job anchors; {kw} in base = one fetch per board term; relative hrefs resolved - PageUp, PeopleAdmin, ...)
-             bamboo / breezy / jobvite / wprss / rippling (small ATSes, one fetch per company)
+             bamboo / breezy / jobvite / wprss / rippling / nodi (small ATSes, one fetch per company; nodi base = company name)
              smartrecruiters_search (open JSON search API, tenant)  custom_html (card_regex over one careers page;
              positional groups title, location[, url] OR named groups (?P<title>)(?P<loc>)(?P<url>)(?P<id>)(?P<posted>)
              with url_template "{id}" and loc_default)
@@ -317,19 +317,28 @@ def usajobs(e):
 # ── aggregators ────────────────────────────────────────────────────────────────────────────────────────────────
 _sec=_secrets()
 ADZUNA_ID,ADZUNA_KEY=_sec.get("adzuna_id",""),_sec.get("adzuna_key","")
+def _adzuna_url(what=None,company=None,days=7):
+    u=(f"https://api.adzuna.com/v1/api/jobs/{_COUNTRY.lower() if _COUNTRY!='UK' else 'gb'}/search/1?app_id={ADZUNA_ID}&app_key={ADZUNA_KEY}"
+       f"&results_per_page=50&max_days_old={days}&sort_by=date")
+    if what: u+=f"&what={urllib.parse.quote(what)}"
+    if company: u+=f"&company={urllib.parse.quote(company)}"
+    return u
 def adzuna():
+    # 2026-10-16 port: the API snippet travels with each record as 'desc' (screen_minquals falls back to it when the landing
+    # page is bot-walled), and queries.yaml adzuna_companies: [names] runs one company-scoped query per employer - a cheap way
+    # to cover an employer whose own board jobkit cannot read.
     out=[]
-    for q in (_Q.get("adzuna") or []):
+    jobs=[(q,None) for q in (_Q.get("adzuna") or [])]+[(None,c) for c in (_Q.get("adzuna_companies") or [])]
+    for q,co in jobs:
         try:
-            u=(f"https://api.adzuna.com/v1/api/jobs/{_COUNTRY.lower() if _COUNTRY!='UK' else 'gb'}/search/1?app_id={ADZUNA_ID}&app_key={ADZUNA_KEY}"
-               f"&results_per_page=50&what={urllib.parse.quote(q)}&max_days_old=7&sort_by=date")
+            u=_adzuna_url(what=q,company=co)
             d=json.load(urllib.request.urlopen(u,timeout=25))
             for r in d.get("results",[]):
                 t=r.get("title","")
                 if _ADROP.search(t): continue
                 out.append(dict(src="adzuna:"+ (r.get("company",{}).get("display_name") or "unknown"),
                     title=t, loc=(r.get("location",{}).get("display_name") or ""),
-                    url=r.get("redirect_url",""), posted=(r.get("created","") or "")[:10]))
+                    url=r.get("redirect_url",""), posted=(r.get("created","") or "")[:10], desc=_untag(r.get("description",""))))
         except Exception as e:
             print("adzuna arm error:",e)
     seen=set(); ded=[]
@@ -372,13 +381,31 @@ def linkedin():
     2s pacing. Two outputs: (a) jobs into the funnel like any feed arm; (b) companies not in any registry appended to
     tracking/registries/li_discovery.jsonl for registry adds. Fragility is expected (guest API is rate-limited and
     unversioned): errors degrade to zero results, never block the run."""
-    import time
-    out=[]
+    import time, urllib.error
+    # 2026-10-16 port: back off on 429 (5s, 10s, 20s), stop the arm after 3 queries in a row fail, and cache each query's
+    # page for 12 h in tracking/li_cache.json so a re-run the same day does not hit LinkedIn again.
+    _cp=os.path.join(ROOT,"tracking","li_cache.json")
+    try: cache=json.load(open(_cp,encoding="utf-8"))
+    except Exception: cache={}
+    out=[]; streak=0
     for q in (_Q.get("linkedin") or []):
         u=("https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?"
            f"keywords={urllib.parse.quote(q)}&location={urllib.parse.quote(_COUNTRY_NAME)}&f_TPR=r172800&start=0")
-        try: h=fetch(u)
-        except Exception as e: print(f"linkedin arm error ({q}):",e); time.sleep(2); continue
+        hit=cache.get(u)
+        if hit and time.time()-hit.get("t",0)<12*3600: h=hit.get("h","")
+        else:
+            h=None
+            for k in range(3):
+                try: h=fetch(u); break
+                except urllib.error.HTTPError as e:
+                    if e.code!=429: break
+                    time.sleep(5*2**k)
+                except Exception: break
+            if h is None:
+                streak+=1; print(f"linkedin arm: no answer for '{q}'")
+                if streak>=3: print("linkedin arm: stopping for this run (3 queries in a row failed)"); break
+                time.sleep(2); continue
+            streak=0; cache[u]={"t":time.time(),"h":h}
         for card in re.findall(r"<li>(.*?)</li>",h,re.S):
             l=re.search(r'href="(https://www\.linkedin\.com/jobs/view/[^"?]+)',card)
             t=re.search(r'<h3[^>]*>\s*(.*?)\s*</h3>',card,re.S)
@@ -392,6 +419,10 @@ def linkedin():
                 title=title, loc=html.unescape(loc.group(1)).strip() if loc else "",
                 url=l.group(1), posted=dt.group(1) if dt else ""))
         time.sleep(2)
+    try:
+        cache={k:v for k,v in cache.items() if time.time()-v.get("t",0)<12*3600}
+        json.dump(cache,open(_cp,"w",encoding="utf-8"))
+    except Exception: pass
     seen=set(); ded=[]
     for x in out:
         k=re.sub(r"[^0-9]","",x["url"][-12:]) or x["url"]
@@ -457,6 +488,12 @@ def misc_one(e):
             h=fetch(base)
             for m in re.finditer(r"<item>.*?<title>(.*?)</title>.*?<link>(.*?)</link>",h,re.S):
                 out.append((name,html.unescape(m.group(1)).strip(),"",html.unescape(m.group(2).strip()),""))
+        elif kind=="nodi":   # 2026-10-16 port: Nodi public job offers; base = the company name as Nodi spells it. Descriptions cached.
+            for j in json.loads(fetch(f"https://api.nodi.global/job-offers/active/company/{urllib.parse.quote(base or name)}")):
+                u=j.get("magic_link") or ""
+                if not u: continue
+                _cache_jd(u,j.get("title",""),j.get("location",""),_untag(j.get("description","")))
+                out.append((name,j.get("title",""),j.get("location") or j.get("modality") or "",u,(j.get("updated_at") or j.get("created_at") or "")[:10]))
         elif kind=="rippling":
             h=fetch(base)
             for m in re.finditer(r'href="(/[^"]*jobs/[^"]+)"[^>]*>\s*(?:<[^>]+>\s*)*([^<]{4,90})<',h):
@@ -465,7 +502,7 @@ def misc_one(e):
     return out
 
 _WHOLE={"getro":getro,"ats_links":ats_links,"rss":rss,"html_links":html_links,"pipermail":pipermail,"neogov":neogov,"json_list":json_list,"usajobs":usajobs}
-_SMALL=("bamboo","breezy","jobvite","wprss","rippling")
+_SMALL=("bamboo","breezy","jobvite","wprss","rippling","nodi")
 def main():
     res=[]
     whole=[e for e in FEEDS if e.get("kind") in _WHOLE]

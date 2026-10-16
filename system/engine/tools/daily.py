@@ -169,7 +169,8 @@ for path,srckey in (("feed_candidates.json","src"),("hard_candidates.json","comp
         _a=max(_a,0)
         cands.append(dict(band="FRESH" if _a<=7 else ("RECENT" if _a<=14 else "OPEN"),
             tier="1" if _T1.search(loc) else ("2" if _T2.search(loc) else "3"),
-            age=_a,src=str(x.get(srckey,'feed')),title=x.get('title',''),loc=loc,url=x.get('url','')))
+            age=_a,src=str(x.get(srckey,'feed')),title=x.get('title',''),loc=loc,url=x.get('url',''),
+            **({'desc':x['desc']} if x.get('desc') else {})))   # 2026-10-16 port: listing snippet = screen fallback text
 # 2026-10-01 audit H1/H4: ONE geo test for every arm (loc text, URL path, title). Workday "N Locations" placeholders
 # and corpus "Remote" matches leaked Onto Remote-Germany / AMAT Bangalore / CuspAI Berlin into the queue.
 _n_geo=len(cands); cands=[x for x in cands if not _NONUS_ANY(x.get('loc',''),x.get('url',''),x.get('title',''))]
