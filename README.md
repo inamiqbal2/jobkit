@@ -1,12 +1,12 @@
 # jobkit
 
-![jobkit in about a minute: set me up, an in-depth interview that finds what you would leave out, it reads every posting, two blind judges decide, your story is told for the job, invented lines are refused](system/docs/jobkit_demo.gif)
+![jobkit in about a minute: set me up, drop in your documents, an in-depth interview, it reads every posting on employers' own boards, two blind judges score the fit, your story is told for the job, invented lines are refused](system/docs/jobkit_demo.gif)
 
 <sub>Fictional user ("Riley", a model-risk analyst in New York); the scores and counts shown come from a live jobkit run
 in October 2026.</sub>
 
-**Your story, told for the job you want.** Other AI tools stuff your resume with the posting's keywords. jobkit
-interviews you in depth first and finds the experience you would forget to mention, then reads every posting on the
+**Your story, told for the job you want.** Most resume tools match keywords against one resume you upload. jobkit
+reads everything you have (old resumes, papers, transcripts, project reports), interviews you in depth, then reads every posting on the
 employer's own job board, has two blind judges decide which ones are worth your time, and builds each resume to lead
 with what that job needs, from your real experience, in words you confirmed. Your best self for the job you want,
 never a made-up line.
@@ -25,7 +25,8 @@ any field: nursing, software, field biology, teaching, sales, city planning.
 - **Listings are not all what they seem.** About one listing in five is a "ghost job" that is not really
   being filled.[^4]
 - **Fit and tailoring are what still work.** Resumes tailored to the posting convert to responses about 1.6
-  times as often as generic ones.[^5]
+  times as often as generic ones.[^5] Yet only about one job seeker in four tailors their resume for every job, and
+  68% spend under 30 minutes when they do.[^6]
 
 Tools that help you send more applications, or stretch your resume past the keyword filter, feed the same
 loop: more noise, lower odds, harder interviews. jobkit is built for the other direction.
@@ -88,6 +89,7 @@ includes the program history that `modify:` and `revert to original` need.
 [^3]: Greenhouse, *AI in Hiring Report*, November 2025, as reported by Fortune, Nov 18 2025.
 [^4]: Greenhouse CEO Daniel Chait, interview with Fortune, Apr 9 2025.
 [^5]: Huntr, *2025 Annual Job Search Trends Report* (1.78 million applications): 5.8% vs 3.73%.
+[^6]: Novoresume, *Resume Report 2026*, May 2026 (survey of 2,000 US adults).
 
 ---
 
