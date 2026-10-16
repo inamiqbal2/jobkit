@@ -1,6 +1,6 @@
 # jobkit
 
-![jobkit in about a minute: set me up, drop in your documents, an in-depth interview, it reads every posting on employers' own boards, two blind judges score the fit, your story is told for the job, invented lines are refused](system/docs/jobkit_demo.gif)
+![jobkit in about a minute: set me up, drop in your documents, an in-depth interview, it reads every posting on employers' own boards, two blind judges score the fit, and your story is told for the job](system/docs/jobkit_demo.gif)
 
 <sub>Fictional user ("Riley", a model-risk analyst in New York); the scores and counts shown come from a live jobkit run
 in October 2026.</sub>
