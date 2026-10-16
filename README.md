@@ -1,13 +1,15 @@
 # jobkit
 
-![jobkit in under a minute: it interviews you in depth, you type one sentence, it reads every posting, two blind judges decide, your resume uses only what you confirmed, invented lines are refused](system/docs/jobkit_demo.gif)
+![jobkit in about a minute: set me up, an in-depth interview that finds what you would leave out, it reads every posting, two blind judges decide, your story is told for the job, invented lines are refused](system/docs/jobkit_demo.gif)
 
-<sub>Fictional user ("Riley", a model-risk analyst in New York); every number and decision shown is real output from a live
-jobkit run on 12 October 2026.</sub>
+<sub>Fictional user ("Riley", a model-risk analyst in New York); the scores and counts shown come from a live jobkit run
+in October 2026.</sub>
 
-**A job search that learns you first.** jobkit interviews you in depth, reads every posting on the
-employer's own job board, has two blind judges decide whether each one is worth your time, and builds your
-resume only from what you confirmed. Fewer applications, chosen better, each one you can stand behind.
+**Your story, told for the job you want.** Other AI tools stuff your resume with the posting's keywords. jobkit
+interviews you in depth first and finds the experience you would forget to mention, then reads every posting on the
+employer's own job board, has two blind judges decide which ones are worth your time, and builds each resume to lead
+with what that job needs, from your real experience, in words you confirmed. Your best self for the job you want,
+never a made-up line.
 
 It runs inside the Claude desktop app. You talk to it in plain English; no programming, ever. It works for
 any field: nursing, software, field biology, teaching, sales, city planning.
