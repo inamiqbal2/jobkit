@@ -296,6 +296,14 @@ def main():
     else:
         print("KEYWORD COVERAGE ..... skipped (pass --jd or --terms)")
 
+    # 2026-10-16 port: optional - some people send .docx only and want no stray PDF copy next to it (an old PDF is easy to
+    # attach by mistake). settings.yaml build.no_pdf_copies: true turns the check on; default off.
+    if _cfg("build.no_pdf_copies", False):
+        folder = os.path.dirname(os.path.abspath(a.docx))
+        pdfs = [f for f in os.listdir(folder) if f.lower().endswith(".pdf") and re.match(r"(resume|cv|cover_?letter|statement)", f, re.I)]
+        print(f"NO PDF IN FOLDER ..... {'PASS' if not pdfs else 'FAIL ' + ', '.join(pdfs[:3])} (settings.yaml build.no_pdf_copies)")
+        if pdfs: ok = False
+
     print(f"\nRESULT: {'PASS' if ok else 'NEEDS WORK'}\n")
     return 0 if ok else 1
 

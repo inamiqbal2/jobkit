@@ -170,6 +170,7 @@ TEMPLATES = [   # (template relative to the shipped My Job Search/, live name re
     ("profile/signals.yaml.example", "profile/signals.yaml"),
     ("profile/critic_rules.yaml.example", "profile/critic_rules.yaml"),
     ("profile/lexicon.yaml.example", "profile/lexicon.yaml"),
+    ("profile/claim_lexicon.yaml.example", "profile/claim_lexicon.yaml"),   # 2026-10-16: equivalence lexicon (starts empty)
     ("profile/approved_claims.yaml.example", "profile/approved_claims.yaml"),
     ("profile/profile_blind.TEMPLATE.md", "profile/profile_blind.md"),
     ("profile/publications.TEMPLATE.md", "profile/publications.md"),

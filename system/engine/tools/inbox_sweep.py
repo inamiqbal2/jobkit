@@ -56,7 +56,12 @@ def _token(name):
     for k, v in _TOK_OVERRIDE.items():
         if n.startswith(k): return v
     w = [x for x in re.split(r"[^a-z0-9-]+", n) if x and x not in _STOP]
-    return w[0] if w else ""
+    if not w: return ""
+    # 2026-10-16 port: a one- or two-letter first word ("d" from "D. E. Shaw", "3m" is fine) matched nearly every sender.
+    # Short first words fall back to the whole name as a quoted phrase; still too short -> no token (add an override).
+    if len(w[0]) >= 3: return w[0]
+    phrase = " ".join(w)
+    return f'"{phrase}"' if len(phrase.replace(" ", "")) >= 4 else ""
 
 def _last_sweep():
     try:
@@ -81,7 +86,7 @@ def build_plan():
     rows = list(c.execute("""SELECT "#",Company,Position,Status,"Date Applied"
                              FROM applications
                              WHERE "Date Applied"!='' AND Status IN
-                                   ('open','interviewing','advanced')"""))
+                                   ('open','applied','interviewing','advanced')"""))   # 2026-10-16 port: 'applied' rows were never swept
     live = [r for r in rows if r["Status"] in ("interviewing", "advanced")]
     seen, companies = set(), []
     for r in rows:
@@ -92,6 +97,8 @@ def build_plan():
 
     # 2026-10-01: sender-scoped only. One from:(...) clause per batch of employer tokens; no bare keywords.
     toks = sorted({_token(n) for n in companies if _token(n)})
+    _untok = [n for n in companies if not _token(n)]
+    if _untok: print("inbox sweep: no safe sender token for " + ", ".join(_untok[:5]) + " - add them to tracking/inbox_sender_tokens.json")
     queries = []
     for i in range(0, len(toks), 25):
         grp = " OR ".join(toks[i:i+25])

@@ -113,6 +113,7 @@ build:
   cv_max_pages: 3
   min_experience_entries: 3            # resume_builder warns below this
   location_line_default: "Open to relocation"   # contact-line text for roles outside commutable_metros
+  no_pdf_copies: false                 # true = verify_resume fails when a Resume_/CV_/CoverLetter_ PDF sits in the folder (send .docx only)
 
 education: []                          # printed by resume_builder.education(); newest first; phase 7 writes it. Each entry:
                                        #   - institution: "<school>"

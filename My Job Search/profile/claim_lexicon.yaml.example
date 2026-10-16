@@ -1,0 +1,12 @@
+# EQUIVALENCE LEXICON - wordings YOU confirmed mean the same thing for your own work (system/engine/tools/claim_lexicon.py).
+# Starts empty. Claude adds an entry only after asking you, e.g. "Three postings call it 'benchmark models'; your approved
+# claim says 'challenger models'. Is 'benchmark models' an equally true description of what you did?" A yes adds an entry
+# with today's date. From then on a resume may use either wording and the audit still passes. Entries without a
+# 'confirmed' date are ignored. Never-claims stay forbidden whatever this file says.
+#
+# entries:
+#   - approved: "challenger models"
+#     equivalents: ["benchmark models"]
+#     categories: []              # optional: lanes where the swap reads naturally; [] = any
+#     confirmed: "2026-10-16"
+entries: []

@@ -95,8 +95,12 @@ def _traceability(paras):
     phone = str(_cfg("identity.phone", "") or "").strip(); email = str(_cfg("identity.email", "") or "").strip()
     nonempty = [q for q in paras if q.text.strip()]
     bad = []
+    try:
+        from claim_lexicon import canonical as _lex   # 2026-10-16: confirmed equivalent wordings map back to approved wording
+    except Exception:
+        _lex = lambda x: x
     for i, q in enumerate(nonempty):
-        t = q.text.strip()
+        t = _lex(q.text.strip())
         is_list = q.style.name.startswith("List")
         if name and t == name:
             continue                                            # name line (structure)

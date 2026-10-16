@@ -89,7 +89,7 @@ def _found(term, syns, text):
     return any(_kw_hit(s, tl) for s in syns)
 
 _SKIP_LINE = _re.compile(r"^\s*(#|SOURCE:|APPLY:|URL:|FIT:|Verified|Posted|=+|-+\s*$)", re.I)
-_LEVEL = _re.compile(r"\b(Senior|Sr\.?|Staff|Principal|Lead|Junior|Jr\.?|Associate|I{1,3}|IV|V|\d)\b", re.I)
+_LEVEL = _re.compile(r"\b(?:Senior|Sr|Staff|Principal|Lead|Junior|Jr|Associate|I{1,3}|IV|V|\d)\b\.?", re.I)   # 2026-10-16: "Sr." / "Jr." swallow their dot
 def jd_title(jtext):
     """The JD's job title: first non-empty line after the '# FIT' header (or other header lines);
     'Title | Company | ...' lines are cut at the first '|'."""
@@ -121,7 +121,7 @@ def title_present(title, rtext):
     if _hit(title): return "exact"
     core = _re.split(r"(?:\s+[-\u2013\u2014]|\s*[:,(])\s*", title)[0]
     core = _LEVEL.sub(" ", core)
-    core = _re.sub(r"\s+", " ", core).strip(" -,")
+    core = _re.sub(r"\s+", " ", core).strip(" -,.")
     if core and core.lower() != title.lower() and _hit(core): return f"near: {core}"
     return None
 
@@ -153,5 +153,32 @@ def check(resume_path, jd_path):
     for t in never: print(f"  x {t}")
     return add, ask, never
 
+def lexicon_swaps(resume_path, jd_path, category=None):
+    """2026-10-16: confirmed equivalence-lexicon swaps worth making for this posting - the resume uses the approved wording,
+    the posting uses a confirmed equivalent. Advisory: the build may use the posting's wording; the audit accepts it."""
+    from claim_lexicon import for_category, _pat
+    try:
+        from docx import Document
+        rt = "\n".join(p.text for p in Document(resume_path).paragraphs)
+    except Exception:
+        rt = open(resume_path, encoding="utf-8", errors="ignore").read() if os.path.exists(resume_path) else ""
+    jt = open(jd_path, encoding="utf-8", errors="ignore").read()
+    es = for_category(category)
+    print(f"\n-- EQUIVALENCE LEXICON ({len(es)} confirmed entr{'y' if len(es)==1 else 'ies'}" + (f", category {category}" if category else "") + "):")
+    n = 0
+    for e in es:
+        if not _pat(e["approved"]).search(rt):
+            continue
+        for q in e["equivalents"]:
+            if _pat(q).search(jt) and not _pat(e["approved"]).search(jt):
+                print(f"  ~ the posting says {q!r}; the resume says {e['approved']!r} - the confirmed equivalent may be used"); n += 1
+    if not n:
+        print("  (no swaps apply)")
+
 if __name__ == "__main__":
-    check(sys.argv[1], sys.argv[2])
+    _args = [a for a in sys.argv[1:] if not a.startswith("--category")]
+    _cat = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--category=")), None)
+    if "--category" in sys.argv and sys.argv.index("--category") + 1 < len(sys.argv):
+        _cat = sys.argv[sys.argv.index("--category") + 1]; _args = [a for a in _args if a != _cat]
+    check(_args[0], _args[1])
+    lexicon_swaps(_args[0], _args[1], _cat)
