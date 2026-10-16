@@ -73,6 +73,9 @@ JD_GATE=float(_TH.get("jd_gate",_user_thresholds()["jd_gate"]))     # JD-text ma
 JD_SIG=float(_TH.get("sig_min",4 if SIG else 0))                     # home-signature weight required with the bar
 JD_SIGX=float(_TH.get("sigx_min",12)) if SIGX else float("inf")      # transferable-signature rescue (needs SIGX terms)
 JD_SIG_FLOOR=float(_TH.get("sig_floor",-4))                          # a JD whose home signature is this negative is never rescued
+# 2026-10-16 port: JD-GATE RESCUE. A posting just under the match bar whose home signature is strong (many of the person's own
+# field words) passes, tagged '~SIG' so the queue shows how it got in. signals.yaml thresholds rescue_match / rescue_sig.
+JD_GATE_RESCUE=float(_TH.get("rescue_match",0.25)); JD_RESCUE_SIG=float(_TH.get("rescue_sig",8)) if SIG else float("inf")
 SIGNALS_EMPTY=not (SIG or SIGX or GATES)
 if SIGNALS_EMPTY:
     print("match: profile/signals.yaml has no terms - running COSINE-ONLY (score>=jd_gate, no signature floor). "
@@ -117,6 +120,7 @@ def judgment_gate(score,sg,sx,gates=None,stub=False):
     - std:  score>=JD_GATE and (sg>=JD_SIG or (sx>=JD_SIGX and sg>JD_SIG_FLOOR))
     - lane: not a stub JD and sx>=gate.sigx_min and dom>=gate.domain_min and cos>=gate.cos_min and sg>JD_SIG_FLOOR"""
     if score>=JD_GATE and (sg>=JD_SIG or (sx>=JD_SIGX and sg>JD_SIG_FLOOR)): return 'std'
+    if score>=JD_GATE_RESCUE and sg>=JD_RESCUE_SIG: return '~SIG'
     if stub: return None
     for g in GATES:
         v=(gates or {}).get(g['name']) or {}
@@ -125,6 +129,7 @@ def judgment_gate(score,sg,sx,gates=None,stub=False):
     return None
 def gate_description():
     s=f"JD-match>={JD_GATE:g} AND [home-sig>={JD_SIG:g}"+(f" OR transferable-sig>={JD_SIGX:g}" if SIGX else "")+"]"
+    if SIG: s+=f" OR [JD-match>={JD_GATE_RESCUE:g} AND home-sig>={JD_RESCUE_SIG:g}] (~SIG)"
     for g in GATES: s+=f" OR lane gate {g['name']} [sigx>={g['sigx_min']:g} & dom>={g['domain_min']:g} & cos>={g['cos_min']:g}]"
     return s
 

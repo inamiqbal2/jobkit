@@ -44,16 +44,22 @@ step 7 and say so plainly ("The boards answered; nothing new fits well enough to
 `run.judge_top_n` postings by match score (default 40; priority-lane postings first) are in it - the rest were
 ledgered DEFER and come back next run; each posting is trimmed to `run.jd_text_cap_chars` (default 6000) with its
 requirements block whole (`tracking/rubric/judge_plan.json` has the counts; settings.yaml documents both knobs).
-Spawn TWO independent subagents (Agent tool; use the strongest model the account offers, Fable where available,
-otherwise the session's own model - the method needs two blind readers, not a specific model). Give BOTH the SAME
-prompt: the prompt file's text verbatim, nothing added, nothing reordered (an identical prompt is cached once and the
-second scorer costs a fraction of the first). Each reads only the files the prompt names (`profile/profile_blind.md`
-+ the JD files). Never give them match scores, critic lines, the queue, outcomes, or each other's output. Run A writes `tracking/rubric/run_A_<today>.json`, run B writes
-`run_B_<today>.json` (JSON only, every id, the exact schema in the prompt). Wait for both.
+Two blind scorers, the second only where it matters (2026-10-16):
+1. **Scorer A** - spawn ONE subagent (Agent tool; use the strongest model the account offers, Fable where available,
+   otherwise the session's own model). Give it the prompt file's text verbatim, nothing added, nothing reordered. It reads
+   only the files the prompt names (`profile/profile_blind.md` + the JD files) and writes `tracking/rubric/run_A_<today>.json`
+   (JSON only, every id, the exact schema in the prompt). With more than ~120 postings, split A into two subagents over the
+   two halves of the id list (same header, each half's lines) and join their JSON into run_A yourself.
+2. `system/.venv/bin/python system/engine/tools/rubric.py prep-b tracking/rubric/run_A_<today>.json` writes
+   `prompt_B_<today>.txt` with only the postings A scored 30-69 (settings.yaml rubric.b_band). Below 30 A alone is a clear
+   reject, 70+ a clear build; the borderline band is where a second blind reading changes decisions.
+3. **Scorer B** - spawn a second, independent subagent on `prompt_B_<today>.txt`, verbatim; it writes `run_B_<today>.json`.
+Never give either scorer match scores, critic lines, the queue, outcomes, or the other's output.
 Then `system/.venv/bin/python system/engine/tools/rubric.py merge tracking/rubric/run_A_<today>.json tracking/rubric/run_B_<today>.json`
-(use the absolute workspace paths). It averages, auto-ledgers clear rejects (both judges < 40, agreeing,
-non-stub, not the priority lane) and rewrites the queue in rubric order. If merge refuses because the id
-sets differ, re-run the judge whose file is incomplete.
+(use the absolute workspace paths). It averages where both scored (A-only elsewhere, tagged in the queue), auto-ledgers clear
+rejects (< 40, judges agreeing, non-stub, not the priority lane, and not at or above the build line in the last 14 days)
+and rewrites the queue in rubric order. If merge refuses because the id sets differ, re-run the scorer whose file is
+incomplete. (Scoring all ids with both scorers still works: merge accepts a full run B.)
 
 ## Step 4 - Judge the queue, top-down
 Read `tracking/queue_<today>.md`. Thresholds from `settings.yaml thresholds` (defaults 60 / 45 / 40). For EACH
@@ -72,6 +78,10 @@ item, read the posting's saved JD (path on the queue line), the critic line, the
   block, a years bar when the JD credits an advanced degree, a judgment on a truncated JD (fetch the full
   text first). "When in doubt, build": drafting is free; the person decides what is sent.
 Ledger every decision: `system/.venv/bin/python system/engine/tools/decide.py "<url>" SKIP|BUILT|WATCH "<reason in one line>"`.
+decide.py refuses a SKIP of a posting at or above the build line (today or in the last 14 days) unless the reason quotes the
+failed requirement as `REQ:"<the posting's words>"` or carries a hard tag (INELIGIBLE, EXPIRED, CLOSED, NOT-IN-COUNTRY,
+NEVER-CLAIM, USER-RULE:<rule>, DUPLICATE:<ledgered url or folder>); it also refuses a location-only skip in the stretch band
+unless the person never relocates. When it refuses, either supply the real reason or record WATCH and ask the person.
 Unlogged items re-surface tomorrow. Before BUILT, the build must have actually succeeded (step 5).
 
 ## Step 5 - Build documents for every BUILD

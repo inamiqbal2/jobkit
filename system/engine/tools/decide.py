@@ -2,13 +2,14 @@
 """DECIDE - append one judgment decision to the dispositions ledger.
 Every build/skip/apply decision goes here so the pipeline NEVER re-surfaces a judged job.
 Usage: <jobkit python> decide.py <url> SKIP|BUILT|APPLIED|WATCH|REOPEN "<reason>"
+       SKIP is GUARDED (2026-10-16): see skip_guard() - a strong posting needs REQ:"<required line>" or a hard tag.
        REOPEN supersedes an earlier decision (last decision per URL wins) so a job can re-enter
        the queue WITHOUT deleting any ledger line. Added 2026-09-15 for stub-JD recovery.
        <jobkit python> decide.py --list [n]     show last n decisions
 BUILT is GATED (v0.5, CONSTITUTION I.8): it is refused unless an application folder whose JobDescription.txt APPLY line
 is this URL exists AND carries a fresh AUDIT_PASS.json (written by audit_claims.py when every .docx in the folder passed;
 the sha256 of each .docx must still match). Exit 2 with a plain message otherwise - nothing is ledgered."""
-import sys,json,os,datetime
+import sys,json,os,datetime,re
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from urlcanon import canon
 from userconfig import WS as ROOT, APPLICATIONS   # JOBKIT: workspace = data root
@@ -42,6 +43,47 @@ def built_gate(cu):
         if ok: return True,f"{os.path.basename(folder)}: {msg}"
         msgs.append(f"{os.path.basename(folder)}: {msg}")
     return False,"BUILT refused for "+"; ".join(msgs)+". A document that has not passed the audit is not a document."
+# ── 2026-10-16 port: SKIP GUARDS. An audit of past decisions found strong postings hand-skipped on weak grounds (a location
+# guess, a "duplicate" nobody could point to). A SKIP is now refused, with the reason why, when:
+#   1. the posting scored at or above the build line (settings.yaml thresholds.build_default_min_rubric, default 60) today
+#      or in the last 14 days, and the reason neither quotes the posting's REQUIRED block (REQ:"...") nor carries a hard
+#      tag (INELIGIBLE, EXPIRED, CLOSED, NOT-IN-COUNTRY, NEVER-CLAIM, USER-RULE:<rule>, DUPLICATE:<url or folder>);
+#   2. the reason says DUPLICATE but does not cite a ledgered URL or an applications/ folder;
+#   3. the score is in the stretch band (45 up to the build line) and the only reason is location/relocation while
+#      settings.yaml location.relocation is not "no".
+_HARD_TAGS=re.compile(r"\b(?:INELIGIBLE|EXPIRED|CLOSED|NOT-IN-COUNTRY|NEVER-CLAIM|USER-RULE:\S+|DUPLICATE:\S+)",re.I)
+_REQ=re.compile(r'REQ:\s*"[^"]{8,}"')
+_LOCATION_ONLY=re.compile(r"^\s*(?:location|relocat\w*|not commutable|outside (?:the )?(?:metro|area|commute)|too far)\b",re.I)
+def _score_now(cu):
+    try:
+        for x in json.load(open(os.path.join(ROOT,"tracking","minquals_screened.json"),encoding="utf-8")):
+            if canon(x.get('url',''))==cu and x.get('rubric') is not None: return float(x['rubric'])
+    except Exception: pass
+    return None
+def skip_guard(cu,reason):
+    """(ok, message) for a SKIP decision."""
+    from userconfig import get as _cfg
+    build=float(_cfg("thresholds.build_default_min_rubric",60) or 60)
+    try:
+        from rubric import best_recent; best=best_recent(cu)
+    except Exception: best=None
+    now=_score_now(cu); top=max([v for v in (now,best) if v is not None],default=None)
+    if re.search(r"\bDUPLICATE\b",reason,re.I):
+        m=re.search(r"DUPLICATE:\s*(\S+)",reason,re.I); ref=(m.group(1) if m else "").strip('.,;')
+        led={d.get('url') for d in load()}
+        if not ref or not (canon(ref) in led or os.path.isdir(os.path.join(APPLICATIONS,ref))):
+            return False,("SKIP refused: a DUPLICATE must cite what it duplicates - DUPLICATE:<ledgered url> or "
+                          "DUPLICATE:<applications folder name>.")
+    if top is not None and top>=build and not (_REQ.search(reason) or _HARD_TAGS.search(reason)):
+        return False,(f"SKIP refused: this posting scored {top:.0f} (build line {build:.0f}"+(", best of the last 14 days" if best and best==top else "")+
+                      "). Quote the REQUIRED line it fails as REQ:\"...\" or give a hard tag (INELIGIBLE, EXPIRED, CLOSED, "
+                      "NOT-IN-COUNTRY, NEVER-CLAIM, USER-RULE:<rule>, DUPLICATE:<ref>).")
+    reloc=str(_cfg("location.relocation","case-by-case") or "").lower()
+    if top is not None and 45<=top<build and _LOCATION_ONLY.search(reason) and reloc!="no":
+        return False,(f"SKIP refused: score {top:.0f} is in the stretch band and the reason is location only, but settings.yaml "
+                      f"location.relocation is '{reloc}'. Use WATCH and ask the person, or add the real reason.")
+    return True,""
+
 if __name__=="__main__":
     try: sys.stdout.reconfigure(encoding="utf-8",errors="replace")
     except Exception: pass
@@ -55,6 +97,10 @@ if __name__=="__main__":
     if decision not in ("SKIP","BUILT","APPLIED","WATCH","REOPEN","DEFER"):
         print("decision must be SKIP|BUILT|APPLIED|WATCH|REOPEN (DEFER is written by rubric.py prep only)"); sys.exit(2)
     cu=canon(url)   # 2026-10-01 audit H3: one job, one ledger key (tracking params / greenhouse host variants collapsed)
+    if decision=="SKIP" and not reason.startswith("AUTO("):
+        ok,msg=skip_guard(cu,reason)
+        if not ok:
+            print(msg); sys.exit(2)
     if decision=="BUILT":
         ok,msg=built_gate(cu)
         if not ok:

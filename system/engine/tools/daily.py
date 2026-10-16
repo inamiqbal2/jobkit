@@ -407,7 +407,7 @@ print("\n"+"="*20,"STEP 5: RUBRIC PREP (blind LLM ranking pass)","="*20)
 # ranking interview-producers. Deterministic code preps the batch; the agent spawns two blind
 # scoring subagents and merges — see tools/rubric.py docstring for the ritual.
 subprocess.run([PY,os.path.join(T,"rubric.py"),"prep"],cwd=ROOT)
-print("\nNEXT: run the rubric ritual above (2 blind agents -> rubric.py merge), then judge the")
+print("\nNEXT: run the rubric ritual above (scorer A -> rubric.py prep-b -> scorer B -> rubric.py merge), then judge the")
 print("rubric-ordered queue top-down, build CLOSE-first, log every decision via")
 print("tools/decide.py <url> SKIP|BUILT|APPLIED \"reason\". Human approves sends.")
 

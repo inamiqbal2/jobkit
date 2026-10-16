@@ -177,7 +177,12 @@ this spine; `system/engine/skills/onboarding/SKILL.md` is the 21-phase interview
 | API keys (Adzuna, USAJobs) | `keys.json` |
 With all of these empty the engine still runs (cosine-only ranking, generic knockouts, idle keyword arms) and says so.
 
-## Cost knobs and the blind judges (v0.5)
+## Cost knobs and the blind judges (v0.5; conditional scorer B since 2026-10-16)
+Scorer B reads only the postings scorer A placed in the borderline band (`settings.yaml rubric.b_band`, default [30, 70]):
+`rubric.py prep-b <run_A>` writes `prompt_B_<date>.txt` and `b_ids_<date>.json`; `merge` accepts a run B covering exactly
+that subset (or every id) and tags single-judge scores "A-only". Every merged score is appended to
+`tracking/rubric/score_history.jsonl`; `rubric.best_recent(url)` is the 14-day best, used by the auto-skip guard and by
+`decide.py`'s SKIP guard (`skip_guard`: REQ:"..." quote or a hard tag needed at or above the build line).
 `settings.yaml run.judge_top_n` (default 40) caps how many postings the two blind scorers read per run (ranked by the
 deterministic match score, priority-lane postings first); the rest are ledgered `DEFER` by `rubric.py prep` and re-surface on
 the next run (`daily.py` does not count DEFER as judged). `run.jd_text_cap_chars` (default 6000) trims each posting for the

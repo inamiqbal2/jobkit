@@ -10,7 +10,8 @@ no match scores, no critic verdicts, no outcomes, no knowledge of each other.
 
 Usage:
   <jobkit python> tools/rubric.py prep                      # after daily.py; writes batch+prompt, prints next steps
-  <jobkit python> tools/rubric.py merge <runA.json> <runB.json>   # averages runs, re-orders queue_<date>.md
+  <jobkit python> tools/rubric.py prep-b <runA.json>         # scorer B's prompt: only ids scorer A put in 30-69
+  <jobkit python> tools/rubric.py merge <runA.json> <runB.json>   # averages runs (A-only where B did not read), re-orders queue_<date>.md
 """
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
@@ -120,26 +121,71 @@ def prep():
         f.write(f"\nWrite your JSON to: {RB}/run_<A|B>_{TODAY}.json\n")
     print(f"rubric prep: {len(man)} queue items -> {mp}  (about {len(man)} postings scored, ~{total_chars//1000}k characters of postings per scorer, ~{(total_chars//4+3000)//1000}k input tokens each)")
     print(f"agent prompt -> {pp}")
-    print("NEXT (agent ritual): spawn TWO independent blind subagents, each given ONLY the")
-    print(f"prompt file above - the SAME file, verbatim, for both (an identical prompt is cached once) -")
-    print(f"(run A writes run_A_{TODAY}.json, run B writes run_B_{TODAY}.json),")
+    print("NEXT (agent ritual): spawn blind scorer A on the prompt file above, verbatim (run A writes run_A_"+TODAY+".json),")
+    print(f"then: <jobkit python> tools/rubric.py prep-b {RB}/run_A_{TODAY}.json  (writes prompt_B with A's borderline ids),")
+    print(f"then a second, independent blind scorer B on prompt_B_{TODAY}.txt (writes run_B_{TODAY}.json),")
     print(f"then: <jobkit python> tools/rubric.py merge {RB}/run_A_{TODAY}.json {RB}/run_B_{TODAY}.json")
+
+# ── 2026-10-16 port: CONDITIONAL SCORER B (prep-b) ─────────────────────────────────────────────────────────────────────
+# Scorer A reads every posting. Scorer B is only needed where one score could decide wrongly: A's 30-69 band (rubric.b_band
+# in settings.yaml to change it). Below 30 A alone is a clear reject; at 70+ A alone is a clear build. This roughly halves
+# the second scorer's cost. The merge treats an id A scored and B did not as a single-judge score (delta 0, tagged A-only).
+def _b_band():
+    try: lo,hi=_cfg("rubric.b_band",[30,70]); return float(lo),float(hi)
+    except Exception: return 30.0,70.0
+def prep_b(pa):
+    man=json.load(open(os.path.join(RB,f"batch_{TODAY}.json"), encoding="utf-8"))
+    A=json.load(open(pa, encoding="utf-8"))
+    if set(A)!=set(man): sys.exit(f"prep-b ABORTED: run A covers {len(A)} ids, the batch has {len(man)} - finish run A first")
+    lo,hi=_b_band()
+    ids=[k for k in man if lo<=float(A[k].get('overall',0))<hi]
+    json.dump(ids,open(os.path.join(RB,f"b_ids_{TODAY}.json"),"w",encoding="utf-8"))
+    pp=os.path.join(RB,f"prompt_B_{TODAY}.txt")
+    with open(pp,"w",encoding="utf-8") as f:
+        f.write(PROMPT_HEADER)
+        f.write(f"\n== CANDIDATE PROFILE (read this file): {PROFILE}\n")
+        f.write("\n== JOBS TO SCORE (id -> JD file to read):\n")
+        for k in ids: f.write(f"  {k}: {man[k]['jd']}\n")
+        f.write(f"\nWrite your JSON to: {RB}/run_B_{TODAY}.json\n")
+    print(f"prep-b: scorer B reads {len(ids)} of {len(man)} postings (scorer A's {lo:g}-{hi:g} band) -> {pp}")
+
+# ── 2026-10-16 port: 14-DAY BEST-SCORE HISTORY ──────────────────────────────────────────────────────────────────────────
+# Every merged score is appended to tracking/rubric/score_history.jsonl. A posting that scored at or above the build line
+# in the last 14 days is never auto-skipped on a lower re-score (blind scorers wobble), and decide.py SKIP checks it too.
+HIST=os.path.join(RB,"score_history.jsonl")
+def best_recent(url,days=14):
+    cu=_curl(url); cut=(datetime.date.today()-datetime.timedelta(days=days)).isoformat(); best=None
+    if os.path.exists(HIST):
+        for l in open(HIST,encoding="utf-8"):
+            try: h=json.loads(l)
+            except Exception: continue
+            if h.get('url')==cu and h.get('date','')>=cut: best=max(best or 0,float(h.get('rubric',0)))
+    return best
 
 def merge(pa,pb):
     man=json.load(open(os.path.join(RB,f"batch_{TODAY}.json"), encoding="utf-8"))
     A=json.load(open(pa, encoding="utf-8")); B=json.load(open(pb, encoding="utf-8"))
-    # 2026-09-12 code audit HIGH-1: ids are positional; refuse to merge runs whose id sets differ from the batch
-    if set(A)!=set(man) or set(B)!=set(man):
-        sys.exit(f"rubric merge ABORTED: id sets differ (batch {len(man)}, A {len(A)}, B {len(B)}) - re-run the blind agents on the current prompt")
+    # 2026-09-12 code audit HIGH-1: ids are positional; refuse to merge runs whose id sets differ from the batch.
+    # 2026-10-16: B may cover only the prep-b subset (b_ids_<today>.json), exactly.
+    _bp=os.path.join(RB,f"b_ids_{TODAY}.json")
+    _bset=set(json.load(open(_bp,encoding="utf-8"))) if os.path.exists(_bp) and set(B)!=set(man) else set(man)
+    if set(A)!=set(man) or set(B)!=_bset:
+        sys.exit(f"rubric merge ABORTED: id sets differ (batch {len(man)}, A {len(A)}, B {len(B)}, B expected {len(_bset)}) - re-run the blind agents on the current prompt")
     scr=json.load(open(os.path.join(TR,"minquals_screened.json"), encoding="utf-8"))
     by_url={v['url']:k for k,v in man.items()}
     rows=[]
     for x in scr:
         k=by_url.get(x.get('url'))
-        if k is None or k not in A or k not in B: continue
-        a,b=A[k].get('overall',0),B[k].get('overall',0)
-        x['rubric']=round((a+b)/2,1); x['rubric_delta']=abs(a-b)
+        if k is None or k not in A: continue
+        a=A[k].get('overall',0)
+        if k in B:
+            b=B[k].get('overall',0); x['rubric']=round((a+b)/2,1); x['rubric_delta']=abs(a-b); x.pop('single_judge',None)
+        else:
+            x['rubric']=float(a); x['rubric_delta']=0; x['single_judge']=True
+        x['best14']=best_recent(x['url'])
         rows.append(x)
+    with open(HIST,"a",encoding="utf-8") as f:
+        for x in rows: f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),rubric=x['rubric'],single=bool(x.get('single_judge'))))+"\n")
     json.dump(scr,open(os.path.join(TR,"minquals_screened.json"),"w", encoding="utf-8"),indent=1)
     # AUTO-LEDGER of clear rubric rejects (2026-09-09, after audit found 23/45 queue items were
     # recurring sub-50 re-scores). THREE GUARDS, all evidence-bounded by tracking/matchbench:
@@ -178,7 +224,8 @@ def merge(pa,pb):
         for x in rows:
             if x['rubric']<40 and x['rubric_delta']<15 and not _PROTECT.search(x.get('title','')) \
                     and not _LANE(x.get('title','') or '', _jdtext(x.get('jd','') or '')) \
-                    and not _stub(x) and _curl(x['url']) not in _led:
+                    and not _stub(x) and _curl(x['url']) not in _led \
+                    and not (x.get('best14') and x['best14']>=_cfg("thresholds.build_default_min_rubric",60)):
                 f.write(json.dumps(dict(date=TODAY,url=x['url'],decision="SKIP",
                     reason=f"AUTO(rubric): dual-blind avg {x['rubric']:.0f} (Δ{x['rubric_delta']}) below 40 — {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
                 x['fitclass']="AUTOSKIP"; _auto+=1
@@ -201,7 +248,7 @@ def merge(pa,pb):
         f.write(f"# Judgment queue — {TODAY} — RUBRIC-ORDERED (dual blind runs, averaged)\n\n")
         f.write("Judge top-down. ⚠Δ = the two blind runs disagreed by >=15pts: borderline case, read closely.\n\n")
         for x in rows:
-            warn=" ⚠Δ%d"%x['rubric_delta'] if x['rubric_delta']>=15 else ""
+            warn=(" ⚠Δ%d"%x['rubric_delta'] if x['rubric_delta']>=15 else "")+(" A-only" if x.get('single_judge') else "")+(f" best14d {x['best14']:.0f}" if x.get('best14') and x['best14']>x['rubric'] else "")
             _c=(f" · ${x['band_lo']/1000:.0f}-{x['band_hi']/1000:.0f}K" + (" LOWBAND" if x.get('lowband') else "")) if x.get('band_hi') else " · $?"
             _it=" · ⚠ITAR" if x.get('itar') else " · noITAR"
             f.write(f"## [RUBRIC {x['rubric']:.0f}{warn}{_c}{_it} · {x['fitclass']} · {x.get('band')} T{x.get('tier')} "
@@ -215,5 +262,6 @@ def merge(pa,pb):
 
 if __name__=="__main__":
     if len(sys.argv)>1 and sys.argv[1]=="prep": prep()
+    elif len(sys.argv)>2 and sys.argv[1]=="prep-b": prep_b(sys.argv[2])
     elif len(sys.argv)>3 and sys.argv[1]=="merge": merge(sys.argv[2],sys.argv[3])
     else: print(__doc__)

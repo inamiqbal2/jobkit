@@ -17,9 +17,11 @@ non-professional; `tools/eligibility.py` + `exclusions.role_types`). Search TERM
 
 ## Rubric ritual (after daily.py)
 1. `rubric.py prep` wrote `tracking/rubric/batch_<date>.json` and `prompt_<date>.txt`.
-2. Spawn TWO independent blind scoring subagents. Each sees ONLY the prompt file (profile_blind.md + JD
-   paths). Never give them match scores, critic verdicts, outcomes, or each other's output.
-3. `<jobkit python> system/engine/tools/rubric.py merge <run_A> <run_B>` averages, auto-ledgers clear rejects, re-orders.
+2. Blind scorer A reads every posting; `rubric.py prep-b <run_A>` writes `prompt_B_<date>.txt` with only A's 30-69 band;
+   an independent blind scorer B reads that. Each sees ONLY its prompt file (profile_blind.md + JD paths). Never give them
+   match scores, critic verdicts, outcomes, or each other's output. (Both scorers on every posting also works.)
+3. `<jobkit python> system/engine/tools/rubric.py merge <run_A> <run_B>` averages (A-only outside B's band), auto-ledgers
+   clear rejects (never one that reached the build line in the last 14 days), re-orders.
 4. Judge top-down. `⚠Δ` = the runs disagreed by >= 15 points: read that JD yourself.
 Benchmark basis (original project, 27 labelled JDs, 5 real interview-producers): blind rubric AUC 0.91
 vs deterministic matcher 0.58. Single scores wobble up to 20 points on borderline cases - that is why
