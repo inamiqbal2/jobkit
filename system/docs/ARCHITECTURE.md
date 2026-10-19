@@ -9,7 +9,7 @@ computer, in their own field, with their own facts. The split is strict:
 | rules | `CONSTITUTION.md` (non-negotiable), `charters/*.md` (method) | `my-rules.md` (geography, lanes, exclusions, salary, temporary windows) |
 | data | `registries/packs/*.json` (job-board packs by field: six generic ones since v0.3 plus the science/engineering ones), `tools/geo.py` (country tables) | `settings.yaml`, `profile/` (incl. `signals.yaml`, `critic_rules.yaml`, `lexicon.yaml`), `tracking/registries/queries.yaml` + `custom.json` (filled by `tools/discover_boards.py`), `tracking/`, `applications/`, `keys.json` |
 | skills | `skills/onboarding/SKILL.md` (the 21-phase interview + "read my documents" confirmation mode), `skills/daily/SKILL.md` ("run my job search"), `skills/build/SKILL.md` ("build my documents for ...") | `ONBOARDING_STATUS.md`, `reports/<date>.md`, `tracker.csv`, `intake/` (the person's documents; `_extracted/` by `tools/intake.py`) |
-| integrity | `MANIFEST.sha256` (every engine file; `tools/manifest.py`), read-only on disk after setup, git tag `original-v0.6`, changes on branch `modified` | never locked; never touched by modify / revert |
+| integrity | `MANIFEST.sha256` (every engine file; `tools/manifest.py`), read-only on disk after setup, git tag `original-v0.7`, changes on branch `modified` | never locked; never touched by modify / revert |
 
 **Rule of thumb:** if a value would be wrong for the next user, it belongs in the workspace. If the
 engine ever needs a personal value, it reads it through `system/engine/tools/userconfig.py`.

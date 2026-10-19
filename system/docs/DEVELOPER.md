@@ -39,7 +39,7 @@ system/
                    experience: [] - a fresh install assembles no board list and loads no bullet until the interview.
   docs/            ARCHITECTURE.md (engine/workspace contract, every schema) · HANDOFF_TO_NEW_USER.md (plain) · this file ·
                    REFACTOR_PLAN.md · EXAMPLES_FROM_ORIGINAL.md (a fictional user's rules) · REGRESSION_2026-10-08.md · UX_TEST_2026-10-09.md
-  release.sh       builds the shippable zip (fresh clone, single commit, tag original-v0.6, manifest, token grep; the token list lives outside the repo)
+  release.sh       builds the shippable zip (fresh clone, single commit, tag original-v0.7, manifest, token grep; the token list lives outside the repo)
 ```
 The folder name `My Job Search` contains spaces on purpose (it is what a non-programmer expects to see); every tool
 resolves it through `userconfig.WS` and every documented command quotes it.
@@ -69,18 +69,18 @@ resolves it through `userconfig.WS` and every documented command quotes it.
 ## The source lock (v0.4)
 - `system/engine/MANIFEST.sha256`: SHA-256 of every file under `system/engine/` (minus itself, `__pycache__`, OS litter),
   written by `manifest.py generate` (the release script runs it). `manifest.py check` / `status` compare the tree to it;
-  setup.py prints `Engine: original (v0.6)` or `Engine: MODIFIED - N files (see 'show my modifications')`.
+  setup.py prints `Engine: original (v0.7)` or `Engine: MODIFIED - N files (see 'show my modifications')`.
 - `manifest.py lock` makes every file AND folder under `system/engine` read-only (`chmod a-w`; Windows `attrib +R` on
   files). Python keeps importing and running everything; it just stops writing `.pyc` caches there. `unlock` reverses it.
   Git needs the unlock before it can check files out into the folder, which is why the commands below unlock first.
   The same applies to deleting an install from a shell: `rm -rf` refuses read-only folders, so `setup.py --unlock`
   (or `chmod -R u+w system/engine`) first. Finder / Explorer move the folder to the trash as usual.
-- Git: the release ships with `.git` initialised, one commit, tag `original-v0.6`. "modify: <what>" = explain, yes,
+- Git: the release ships with `.git` initialised, one commit, tag `original-v0.7`. "modify: <what>" = explain, yes,
   `setup.py --unlock`, change, commit on branch `modified` (`MOD <date>: <what> - <why>`), `setup.py --lock`. The
   manifest is NOT regenerated after a modification: it stays the fingerprint of the original, which is what makes
-  setup.py report `MODIFIED - N files`. "show my modifications" = `git log original-v0.6..modified` + `git diff --stat`.
+  setup.py report `MODIFIED - N files`. "show my modifications" = `git log original-v0.7..modified` + `git diff --stat`.
   "revert to original" = unlock, `git rm -r -q system/engine` (so files a modification added go too), `git checkout
-  original-v0.6 -- system/engine`, commit `REVERT to original-v0.6`, lock -> `Engine: original (v0.6)`. None of it
+  original-v0.7 -- system/engine`, commit `REVERT to original-v0.7`, lock -> `Engine: original (v0.7)`. None of it
   touches `My Job Search/` (which is git-ignored apart from its templates anyway). `manifest.py generate` is for the
   release script only.
 
@@ -202,7 +202,7 @@ described in `system/docs/ARCHITECTURE.md` and shown filled in `system/examples/
 
 ## Release (`system/release.sh`)
 `system/release.sh [version] [out_dir]` does the whole thing: fresh `git clone` of this repo into a temp folder, strip
-`.git`, `git init`, `manifest.py generate`, single commit `jobkit v0.5`, tag `original-v0.6`, grep the staged tree for personal
+`.git`, `git init`, `manifest.py generate`, single commit `jobkit v0.5`, tag `original-v0.7`, grep the staged tree for personal
 tokens (the pattern list is `~/Downloads/jobkit_release/scrub_patterns.txt`, outside the repo; `SCRUB_PATTERNS=` overrides; must be 0
 hits), zip to `<out_dir>/jobkit_v0.5_<date>.zip`. `release.sh` itself is removed from the stage and never ships without `.venv`, `__pycache__`, run artifacts or extracted
 intake, and write `EMAIL_NOTE_<date>.md` next to it. The shipped `My Job Search/` holds templates, the intake README and

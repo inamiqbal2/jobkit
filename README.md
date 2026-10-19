@@ -43,41 +43,85 @@ hands-on, used, or never. Then it shows you about 20 real postings and learns fr
 dozen names, and the same title means different work at different employers. jobkit reads the full text of
 every posting against your profile and ignores the title, except to drop roles you are not eligible for.
 
-**3. Two blind judges decide whether it is worth your time.** The best-matching postings are each scored
-twice, separately, by judges that see only your profile and the posting, nothing else. Skills,
-experience level, location and whether the role would use your real strengths all count. The two scores are
-averaged; when they disagree, the posting gets a closer look.
+**3. Two blind judges decide whether it is worth your time.** The best-matching postings are scored by judges
+that see only your profile and the posting, nothing else, on a fixed scale (70 = meets the requirements; 30 = misses
+a core one). Skills against the requirements and your experience level always count; location, career direction,
+pay and remote count only if you said they should. Each judge quotes the line of the posting that decided its score,
+and jobkit checks the quote is really there, so a judge cannot skim. A second judge re-reads the close calls; when
+the two disagree, the posting gets a closer look.
 
 **4. It tells you what to skip, and why.** A job that needs a license you do not hold, a clearance you
 cannot get, or experience you never had is set aside with the reason in one plain line. Jobs above your line
 get documents built for you, with an honest read of the fit and the gaps. Your hours go where an interview is
 realistic.
 
-**5. It goes to the employers' own job boards.** Out of the box: 265 company boards on Greenhouse, Lever,
+**5. It follows your choices, not ours.** Setup asks, and explains what each answer changes before you pick:
+whether you will stay local, would move for a strong fit (and how strong), or do not mind where; which other
+countries you would work in; which kinds of positions you want (full-time, internships, co-ops, new-graduate
+programs, research or unpaid work, postdocs, contract, hourly...); and what the judges should score. Nothing is
+filtered because someone else would not want it.
+
+**6. It goes to the employers' own job boards.** Out of the box: 265 company boards on Greenhouse, Lever,
 Ashby, SmartRecruiters and Workable; 79 Workday career sites; 40 large-employer systems (Oracle, SAP,
 iCIMS, Phenom and others); and 47 government job portals, in 14 field packs you pick from. Name any employer
 and jobkit finds its board and adds it to your search. Every link it gives you is the employer's own posting.
 
-**6. Your real experience, in the posting's terms. Never invented.** For each posting jobkit picks and
+**7. Your real experience, in the posting's terms. Never invented.** For each posting jobkit picks and
 orders your most relevant confirmed experience and checks the posting's keywords against your skills: what
 you have is used, what you have never done is shown to you as a gap and never added. Every resume line must
 match a statement you approved, word for word, or the program refuses the document. No keyword stuffing, no
 hidden text, no numbers without a source.
 
-**7. It becomes your own tool.** Add rules in plain words ("never show me night-shift jobs", "always flag
+**8. It becomes your own tool.** Add rules in plain words ("never show me night-shift jobs", "always flag
 relocation"). The program itself is locked and fingerprinted so nothing changes it by accident; ask for a
 change with `modify:` and it explains, waits for your yes, records it, and can undo it with `revert to
 original`.
 
 **And it never** applies for you, sends anything, or reads your email. You decide, and you apply.
 
-## What you need
-The [Claude desktop app](https://claude.ai/download) and a Claude subscription; jobkit runs on it, and each
-search run uses part of your usage. jobkit itself is free and open source (MIT).
+## What you need, and what it costs
+The [Claude desktop app](https://claude.ai/download) on a **paid** plan: Claude Code, which jobkit runs in, is not
+part of the free plan. jobkit itself is free and open source (MIT). Every search run uses part of your Claude usage.
+Measured on one full "run my job search" for the fictional test user (about 5,000 postings read from the boards):
+
+| How you run it | Time per run | Usage per run (pay-as-you-go price) |
+|---|---|---|
+| **Light mode** (Sonnet, 15 postings judged per run) | ~10 min | ~$1.40 |
+| Sonnet, 40 postings judged | ~10 min | ~$2.00 |
+| Top model (Fable), 40 postings judged | ~18 min | ~$10.40 |
+
+- **Pro ($20/month):** use light mode, which setup offers. One run a day should fit; several back to back may not.
+  Not yet measured on a real Pro account.
+- **Max:** the default settings are fine.
+- **No subscription:** Claude Code can also run on a pay-as-you-go key from platform.claude.com, billed per use (not
+  yet tested with jobkit in the desktop app).
+- **Setup** is a long conversation (two to four hours, in as many sittings as you like); on Pro it may take a
+  few usage windows.
+
+In a side-by-side test on the same 40 postings, the light judges agreed with the top model on every build decision;
+they differed only on borderline postings in the 30-45 range.
 
 **Status: early.** Its first users are trying it now, so there are no outcome numbers yet; real ones will go
 here when there are. Built and tested on macOS; Windows and Linux are supported but not yet tried by a real
 user. Problems and ideas: open an issue.
+
+## Limitations, honestly
+- **It costs Claude usage** (table above), and it needs the desktop app on a paid plan or a pay-as-you-go key.
+- **The judges are AI, not recruiters.** Both are the same model read twice, blind to each other. Scores wobble by
+  about 4 points between readings, and a score is a judgment of fit, not a prediction of an interview.
+- **It only searches where it can look:** the boards in the packs you pick and the employers you add. Sites behind
+  bot walls become a "check by hand" list; LinkedIn and Indeed are off unless you turn them on; some postings cannot
+  be read on a given day (each report says how many).
+- **Very long postings are trimmed** to about 6,000 characters for the judges (the requirements are kept when they
+  can be found, which is not always).
+- **It does not detect reposted or stale listings**; a "posted 2 days ago" date is taken at face value. Salary is a
+  flag on the job, not a ranking factor.
+- **Honest means "never invents", not "verified".** Every resume line comes from something you confirmed; jobkit
+  cannot check that what you told it is true.
+- **Resumes are one-page (or a multi-page academic CV)**, built from your approved lines and wording you confirmed;
+  it does not write new prose for each job.
+- **Countries:** the US, Canada and the UK are built in; other countries work with place lists drafted at setup.
+- **Tested on macOS only** so far.
 
 ## Get it
 Go to **Releases** (right side of this page), download `jobkit.zip` from the newest release, unzip it, and
@@ -131,7 +175,12 @@ Three more things you can type: **`build my documents for <link>`** for a postin
 ## What it will ask you for
 - Your name, email, phone, city, and the links you want printed (LinkedIn, a portfolio, ORCID, GitHub).
 - Your work authorization in plain terms (citizen? permanent resident? need a visa?).
-- Where you live, where you could commute, whether you would move.
+- Where you live and could commute; how you think about location (stay local, local first but would move for a
+  strong fit, location does not matter, or not sure yet) and the reasons behind it; remote or not; other countries
+  you would work in.
+- Which kinds of positions you want (full-time, part-time, internships, co-ops, new-graduate programs,
+  fellowships, research or unpaid work, PhD positions, postdocs, contract, temporary, hourly).
+- What the judges should score besides skills and experience: location, career direction, pay, remote.
 - Your field and track: industry, academic or research, government, nonprofit, or a mix. What you are
   looking for in your own words, the titles you have seen, and what you never want to see.
 - The lowest salary you would accept and what you are aiming for.
@@ -157,7 +206,7 @@ sittings as you like.
 ## The program is locked; you can ask for changes and undo them
 Everything under `system/` is the program. After setup it is read-only on your disk and checked against a
 list of fingerprints, so nothing changes it by accident; the status Claude prints says "Engine: original
-(v0.6)". If you want it to behave differently ("stop showing me night-shift jobs in the report", "put the
+(v0.7)". If you want it to behave differently ("stop showing me night-shift jobs in the report", "put the
 summary before the skills"), say **`modify: <what you want>`**. Claude explains in one paragraph what it would
 change, waits for your yes, makes the change, records it, and locks the program again; the status then says
 "Engine: MODIFIED - 2 files". **`show my modifications`** lists every change in plain words, and **`revert to
