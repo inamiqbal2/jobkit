@@ -15,7 +15,7 @@ What you are looking for, in two sentences a stranger could act on. Lanes are in
 this is the "why" and the priority order between them.
 
 ## <date> - GEOGRAPHY (standing)
-Commutable area, relocation stance, how location changes the build bar
+Their location choice (stay local / local first / fit first / not sure), commuting area, places they would or would never move to, remote, and the reasons behind it in their words
 (settings.yaml: location.*, thresholds.commutable_min_rubric).
 
 ## <date> - EMPLOYER EXCLUSIONS (standing)
@@ -23,7 +23,7 @@ Employers never to build for, with the reason or "reason not stated". Mirror the
 settings.yaml -> exclusions.employers (that is what the code reads; this is the explanation).
 
 ## <date> - ROLE-TYPE EXCLUSIONS (standing)
-Contract gigs, postdocs, management-only, sales, etc. Mirror settings.yaml -> exclusions.
+Kinds of roles this person never wants, in their own words, with their reason. Mirror settings.yaml -> exclusions.
 
 ## <date> - SALARY (standing)
 Floor and target (settings.yaml -> salary). How a posted band above/below changes judgment.

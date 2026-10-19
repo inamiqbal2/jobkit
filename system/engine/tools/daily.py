@@ -411,26 +411,29 @@ print("\nNEXT: run the rubric ritual above (scorer A -> rubric.py prep-b -> scor
 print("rubric-ordered queue top-down, build CLOSE-first, log every decision via")
 print("tools/decide.py <url> SKIP|BUILT|APPLIED \"reason\". Human approves sends.")
 
-# ═══ TRIPWIRE: zero applications for days can go unnoticed while build-line items sit in the queue. Deterministic
-# guard: count pipeline-originated BUILTs in the last 7 days vs the number of distinct dual-blind items at or above
-# settings.yaml thresholds.build_default_min_rubric; fewer than 3 builds with >=3 such items is a JUDGMENT DEFECT.
+# ═══ JUDGMENT CHECK (v0.7; replaces the original user's "3 builds a week" tripwire). Strong matches must never sit without a
+# decision: every job that scored at or above the build line in the last 7 days (rubric/score_history.jsonl) should have a
+# BUILT, WATCH or SKIP-with-reason line in the ledger. settings.yaml run.judgment_check: false turns it off.
 _BUILD_LINE=_thresholds()['build_default_min_rubric']
 try:
-    import glob as _g
-    _t=datetime.date.today(); _win=[(_t-datetime.timedelta(days=i)).isoformat() for i in range(7)]
-    _built=sum(1 for l in open(os.path.join(TR,"dispositions.jsonl"), encoding="utf-8") if '"BUILT"' in l and any(f'"date": "{d}"' in l for d in _win))
-    _hi=set()
-    for _d in _win:
-        _bf=os.path.join(TR,"rubric",f"batch_{_d}.json"); _ra=os.path.join(TR,"rubric",f"run_A_{_d}.json"); _rb=os.path.join(TR,"rubric",f"run_B_{_d}.json")
-        if all(os.path.exists(p) for p in (_bf,_ra,_rb)):
-            _b=json.load(open(_bf, encoding="utf-8")); _A=json.load(open(_ra, encoding="utf-8")); _B=json.load(open(_rb, encoding="utf-8"))
-            for _k,_v in _b.items():
-                if _k in _A and _k in _B and (_A[_k]['overall']+_B[_k]['overall'])/2>=_BUILD_LINE: _hi.add(_v['url'])
-    if _built<3 and len(_hi)>=3:
-        print("\n"+"!"*78+f"\n!! TRIPWIRE: only {_built} BUILT in the last 7 days while {len(_hi)} distinct jobs scored >={_BUILD_LINE}.\n!! Per charters/search.md policy this is a JUDGMENT DEFECT - audit TODAY, build the >={_BUILD_LINE} list.\n"+"!"*78)
-    else:
-        print(f"\ntripwire OK: {_built} built / {len(_hi)} jobs >={_BUILD_LINE} in the last 7 days")
-except Exception as _e: print("tripwire check error:",_e)
+    if _run_opts().get("judgment_check", True):
+        _cut=(datetime.date.today()-datetime.timedelta(days=7)).isoformat(); _hi=set()
+        _hp=os.path.join(TR,"rubric","score_history.jsonl")
+        if os.path.exists(_hp):
+            for _l in open(_hp,encoding="utf-8"):
+                try: _h=json.loads(_l)
+                except Exception: continue
+                if _h.get('date','')>=_cut and float(_h.get('rubric',0))>=_BUILD_LINE: _hi.add(_h['url'])
+        _dec={}
+        for _l in open(os.path.join(TR,"dispositions.jsonl"),encoding="utf-8"):
+            try: _d=json.loads(_l); _dec[_curl(_d['url'])]=_d['decision']
+            except Exception: pass
+        _open=[u for u in _hi if _dec.get(_curl(u)) not in ("BUILT","WATCH","SKIP","APPLIED")]
+        if _open:
+            print("\n"+"!"*78+f"\n!! JUDGMENT CHECK: {len(_open)} job(s) scored >={_BUILD_LINE} in the last 7 days and have no decision yet.\n!! Decide each one today (build, watch, or skip with the reason).\n"+"!"*78)
+        else:
+            print(f"\njudgment check OK: every job >={_BUILD_LINE} in the last 7 days has a decision ({len(_hi)} such jobs)")
+except Exception as _e: print("judgment check error:",_e)
 
 # ═══ RUN SUMMARY (v0.5): the lines the report opens with. Also in tracking/run_summary.json. ═══
 _SUMMARY["queue"]=len(ok); _SUMMARY["candidates"]=len(cands)

@@ -151,21 +151,44 @@ have are dropped only according to what you tell me now." Then ask:
 Write the block. Read back: "On your resume: '<resume_line>'. I will drop postings that require: <the classes
 that are closed>. I will keep everything else. Correct?" Note the date in the status file.
 
-## Phase 4 - Location, commuting, relocation  -> `settings.yaml: location`
-Ask:
-1. "Which country are you searching in? (e.g. United States)"
-   -> `country` (US / CA / UK have built-in geography; any other country: draft `in_country_regex`,
-   `in_country_regex_loose`, `foreign_regex_extra` yourself from the country's place names and read them
-   back as a plain list of place words).
-2. "Where could you commute from home? Name the towns or areas. (e.g. anywhere in the Denver metro, up to
-   Boulder)" -> commutable_metros, commute_radius_miles (ask "roughly how many miles is too far?" only if unclear).
-3. "Would you move for a job: yes, no, or only for the right one?" -> relocation yes / no / case-by-case.
-4. If yes or case-by-case: "Which places would you be glad to move to? (e.g. Salt Lake City, Phoenix,
-   anywhere in the Pacific Northwest)" -> draft `tier2_regex` from these; `tier1_regex` from the commutable area +
-   "Remote".
-Write the block. Read back: "Home: <home>. Within commuting reach: <metros>. Moving: <stance>. Places I will
-rank second: <tier2 places in words>. Remote jobs count as close. These only order the list; they never hide
-a posting. Correct?"
+## Phase 4 - Location, country, moving and remote  -> `settings.yaml: location`; `my-rules.md` GEOGRAPHY
+Location changes what jobkit shows and builds, so the PERSON decides how. Ask one question at a time, explain each effect
+before they choose, and never pick for them.
+1. "Which country do you live in?" -> `country` (US / CA / UK have built-in geography; any other country: draft
+   `in_country_regex`, `in_country_regex_loose`, `foreign_regex_extra` from the country's place names and read them back as
+   a plain list of place words).
+2. "Would you also take a job in another country? If yes, which ones, and do you already have the right to work there or
+   would you need sponsorship?" -> `other_countries` (names or codes; "any" = anywhere) and, for places the built-in tables
+   do not cover, `other_countries_regex` from their main cities; the work-rights answer goes into my-rules.md GEOGRAPHY in
+   their words. Effect to say: "Jobs in <countries> will be searched and judged like jobs at home; anything else outside
+   <home country> is set aside."
+3. "Where do you live, and which towns could you commute to?" -> `home`, `commutable_metros`, `commute_radius_miles`;
+   `tier1_regex` from the commuting area + "Remote" (if remote is fine, see 6).
+4. "How do you think about location? Pick the one closest to you; I will tell you what each one does:" (read all four,
+   with their effect, before they answer)
+   - A. "Stay local - I will not move." -> `mode: local_only`. Effect: "Jobs outside your commuting area are set aside
+     before the judges see them, which also saves your usage. Remote jobs count as local."
+   - B. "Local first, but I would move for a strong fit." -> `mode: local_first`. Effect: "Local jobs get a resume from a
+     score of 45; jobs elsewhere only from a higher bar. Jobs elsewhere that score between 60 and that bar are listed as
+     'worth a look if you would move'." Then ask: "How strong should a job elsewhere be before I build for it? Most
+     people pick 70 out of 100." -> `away_bar`.
+   - C. "Fit first - location barely matters." -> `mode: fit_first`. Effect: "Location is not scored at all; every job is
+     judged on fit alone, wherever it is."
+   - D. "Not sure yet." -> `mode: unsure`. Effect: "I treat it like B, but every strong job elsewhere comes with a
+     question - 'Would you move to Austin for this?' - and after about five answers I tell you which of A, B or C your
+     answers point to."
+   Also set `relocation` to match (A no, B/D case-by-case, C yes) for older tools.
+5. If B, C or D: "Are there places you would be glad to move to? And anywhere you would never move?" -> `tier2_regex`
+   from the glad-to places; `never_places` from the never places.
+6. "Remote, hybrid or on-site: which are fine, and do you prefer one?" -> `remote: ok | preferred | no` (no -> remove
+   "Remote" from tier1_regex).
+7. "Is there anything behind your answers I should keep in mind - family, a partner's job, cost of living, a visa, a
+   date you could move by?" -> my-rules.md GEOGRAPHY, in their words, with today's date.
+Write the block. Read back in plain words, built from the answers, e.g.: "You live in Denver and can commute to Boulder
+and Aurora. You chose: local first, but you would move for a strong fit. So: Denver-area and remote jobs get a resume
+from a score of 45; jobs elsewhere only from 70; jobs elsewhere scoring 60 to 69 are listed for you to decide. Never:
+Alaska. Remote is fine. Jobs in Canada are searched too. Correct?" The location criterion of the judges is asked in
+phase 14 (C defaults to not scored).
 
 ## Phase 5 - Your field and track, what you are looking for  -> `settings.yaml: lanes[], targets, exclusions, build.format`; `my-rules.md` TARGET + EXCLUSIONS; `tracking/registries/queries.yaml` (first draft)
 Ask:
@@ -176,17 +199,21 @@ Ask:
    (industry | academic | government | nonprofit | mix). Consequences you apply silently:
    - academic or research in the mix -> phases 9, 11, 12 are asked; otherwise they are marked not applicable.
    - government in the mix -> phase 16 offers the USAJobs key; otherwise it is skipped.
-   - academic -> ask 3 below; otherwise targets.phd_positions false.
-3. (academic/research only) "Are you looking for (a) PhD positions, (b) paid research or professional jobs,
-   (c) both?" -> targets.phd_positions (a or c -> true); then "Are fixed-term, grant-funded posts of 1-2 years
-   fine? Most research posts are." -> fixed_term_ok. (Everyone else: fixed_term_ok false unless they say
-   contract-length roles are fine.)
-4. "Are the jobs you want sometimes paid hourly or open to people without a degree? (e.g. nursing shifts,
-   technician work, trades)" -> targets.hourly_ok (true = the critic stops flagging hourly / high-school-minimum
-   postings as below your level).
-5. "What is your highest degree, and in what? (e.g. 'BSN, nursing, 2019'; 'B.S. Computer Science, 2021';
-   'M.S. Wildlife Biology, 2022')" -> if no PhD: exclusions.postdocs false (postdoc titles dropped) and say so
-   only if academic; if PhD: ask whether postdocs are wanted.
+3. "Which kinds of positions are you looking for? Tick all that apply - I will only filter out what you leave unticked:
+   full-time jobs; part-time jobs; internships; co-ops or apprenticeships; new-graduate or early-career programs;
+   fellowships; research assistant, volunteer or unpaid research work; PhD positions; postdocs; contract or freelance work;
+   temporary or seasonal work; hourly-paid work (shifts, technician, trades)."
+   -> `targets.position_types` (internships, co_ops, new_grad, fellowships, unpaid_research, phd_positions, postdocs,
+   contract, temporary, hourly, part_time, full_time). Consequences, said back in one line each for what they LEFT OUT:
+   internships / co-ops / new-grad programs / postdocs / temporary unticked -> those titles are set aside; contract
+   unticked -> contract and freelance gigs are set aside (`exclusions.contract_work: false`); postdocs unticked ->
+   `exclusions.postdocs: false`; hourly unticked -> hourly or high-school-minimum postings are flagged as below your level;
+   unpaid research ticked -> no salary floor and no low-pay flag (phase 6 confirms). If a fixed-term or grant-funded post
+   might come up and they did not tick temporary, ask once: "Are fixed-term posts of 1-2 years fine?" -> `fixed_term_ok`.
+4. "What is your highest degree, and in what? (e.g. 'BSN, nursing, 2019'; 'B.S. Computer Science, 2021';
+   'M.S. Wildlife Biology, 2022'; 'currently a junior in mechanical engineering')" -> remembered for phase 7.
+5. (only when internships, co-ops or new-grad programs are ticked) "When could you start, and for how long?" ->
+   my-rules.md TARGET (e.g. "summer 2027 internship, 10-12 weeks").
 6. "Describe the work you want in two or three sentences, as if to a stranger. (e.g. 'Staff nurse in an ICU
    or step-down unit at a hospital; or a clinical educator role teaching new nurses.' / 'Backend or platform
    engineer on a product team, Python or Go, at a company of 50-2,000 people.' / 'Field and lab work on
@@ -197,28 +224,29 @@ Ask:
    Field Technician, Research Associate)" -> example_titles (breadth only; titles never decide fit).
 8. "Is there a second kind of work you would also take, maybe a little outside your field? (e.g. case
    management or quality roles / developer-tools or data engineering / environmental consulting field work)"
-   -> lane 2 (transferable) or none. Repeat once more at most (max 4 lanes, one of them PhD positions if 3a/3c).
+   -> lane 2 (transferable) or none. Repeat once more at most (max 4 lanes, one of them PhD positions if they ticked PhD positions).
 9. "Which one of these kinds of job must I never skip, even when a score looks low?" -> `priority: true` on that lane.
 10. "What kinds of jobs should I never show you? (e.g. travel-nurse agencies, home health / recruiting, sales
     engineering / anything that is really a sales job)" -> exclusions.role_types (plain words -> word-bounded
     regexes), my-rules.md EXCLUSIONS with the reason as they said it.
 11. "Any employers you do not want to see? Say none if none." -> exclusions.employers.
-12. "Contract, agency or freelance gigs: in or out?" -> exclusions.contract_work.
-13. "For applications, do you want a one-page resume (usual for industry, hospitals, government and
+12. "For applications, do you want a one-page resume (usual for industry, hospitals, government and
     nonprofits) or a multi-page academic CV (usual for research and PhD applications)?" Default the question
     to the track: offer the resume unless the track is academic. -> build.format resume | academic_cv;
     resume_filename "Resume_<First>_<Last>.docx" / cv_filename "CV_<First>_<Last>.docx"; cv pages 2-3 default.
 Write lanes (name = short slug, description, example_titles, never_claims [] for now, priority, packs []
-for now), targets (track, phd_positions, fixed_term_ok, hourly_ok, employers [] for now), exclusions, build;
+for now), targets (track, position_types, fixed_term_ok, employers [] for now), exclusions, build;
 my-rules TARGET IN PLAIN WORDS (priority order) and EXCLUSIONS; queries.yaml first draft (3-10 short
 `board_terms` from the titles and the field words; the other lists are written in phase 17).
-Read back: "You are looking for: <lane 1 in one line>; also <lane 2>. Track: <track>. Never: <exclusions>.
+Read back: "You are looking for: <lane 1 in one line>; also <lane 2>. Track: <track>. Position types: <ticked>; I
+will set aside <unticked, in plain words>. Never: <exclusions>.
 Documents: <resume or CV>. The kind of job I will never skip: <lane>. Correct?"
 
 ## Phase 6 - Salary  -> `settings.yaml: salary`; `my-rules.md` SALARY
 Ask: "What is the lowest yearly salary you would accept, and what are you aiming for? (e.g. 'at least
 $85,000, hoping for $100,000'). Hourly is fine too; I will convert." (Academic: "PhD stipends are judged on
-their own terms.") -> floor, target, currency.
+their own terms.") -> floor, target, currency. If they ticked unpaid research or volunteer work in phase 5: floor 0 and
+`thresholds.low_band_top: null` (no low-pay flag); say so.
 Say: "This never hides a posting; it only shows up as a note when I judge one."
 Read back the two numbers.
 
@@ -330,12 +358,31 @@ in plain prose: "Two independent judges will read this one-page description of y
 Here it is: ... Anything wrong or missing?"
 Write `settings.yaml verification.employer_tokens` (the employer names on the resume) and finalise `build`.
 
-## Phase 14 - Your own rules  -> `my-rules.md`, `settings.yaml: thresholds, modules, run`
-Ask: "Any rule I should always follow that we have not covered? Say it in your words. (e.g. 'never show me
+## Phase 14 - What the judges score, and your own rules  -> `settings.yaml: scoring, thresholds, modules, run`; `my-rules.md`
+First, what the two judges score (`settings.yaml: scoring`). Say: "Every job you might see is scored by two blind
+judges out of 100. They always score two things: how well your skills match what the job REQUIRES, and whether the
+level fits your experience. You decide what else counts." Ask, one at a time:
+1. "Should where the job is count in the score? Yes, a little, or no?" (default from phase 4: fit first -> suggest no)
+   -> `scoring.location`. Effect: "no" = the judges ignore location entirely; your location choice still decides what is
+   built (phase 4).
+2. "Should the score care whether a job fits your long-term direction - uses and grows your strengths - or is any job
+   you can realistically do and get a good job for you right now?" -> `scoring.career_fit: yes | no`. Effect: "no" = a
+   job outside your usual path is not marked down for that.
+3. "Should pay count in the score?" -> `scoring.pay` (yes adds a PAY line to the judges' profile from phase 6).
+4. (only if remote mattered in phase 4) "Should remote or hybrid count in the score?" -> `scoring.remote`.
+Read back: "The judges will score: skills, experience level<, location (a little)><, career direction><, pay>. They will
+ignore: <the rest>."
+Then the rules. Ask: "Any rule I should always follow that we have not covered? Say it in your words. (e.g. 'never show me
 jobs in Alaska', 'always tell me if a job needs night shifts', 'prefer jobs that start after May')"
-Write each as a dated entry with the revert condition. Explain in one sentence each and keep defaults
-unless they ask: build line 60 / 100, stretch line 45 inside commuting reach, auto-skip below 40 when both
-judges agree. Modules: inbox sweep OFF, outreach OFF (say: "I never read your email; that stays off").
+Write each as a dated entry with the revert condition. my-rules.md starts EMPTY for every person: write only what THIS
+person said, never a rule from the examples. Explain in one sentence each and keep defaults unless they ask: build line
+60 / 100, stretch line 45 (where it applies follows their location choice), auto-skip below 40 when both judges agree.
+Ask: "If a strong match sits for a week without a decision, should I warn you?" -> `run.judgment_check` (default yes).
+Ask about their Claude plan: "Are you on the Pro plan, Max, or paying per use with a key?" Pro or per-use -> offer LIGHT
+MODE and say what it does: "Each search run reads fewer postings in depth (15 instead of 40) and uses the lighter model,
+so a run fits comfortably in Pro's limits; the rest of the postings wait for the next run." -> `run.judge_top_n: 15`,
+`run.judge_model: sonnet`. Max -> keep the defaults. (Measured on the v0.6 test person, one full run: about 10 minutes and
+~$2 of usage on Sonnet; about 18 minutes and ~$10 on the top model.) Modules: inbox sweep OFF, outreach OFF (say: "I never read your email; that stays off").
 Search feeds: the employers' own boards and the packs are always on. Then say: "Two extra listing feeds
 exist, LinkedIn and Indeed. They are read by scraping public pages, which those sites' terms restrict, and
 they break without notice. They are off unless you want them on - do you?" -> run.linkedin_guest /

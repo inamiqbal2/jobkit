@@ -30,17 +30,18 @@ two runs are averaged and large disagreements are flagged, never trusted.
 ## Threshold policy (settings.yaml thresholds; defaults 60 / 45 / 40)
 1. `>= build_default_min_rubric` -> BUILD BY DEFAULT. A skip requires hard ineligibility or a never-claim
    QUOTED FROM THE REQUIRED BLOCK, written into the ledger row.
-2. `commutable_min_rubric .. build_default-1` -> BUILD if a user rule says so (commutable area, a lane the
-   user asked to stretch into, PhD/degree-credit years language, a responding sector). Otherwise skip,
-   naming the specific required-block gap.
+2. `commutable_min_rubric .. build_default-1` -> BUILD when the person's location mode allows it (settings.yaml
+   location.mode: local jobs in local_only / local_first / unsure; any job in fit_first) or a user rule says so (a lane the
+   user asked to stretch into, degree-credit years language). Otherwise skip, naming the specific required-block gap.
+   Away jobs in local_first / unsure need location.away_bar (default 70); unsure asks the person instead of deciding.
 3. Below the commutable line -> the user's call, or a `⚠Δ` read.
 4. `< auto_skip_below_rubric` -> auto-ledgered by `rubric.py merge` ONLY when both runs agree (Δ<15), the JD
    is not a stub, and the item is not in a protected archetype or the priority lane.
 5. NEVER a skip ground alone: an agency's pay band; a working condition; a never-claim outside the required
-   block; a lane's "0%" with fewer than 3 rejections; a years bar when the JD credits an advanced degree;
+   block; a lane's poor record built on fewer than 3 outcomes; a years bar when the JD credits an advanced degree;
    a judgment made on a truncated JD (fetch the full text first - employer page over aggregator stubs).
-6. TRIPWIRE: fewer than 3 pipeline-originated builds in any 7-day window while items above the build line
-   exist is a judgment defect - audit that day. "Maximize success, not volume" does NOT mean fewer builds.
+6. JUDGMENT CHECK: a job at or above the build line must not go 7 days without a decision (BUILT, WATCH or SKIP with
+   the reason); daily.py prints the check (settings.yaml run.judgment_check). How MANY to build is the person's choice.
 7. "When in doubt, build." Drafting is free; the user decides what is sent.
 
 ## Processing order within the queue

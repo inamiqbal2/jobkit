@@ -23,6 +23,10 @@ on the transferable strengths.>
 LIMITS (score LOW on skills when the REQUIRED block needs these):
 <never-claims and known gaps, one per line>
 
-LOCATION: <home>; commutable: <metros>; relocation: <yes/no/case-by-case>.
-Not seeking: <contract/temp gigs, postdocs, management-only, ... from settings.yaml exclusions>.
+LOCATION: <home>; commutable: <metros>; <the person's location choice in their words, e.g. "stays local, will not move" /
+"prefers the Denver area but would move to Austin or Seattle for a strong fit" / "location does not matter">; remote:
+<ok / preferred / no>. (Omit this line entirely when settings.yaml scoring.location is "no".)
+PAY: <floor and target> (only when scoring.pay is "yes").
+Looking for: <position types they ticked, e.g. "full-time jobs and paid internships">.
+Not seeking: <only what THIS person said: position types they left unticked, role types, employers>.
 Level: <how the candidate's seniority should be read - e.g. "M.S. + 4 yrs = mid-level IC, not manager, not new-grad">.

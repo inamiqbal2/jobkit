@@ -33,7 +33,16 @@ location:                              # (required) phase 4
   # foreign_regex_extra: ""            # optional override: extra foreign-place cues to drop (e.g. "United States|USA" for a non-US user)
   commute_radius_miles: 0
   commutable_metros: []                # plain words for the judgment agent and the rubric profile, e.g. ["Denver CO", "Boulder CO"]
-  relocation: "case-by-case"           # yes | no | case-by-case  (case-by-case = present, state location first)
+  relocation: "case-by-case"           # yes | no | case-by-case  (kept for older tools; mode below is what the engine follows)
+  mode: ""                             # (v0.7, onboarding phase 4 - YOUR choice) local_only = stay local, jobs elsewhere are set
+                                       #   aside before judging | local_first = local first, would move for a strong fit (jobs
+                                       #   elsewhere need away_bar) | fit_first = location barely matters | unsure = like
+                                       #   local_first, but every strong job elsewhere is put to you as a question
+  away_bar: 70                         # local_first / unsure: score a job elsewhere needs before a resume is built for it
+  never_places: []                     # places you would never move to, in plain words
+  remote: "ok"                         # ok | preferred | no
+  other_countries: []                  # other countries you would work in (names or codes); ["any"] = anywhere
+  other_countries_regex: ""            # place words for those countries when they are not US / CA / UK (drafted at setup)
   tier1_regex: "Remote"                # commutable places + remote, as a pattern, e.g. "Denver|Boulder|Colorado|\\bCO\\b|Remote"
   tier2_regex: ""                      # nearby places you would consider; "" for none
 
@@ -54,6 +63,9 @@ lanes: []                              # (required) 1-6 target lanes in PLAIN WO
 targets:                               # (optional) what KINDS of positions are in scope, and who you would love to work for
   track: "<industry | academic | government | nonprofit | mix>"   # onboarding phase 5; decides which questions are asked
                                        # and whether the USAJobs key step runs
+  position_types: []                   # (v0.7, onboarding phase 5) what you are looking for: full_time, part_time, internships, co_ops,
+                                       #   new_grad, fellowships, unpaid_research, phd_positions, postdocs, contract, temporary, hourly.
+                                       #   Anything NOT listed is set aside (the older flags below still work)
   phd_positions: false                 # true = funded PhD positions / studentships / graduate research assistantships are
                                        #        targets: the new-grad/campus title drop and the critic's GRAD-GATE are OFF
   fixed_term_ok: false                 # true = "temporary" / fixed-term titles are not an eligibility drop (academic / grant posts)
@@ -63,6 +75,12 @@ targets:                               # (optional) what KINDS of positions are 
                                        # finds each one's job board (Greenhouse / Lever / Ashby / Workday / Oracle / NEOGOV / ...),
                                        # verifies it live and registers it in tracking/registries/custom.json; the rest become watch entries.
                                        # e.g. ["Mayo Clinic", "Denver Health"] / ["Stripe", "Notion"] / ["US Fish and Wildlife Service"]
+
+scoring:                               # (v0.7, onboarding phase 14) what the blind judges score BESIDES skills and experience
+  location: "yes"                      # yes | a little | no  (fit_first in phase 4 suggests no)
+  career_fit: "yes"                    # yes = a job that does not use/grow your strengths scores lower; no = any job you can get
+  pay: "no"                            # yes = posted pay against your salary target counts
+  remote: "no"                         # yes = remote / hybrid terms count
 
 thresholds:
   build_default_min_rubric: 60         # dual-blind average at/above this = build by default
@@ -74,8 +92,9 @@ thresholds:
 
 exclusions:
   employers: []                        # regex or plain names, matched on SOURCE/URL only, never JD text
-  role_types: ["recruit(er|ers|ing|ment)"]   # title-level eligibility drops (regexes, word-bounded, case-insensitive).
-                                       # Intern/co-op/new-grad/temp/contract are built in. Phase 5 adds yours.
+  role_types: []   # title-level eligibility drops (regexes, word-bounded, case-insensitive).
+                                       # Phase 5 adds only what YOU name. Internships, co-ops, new-grad, temp, contract and
+                                       # postdocs follow targets.position_types (what you ticked), never a fixed default.
   contract_work: false                 # false = contract/1099/freelance/contract-to-hire postings are OUT
   postdocs: false                      # false = postdoctoral positions are OUT (postdoc TITLES are dropped by eligibility.py)
 
@@ -101,6 +120,8 @@ run:                                   # discovery arms. Employer boards (packs 
                                        # each run; the rest are recorded "not scored - below the top N" and come back next run
                                        # if still open (0 = score everything). 40 postings is roughly 2 x 90k input tokens.
   jd_text_cap_chars: 6000              # the scorers read at most this many characters of each posting (the requirements block is
+  judgment_check: true                 # (v0.7) warn when a job at or above the build line goes 7 days without a decision
+  judge_model: ""                      # (v0.7 light mode) model for the two judges, e.g. "sonnet"; "" = the strongest available
                                        # always kept whole); long postings are trimmed, not dropped
 
 build:

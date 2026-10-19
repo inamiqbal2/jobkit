@@ -27,18 +27,36 @@ TODAY=datetime.date.today().isoformat()
 
 # JOBKIT: a workspace may override the scorer instructions with profile/rubric_prompt_header.txt (same contract: output JSON only).
 _PH=os.path.join(ROOT,"profile","rubric_prompt_header.txt")
-PROMPT_HEADER="""You are scoring job fit BLIND. Read the candidate profile below, then each job
-description file. You know NOTHING else: no application outcomes, no other scores, no company
-reputation beyond what the JD says. Score each job for THIS candidate on 0-100 overall plus
-sub-scores (each 0-10): skills (required-vs-preferred technical match — weigh the JD's REQUIRED
-block heavily, forgive gaps in preferred), experience (level/seniority fit - read the profile's LEVEL line and judge against it), location
-(0-10; read the profile's LOCATION line: commutable, relocation stance), career (would this role use and grow the
-candidate's core strengths, or park them in an unrelated lane).
-Honor the profile's DOES-NOT-HAVE list absolutely: a job whose core duty requires a listed
-never-claim is scored low on skills no matter how attractive it looks.
-Output ONLY valid JSON, no prose: {"<id>": {"skills": n, "experience": n, "location": n,
-"career": n, "overall": n}, ...} covering every id listed.
-"""
+# v0.7: the judges' criteria come from the person's own answers (settings.yaml scoring, onboarding phase 14). Skills and
+# experience are always scored; location, career fit, pay and remote only when the person said they should count.
+from userconfig import scoring as _scoring, location_mode as _location_mode, location as _loc_cfg
+def prompt_header():
+    sc=_scoring()
+    crit=[("skills","skills (required-vs-preferred match: weigh the posting's REQUIRED block heavily, forgive gaps in preferred)"),
+          ("experience","experience (level / seniority fit: read the profile's LEVEL line and judge against it)")]
+    if sc["location"]!="no":
+        crit.append(("location","location (read the profile's LOCATION line: commuting area, moving stance, remote)"+
+                     (" - count it only LIGHTLY in overall" if sc["location"]=="a little" else "")))
+    if sc["career_fit"]=="yes":
+        crit.append(("career","career (would this role use and grow the candidate's core strengths, or park them in an unrelated lane)"))
+    if sc["pay"]=="yes":
+        crit.append(("pay","pay (the posted pay against the profile's PAY line; no posted pay = 5)"))
+    if sc["remote"]=="yes":
+        crit.append(("remote","remote (the posting's remote / hybrid / on-site terms against the profile's REMOTE line)"))
+    ignore=[]
+    if sc["location"]=="no": ignore.append("where the job is")
+    if sc["career_fit"]!="yes": ignore.append("whether the job matches the candidate's long-term career direction (any job they can realistically do and get counts)")
+    if sc["pay"]!="yes": ignore.append("pay")
+    keys=", ".join(f'"{k}": n' for k,_ in crit)
+    return ("You are scoring job fit BLIND. Read the candidate profile below, then each job\n"
+            "description file IN FULL. You know NOTHING else: no application outcomes, no other scores, no company\n"
+            "reputation beyond what the posting says. Score each job for THIS candidate on 0-100 overall plus\n"
+            "sub-scores (each 0-10): " + "; ".join(t for _,t in crit) + ".\n"
+            "The overall score reflects ONLY these criteria." + (" Do NOT let these count: " + "; ".join(ignore) + "." if ignore else "") + "\n"
+            "Honor the profile's DOES-NOT-HAVE list absolutely: a job whose core duty requires a listed\n"
+            "never-claim is scored low on skills no matter how attractive it looks.\n"
+            'Output ONLY valid JSON, no prose: {"<id>": {' + keys + ', "overall": n}, ...} covering every id listed.\n')
+PROMPT_HEADER=prompt_header()
 
 if os.path.exists(_PH): PROMPT_HEADER=open(_PH,encoding="utf-8").read()
 
@@ -74,7 +92,29 @@ def prep():
         try: return open(p,encoding='utf-8',errors='ignore').read()
         except Exception: return ''
     def _score(x): return float(x.get('score') or x.get('jdmatch') or 0)
-    items.sort(key=lambda x:(0 if _LANE(x.get('title','') or '',_jdtext(x['jd'])) else 1,-_score(x)))
+    # v0.7 LOCATION MODE (settings.yaml location.mode, chosen at setup). "Local" = the commuting-area pattern (location.tier1_regex,
+    # which includes Remote) matches the posting's location or the first part of its text (multi-site postings list cities there).
+    _mode=_location_mode(); _T1=re.compile(_loc_cfg()["tier1_regex"] or r"Remote",re.I)
+    _LOCLINE=re.compile(r"location|,\s*[A-Z]{2}\b|\bremote\b|\bhybrid\b|\$\s?\d",re.I); _LEGAL=re.compile(r"fair chance|ordinance|\blaw\b|act of|regulation",re.I)
+    def _local(x):
+        """Inside the commuting area: the posting's location string, or a location-like line of its text (multi-site postings
+        list cities with their pay); legal boilerplate ("New York City's Fair Chance Act") never counts."""
+        if _T1.search(str(x.get('loc','') or '')): return True
+        for ln in _jdtext(x['jd'])[:8000].splitlines():
+            if len(ln)<200 and _LOCLINE.search(ln) and not _LEGAL.search(ln) and _T1.search(ln): return True
+        return False
+    if _mode=="local_only":
+        _away=[x for x in items if not _local(x)]
+        if _away:
+            dp0=os.path.join(TR,"dispositions.jsonl")
+            with open(dp0,"a",encoding="utf-8") as f:
+                for x in _away:
+                    f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),decision="SKIP",
+                        reason=f"AUTO(location): outside your commuting area - you chose to stay local (settings.yaml location.mode) - {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
+            print(f"rubric prep: {len(_away)} posting(s) outside your commuting area set aside (you chose to stay local)")
+            items=[x for x in items if _local(x)]
+    _locrank=(lambda x: 0 if _local(x) else 1) if _mode in ("local_first","unsure") else (lambda x: 0)
+    items.sort(key=lambda x:(0 if _LANE(x.get('title','') or '',_jdtext(x['jd'])) else 1,_locrank(x),-_score(x)))
     deferred=items[top_n:] if top_n and len(items)>top_n else []
     items=items[:top_n] if top_n else items
     if deferred:

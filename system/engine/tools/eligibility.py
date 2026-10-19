@@ -22,11 +22,16 @@ from userconfig import work_auth as _work_auth, exclusions as _exclusions, targe
 #   targets.fixed_term_ok: true  -> the temp / temporary piece is OFF (academic research posts are routinely fixed-term)
 #   exclusions.postdocs: false   -> postdoctoral titles are DROPPED (the flag existed in settings.yaml but no code consumed it)
 _TG = _targets(); _EXC = _exclusions()
-_ELIG_PARTS = [
-    r"\bintern(s|ships?)?\b|\bco-?ops?\b|\bapprentice(s|ships?)?\b|\bsummer (analyst|associate)s?\b",  # internship titles incl. finance-style
-    r"\bcontract(or)?\s*\(|\(contract(or)?\)",
-]
-if not _TG["phd_positions"]:
+# v0.7: every piece below is switched by what the person said they are looking for (settings.yaml targets.position_types,
+# onboarding phase 5). Nothing is dropped because the ORIGINAL user did not want it.
+_ELIG_PARTS = []
+if not _TG["internships_ok"]:
+    _ELIG_PARTS += [r"\bintern(s|ships?)?\b|\bsummer (analyst|associate)s?\b"]   # internship titles incl. finance-style
+if not _TG["coops_ok"]:
+    _ELIG_PARTS += [r"\bco-?ops?\b|\bapprentice(s|ships?)?\b"]
+if not _EXC["contract_work"]:
+    _ELIG_PARTS += [r"\bcontract(or)?\s*\(|\(contract(or)?\)"]
+if not (_TG["phd_positions"] or _TG["new_grad_ok"]):
     _ELIG_PARTS += [r"\b20\d\d start\b|\(20\d\d start\)",  # "(2027 Start)" graduate-programme titles
                     r"\bnew[- ](college[- ])?grad(uate)?s?\b|\b(university|college) (grad|graduate|hire)s?\b|\bcampus (hire|recruit\w*)\b"]
 if not _TG["fixed_term_ok"]:
@@ -34,7 +39,7 @@ if not _TG["fixed_term_ok"]:
     _ELIG_PARTS += [r"(?<!high )(?<!high-)(?<!low )(?<!low-)(?<!ultra )(?<!ultra-)\btemp\b(?![- ]?(?:metal|alloy|material|ceramic|furnace|sensor|control|superconduct))|\btemporary\b"]
 if not _EXC["postdocs"]:
     _ELIG_PARTS += [r"\bpost[- ]?doc(toral|s)?\b|\bpost[- ]?doctoral\b"]   # "Postdoc", "Post-doctoral", "Post Doctoral Researcher"
-_GENERIC_ELIG = "|".join(_ELIG_PARTS)
+_GENERIC_ELIG = "|".join(_ELIG_PARTS) or r"(?!x)x"
 def _role_type_regex():
     pats = []
     for x in _exclusions()["role_types"]:
@@ -92,7 +97,7 @@ NONUS_TEXT = re.compile(
     r"|(?<!New )\bMexico\b|(?<!New )\bLondon\b|\bU\.?K\.?\b(?![A-Za-z])"
     r"|Kumamoto|Tsukuba|Yokohama|Osaka|Tokyo|Kyoto|JASM|Hsinchu|Tainan|Taichung|Dresden|Munich|Nanjing|Shanghai|Beijing"
     r"|Shenzhen|Seoul|Kaohsiung|Taoyuan|Bangalore|Bengaluru|Penang|Toronto|Vancouver(?![,\s-]*(?:WA\b|Washington|USA|US\b))|Montreal|Veldhoven|Eindhoven|Reykjav"
-    r"|(?<!Florida-)(?<!Florida )(?<!FL-)(?<!FL )\b(?:Berlin|Stockholm|Copenhagen|Frankfurt|Paris|Zurich|Zürich|Amsterdam|Madrid|Milan|Warsaw|Hong Kong|Dubai|Sydney|Melbourne|Brussels|Oslo|Helsinki|Prague|Luxembourg|Barcelona|Gurgaon|Gurugram|Hyderabad|Pune|Mumbai|Chennai|Noida)\b(?!,\s*(?:[A-Z]{2}\b|USA|US\b|United States|Texas|Florida|Ohio))"  # finance-board cities leaked once; US namesakes (Berlin, Paris, Melbourne as US towns) are excluded by the state lookahead
+    r"|(?<!Florida-)(?<!Florida )(?<!FL-)(?<!FL )\b(?:Berlin|Stockholm|Copenhagen|Frankfurt|Paris|Zurich|Zürich|Amsterdam|Madrid|Milan|Warsaw|Hong Kong|Dubai|Sydney|Melbourne|Brussels|Oslo|Helsinki|Prague|Luxembourg|Barcelona|Gurgaon|Gurugram|Hyderabad|Pune|Mumbai|Chennai|Noida|Budapest|Bucharest|Lisbon|Dublin|Vienna|Athens|Krakow|Kraków|Wroclaw|Wrocław|Bratislava|Sofia|Belgrade|Zagreb|Riga|Tallinn|Vilnius|Kyiv|Istanbul|Tel Aviv|Cairo|Johannesburg|Cape Town|Lagos|Nairobi|Bogota|Bogotá|Buenos Aires|Sao Paulo|São Paulo|Santiago|Lima|Manila|Jakarta|Kuala Lumpur|Ho Chi Minh|Hanoi|Bangkok|Edinburgh|Glasgow|Manchester|Belfast|Cork|Galway|Geneva|Basel|Lausanne|Hamburg|Stuttgart|Cologne|Düsseldorf|Rotterdam|The Hague|Antwerp|Lyon|Toulouse|Valencia|Porto|Gothenburg|Aarhus|Bergen|Tampere)\b(?!,\s*(?:(?:AL|AK|AZ|AR|CA|CO|CT|DE|DC|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b|USA|US\b|United States|Texas|Florida|Ohio|Georgia|Virginia|California|Oregon))"  # finance-board cities leaked once; US namesakes (Berlin, Paris, Melbourne as US towns) are excluded by the state lookahead
     r"|[぀-ヿ一-鿿가-힯]", re.I)
 NONUS_URL = re.compile(r"(?:Remote|Hybrid)[-_ ]+(?:Germany|UK|Europe|EMEA|Canada|India|APAC|Netherlands|Ireland|Israel|Japan|Korea|Taiwan|Singapore|Mexico)\b"
     r"|(?<=[a-z])(?:IND|CHN|JPN|KOR|ISR|TWN|DEU|GBR|CAN|MEX|SGP|MYS|NLD|IRL)(?=[/_-]|$)|(?<=/)(?:IND|CHN|JPN|KOR|ISR|TWN|DEU|GBR|CAN|MEX|SGP|MYS|NLD|IRL)---|Bangalore|Bengaluru|Hsinchu|Tokyo|Shanghai|Beijing|Munich|Dresden|Toronto"
@@ -103,6 +108,20 @@ NONUS_URL = re.compile(r"(?:Remote|Hybrid)[-_ ]+(?:Germany|UK|Europe|EMEA|Canada
 # user searching another country the user's own country name/code is whitelisted first and geo.FOREIGN_EXTRA
 # (e.g. "United States|USA" for a Canadian user) is added. Declared assumption: one country of search per workspace.
 import geo as _geo
+# v0.7: other countries the person would also work in (settings.yaml location.other_countries; onboarding phase 4)
+from userconfig import location as _loc_cfg
+_LC = _loc_cfg()
+_OTHER_ANY = any(str(c).strip().lower() in ("any", "anywhere", "all") for c in _LC["other_countries"])
+def _other_regex():
+    parts = []
+    for c in _LC["other_countries"]:
+        c = str(c).strip()
+        if not c or c.lower() in ("any", "anywhere", "all"): continue
+        row = _geo.COUNTRIES.get(c.upper())
+        parts.append(row["in_loc"] if row else re.escape(c))
+    if _LC["other_countries_regex"]: parts.append(_LC["other_countries_regex"])
+    return re.compile("|".join(f"(?:{p})" for p in parts), re.I) if parts else None
+_OTHER = _other_regex()
 _HOME = re.compile(rf"\b{re.escape(_geo.COUNTRY_NAME)}\b|\b{re.escape(_geo.country_code())}\b", re.I) if _geo.country_code() != "US" else None
 # 2026-10-16 port: a multi-site posting whose FIRST listed site is in the United States ("New York, NY; London; Bangalore",
 # "Charlotte, NC, US and 2 more") is a US job with offices abroad - keep it. Only the primary (first) site decides.
@@ -115,6 +134,8 @@ def non_us(loc="", url="", title=""):
     """Eligibility-only geo test (never fit): True if the posting is outside the user's country by location text,
     URL path or title. The function keeps its historical name; it means "not in the country of search"."""
     loc = loc or ""; url = url or ""; title = title or ""
+    if _OTHER_ANY: return False                                         # v0.7: the person would work anywhere
+    if _OTHER and (_OTHER.search(loc) or _OTHER.search(title)): return False   # v0.7: a country the person also accepts
     if _HOME and (_HOME.search(loc) or _HOME.search(title)): return False
     if not _HOME and _geo.country_code() == "US" and _us_primary(loc) and not NONUS_TEXT.search(title): return False
     if _geo.FOREIGN_EXTRA and (_geo.FOREIGN_EXTRA.search(loc) or _geo.FOREIGN_EXTRA.search(title)): return True

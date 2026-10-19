@@ -78,10 +78,19 @@ def skip_guard(cu,reason):
         return False,(f"SKIP refused: this posting scored {top:.0f} (build line {build:.0f}"+(", best of the last 14 days" if best and best==top else "")+
                       "). Quote the REQUIRED line it fails as REQ:\"...\" or give a hard tag (INELIGIBLE, EXPIRED, CLOSED, "
                       "NOT-IN-COUNTRY, NEVER-CLAIM, USER-RULE:<rule>, DUPLICATE:<ref>).")
-    reloc=str(_cfg("location.relocation","case-by-case") or "").lower()
-    if top is not None and 45<=top<build and _LOCATION_ONLY.search(reason) and reloc!="no":
-        return False,(f"SKIP refused: score {top:.0f} is in the stretch band and the reason is location only, but settings.yaml "
-                      f"location.relocation is '{reloc}'. Use WATCH and ask the person, or add the real reason.")
+    # v0.7: a location-only skip follows the location mode the person chose at setup (settings.yaml location.mode)
+    from userconfig import location_mode as _lm, location as _loc, thresholds as _th
+    mode=_lm(); away=float(_loc()["away_bar"]); stretch=float(_th()["commutable_min_rubric"])
+    if top is not None and _LOCATION_ONLY.search(reason):
+        why=None
+        if mode=="fit_first" and top>=stretch:
+            why=f"you said location barely matters (fit first), and this job scored {top:.0f}"
+        elif mode=="local_first" and top>=away:
+            why=f"you said you would move for a strong fit, and this job scored {top:.0f} (your bar for moving is {away:.0f})"
+        elif mode=="unsure" and top>=build:
+            why=f"you are not sure about moving, and this job scored {top:.0f}: ask the person (WATCH + the question in the report)"
+        if why:
+            return False,f"SKIP refused for location alone: {why}. Build it, or record WATCH and ask the person."
     return True,""
 
 if __name__=="__main__":

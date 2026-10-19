@@ -82,8 +82,8 @@ and never shrinks without the user saying so. CV-inherited claims are guilty unt
 - **Consolidation cadence**: monthly (or every ~10 responses) re-run the reports, prune
   contradictions in `my-rules.md`, and rewrite rather than amend. Policy-by-accretion
   is how rule sets drift.
-- **Tripwire**: fewer than 3 pipeline-originated builds in any 7-day window while items above the
-  build line exist is a judgment defect. `daily.py` announces it; audit that day.
+- **Judgment check**: a job at or above the build line never goes 7 days without a decision (BUILT, WATCH or SKIP with
+  the reason). `daily.py` announces any that are open. How many applications to make is the person's choice, not a quota.
 - **A run that could not fetch is reported as that.** `daily.py` probes the job-board hosts first and stops with
   "I could not reach the job boards" when none answers; "nothing new today" is never said about a failed fetch.
 

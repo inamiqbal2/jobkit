@@ -33,7 +33,7 @@ _GENERIC=[
 _WA=_work_auth(); _EX=_exclusions()
 if _WA["citizenship_only_roles_open"] and _WA["clearance_possible"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("INELIGIBLE")]
 if _EX["contract_work"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("CONTRACT-GIG")]
-if _targets()["phd_positions"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("GRAD-GATE")]
+if _targets()["phd_positions"] or _targets()["new_grad_ok"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("GRAD-GATE")]   # v0.7: a new graduate's own target is never a gate
 if _targets()["hourly_ok"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("BELOW LEVEL")]   # v0.2: technician / hourly posts are the target (settings.yaml targets.hourly_ok)   # 2026-10-09: graduate positions are the target (settings.yaml targets.phd_positions)
 def _pairs(key):
     out=[]

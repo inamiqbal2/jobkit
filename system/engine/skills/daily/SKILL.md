@@ -45,8 +45,9 @@ step 7 and say so plainly ("The boards answered; nothing new fits well enough to
 ledgered DEFER and come back next run; each posting is trimmed to `run.jd_text_cap_chars` (default 6000) with its
 requirements block whole (`tracking/rubric/judge_plan.json` has the counts; settings.yaml documents both knobs).
 Two blind scorers, the second only where it matters (2026-10-16):
-1. **Scorer A** - spawn ONE subagent (Agent tool; use the strongest model the account offers, Fable where available,
-   otherwise the session's own model). Give it the prompt file's text verbatim, nothing added, nothing reordered. It reads
+1. **Scorer A** - spawn ONE subagent (Agent tool). Model: `settings.yaml run.judge_model` when set (light mode: sonnet);
+   otherwise the strongest model the account offers, Fable where available, else the session's own model. Scorer B uses
+   the same model. Give it the prompt file's text verbatim, nothing added, nothing reordered. It reads
    only the files the prompt names (`profile/profile_blind.md` + the JD files) and writes `tracking/rubric/run_A_<today>.json`
    (JSON only, every id, the exact schema in the prompt). With more than ~120 postings, split A into two subagents over the
    two halves of the id list (same header, each half's lines) and join their JSON into run_A yourself.
@@ -66,14 +67,26 @@ Read `tracking/queue_<today>.md`. Thresholds from `settings.yaml thresholds` (de
 item, read the posting's saved JD (path on the queue line), the critic line, the eligibility read, then:
 - score >= build line -> BUILD by default. A skip needs hard ineligibility or a never-claim quoted from the
   REQUIRED block, written into the ledger reason.
-- stretch line .. build line-1 -> BUILD when a user rule says so (commutable, a lane they asked to stretch
-  into, the priority lane, degree-credit years language); else SKIP naming the specific required-block gap.
+- stretch line .. build line-1 -> BUILD when the location mode allows it (see LOCATION below) or a user rule says so (a
+  lane they asked to stretch into, the priority lane, degree-credit years language); else SKIP naming the specific
+  required-block gap.
 - below the stretch line, or `⚠Δ` (the judges disagreed) -> read the JD yourself; usually SKIP with the gap
   named, WATCH if it may become relevant, or put it under "needs your decision" in the report when it is
   genuinely a judgment call for the person (salary, location, a role they might like). Before `decide.py WATCH`
   on a posting that came from a listing FEED (the Chronicle, HigherEdJobs, a VC board, a listserv: the queue line's
   source is the feed, the employer is inside the title), find the employer's own posting page and use THAT url;
   the tracker's "Official link" must never be an aggregator (CONSTITUTION I.6).
+- LOCATION follows the mode the person chose at setup (settings.yaml `location.mode`; their reasons are in my-rules.md
+  GEOGRAPHY). "Local" = inside the commuting area or remote.
+  - `local_only` (stay local): away postings were already set aside by rubric prep; build local ones from the stretch line.
+  - `local_first` (local first, would move for a strong fit): local from the stretch line; away only at or above
+    `location.away_bar` (default 70); away postings between the build line and the away bar go under "needs your decision"
+    as "worth a look if you would move to <place>".
+  - `unsure`: like local_first, but EVERY away posting at or above the build line goes under "needs your decision" with the
+    direct question ("Would you move to <place> for this?"); record the answer in my-rules.md GEOGRAPHY. After about five
+    answers, say which mode their answers point to and offer to switch.
+  - `fit_first` (location barely matters): no location bar; judge on fit alone. Never skip for location by itself.
+  - Never build or present a posting in a place listed in `location.never_places`.
 - Never a skip ground alone: an agency pay band, a working condition, a never-claim outside the required
   block, a years bar when the JD credits an advanced degree, a judgment on a truncated JD (fetch the full
   text first). "When in doubt, build": drafting is free; the person decides what is sent.

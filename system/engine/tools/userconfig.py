@@ -224,6 +224,14 @@ def location():
         "commute_radius_miles": loc.get("commute_radius_miles", 0),
         "commutable_metros": list(loc.get("commutable_metros", []) or []),
         "relocation": loc.get("relocation", "case-by-case"),
+        # v0.7 (onboarding phase 4): how location shapes the search - see location_mode()
+        "away_bar": _num(loc.get("away_bar", 70), 70, int, "location.away_bar"),
+        "never_places": list(loc.get("never_places", []) or []),
+        "remote": str(loc.get("remote", "ok") or "ok").lower(),            # ok | preferred | no
+        # v0.7: other countries the person would work in (names or codes); ["any"] = anywhere. Place words for them
+        # (cities, regions) can be given in other_countries_regex; US / CA / UK use the built-in geography tables.
+        "other_countries": [str(x) for x in (loc.get("other_countries", []) or [])],
+        "other_countries_regex": loc.get("other_countries_regex", "") or "",
         "tier1_regex": loc.get("tier1_regex", r"Remote"),
         "tier2_regex": loc.get("tier2_regex", r"(?!x)x"),   # never matches by default
         # optional overrides of the engine's per-country geography table (system/engine/tools/geo.py)
@@ -291,6 +299,10 @@ def run_options():
         "judge_top_n": _num(r.get("judge_top_n", 40), 40, int, "run.judge_top_n"),
         # the scorers read at most this many characters of each posting (the requirements block is kept whole)
         "jd_text_cap_chars": _num(r.get("jd_text_cap_chars", 6000), 6000, int, "run.jd_text_cap_chars"),
+        # v0.7: warn when a job at or above the build line has gone 7 days without a decision (daily.py); false = off
+        "judgment_check": bool(r.get("judgment_check", True)),
+        # v0.7 light mode (Pro plans): fewer postings judged per run, the judge model the person picked at setup
+        "judge_model": str(r.get("judge_model", "") or ""),
     }
 
 
@@ -379,6 +391,19 @@ def validate(cfg=None):
         r = loc.get("relocation")
         if r is not None and not is_placeholder(r) and str(r).lower() not in ("yes", "no", "case-by-case"):
             err(f"location.relocation should be yes, no or case-by-case, not {r!r}")
+        _m = loc.get("mode")
+        if _m not in (None, "") and not is_placeholder(_m) and str(_m).lower().replace("-", "_") not in ("local_only", "local_first", "fit_first", "unsure"):
+            err(f"location.mode should be local_only, local_first, fit_first or unsure, not {_m!r}")
+        want_int("location", loc, "away_bar", 0, 100)
+        _rm = loc.get("remote")
+        if _rm not in (None, "") and str(_rm).lower() not in ("ok", "preferred", "no"):
+            err(f"location.remote should be ok, preferred or no, not {_rm!r}")
+        want_regex("location", "other_countries_regex", loc.get("other_countries_regex"))
+        _sc = get("scoring", {}) or {}
+        for _k, _ok in (("location", ("yes", "a little", "no", "true", "false")), ("career_fit", ("yes", "no", "true", "false")),
+                        ("pay", ("yes", "no", "true", "false")), ("remote", ("yes", "no", "true", "false"))):
+            if _k in _sc and str(_sc[_k]).lower() not in _ok:
+                err(f"scoring.{_k} should be one of {', '.join(_ok[:3] if _k == 'location' else _ok[:2])}, not {_sc[_k]!r}")
         want_int("location", loc, "commute_radius_miles", 0, 1000)
         if loc.get("commutable_metros") is not None and not isinstance(loc.get("commutable_metros"), list):
             err("location.commutable_metros should be a list of places, or []")
@@ -494,13 +519,53 @@ def targets():
     fixed_term_ok  true -> "temporary" / "fixed-term" titles are NOT an eligibility drop (academic posts are usually fixed-term)
     hourly_ok      true -> the critic's "BELOW LEVEL: technician/HS tier" advisory is OFF (technician roles are the target)
     Defaults are the industry reading (both false)."""
+    # v0.7: targets.position_types is the list the person ticked at setup (onboarding phase 5). Each type switches off the
+    # matching title drop / critic gate. The older boolean flags still work and are OR-ed in, so v0.6 workspaces keep working.
     t = get("targets", {}) or {}
+    pt = {str(x).strip().lower().replace(" ", "_").replace("-", "_") for x in (t.get("position_types") or [])}
     return {
-        "phd_positions": bool(t.get("phd_positions", False)),
-        "fixed_term_ok": bool(t.get("fixed_term_ok", False)),
-        # hourly_ok true -> hourly-paid / high-school-minimum technician postings are NOT flagged "BELOW LEVEL" by the
-        # critic (field and lab technician posts are routinely hourly; an industry candidate wants the flag)
-        "hourly_ok": bool(t.get("hourly_ok", False)),
+        "position_types": sorted(pt),
+        "phd_positions": bool(t.get("phd_positions", False)) or "phd_positions" in pt,
+        "fixed_term_ok": bool(t.get("fixed_term_ok", False)) or bool(pt & {"temporary", "seasonal", "fixed_term"}),
+        # hourly_ok true -> hourly-paid / high-school-minimum postings are NOT flagged "BELOW LEVEL" by the critic
+        "hourly_ok": bool(t.get("hourly_ok", False)) or "hourly" in pt,
+        "internships_ok": bool(t.get("internships_ok", False)) or bool(pt & {"internships", "internship"}),
+        "coops_ok": bool(t.get("coops_ok", False)) or bool(pt & {"co_ops", "coops", "apprenticeships", "co_op"}),
+        "new_grad_ok": bool(t.get("new_grad_ok", False)) or bool(pt & {"new_grad", "early_career", "graduate_programs"}),
+        "unpaid_ok": bool(t.get("unpaid_ok", False)) or bool(pt & {"unpaid", "volunteer", "unpaid_research"}),
+        "part_time_ok": bool(t.get("part_time_ok", True)) or "part_time" in pt,
+    }
+
+
+def location_mode():
+    """v0.7: how location shapes the search, chosen by the person at setup (onboarding phase 4).
+    local_only  - stay local: jobs outside the commuting area (and not remote) are not judged
+    local_first - local first, would move for a strong fit: away jobs need `away_bar` to get a resume
+    fit_first   - location barely matters: not scored by the judges, no location bar
+    unsure      - like local_first, but every strong away job is put to the person as a question
+    Missing -> derived from the older location.relocation (no -> local_only, yes -> fit_first, else local_first)."""
+    loc = get("location", {}) or {}
+    m = str(loc.get("mode", "") or "").strip().lower().replace("-", "_")
+    if m not in ("local_only", "local_first", "fit_first", "unsure"):
+        r = str(loc.get("relocation", "case-by-case") or "").strip().lower()
+        m = {"no": "local_only", "yes": "fit_first"}.get(r, "local_first")
+    return m
+
+
+def scoring():
+    """v0.7: what the blind judges score besides skills and experience (always scored). Chosen at setup (phase 14).
+    location: "yes" | "a little" | "no"   career_fit: "yes" | "no"   pay: "yes" | "no"   remote: "yes" | "no"
+    Defaults follow the location mode (fit_first -> location "no") and keep career fit on."""
+    sc = get("scoring", {}) or {}
+    def _v(k, d):
+        raw = sc.get(k)
+        v = (str(raw).strip().lower() if raw not in (None, "") else d)   # empty / missing -> the default
+        return {"true": "yes", "false": "no", "little": "a little"}.get(v, v)
+    return {
+        "location": _v("location", "no" if location_mode() == "fit_first" else "yes"),
+        "career_fit": _v("career_fit", "yes"),
+        "pay": _v("pay", "no"),
+        "remote": _v("remote", "no"),
     }
 
 
