@@ -1,5 +1,8 @@
 # jobkit
 
+**Not a programmer? Get jobkit from the download page: [inamiqbal2.github.io/jobkit](https://inamiqbal2.github.io/jobkit)**, one
+button, no GitHub needed.
+
 ![jobkit in about a minute: set me up, drop in your documents, an in-depth interview, it reads every posting on employers' own boards, two blind judges score the fit, and your story is told for the job](system/docs/jobkit_demo.gif)
 
 <sub>Fictional user ("Riley", a model-risk analyst in New York); the scores and counts shown come from a live jobkit run
