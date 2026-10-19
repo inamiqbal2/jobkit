@@ -68,6 +68,9 @@ def skip_guard(cu,reason):
         from rubric import best_recent; best=best_recent(cu)
     except Exception: best=None
     now=_score_now(cu); top=max([v for v in (now,best) if v is not None],default=None)
+    from userconfig import location_mode as _lm0
+    if _lm0()=="local_only" and _LOCATION_ONLY.search(reason) and not re.search(r"\bDUPLICATE\b",reason,re.I):
+        return True,""   # v0.7: the person chose to stay local - outside the commuting area is their own reason
     if re.search(r"\bDUPLICATE\b",reason,re.I):
         m=re.search(r"DUPLICATE:\s*(\S+)",reason,re.I); ref=(m.group(1) if m else "").strip('.,;')
         led={d.get('url') for d in load()}
