@@ -55,7 +55,17 @@ def prompt_header():
             "The overall score reflects ONLY these criteria." + (" Do NOT let these count: " + "; ".join(ignore) + "." if ignore else "") + "\n"
             "Honor the profile's DOES-NOT-HAVE list absolutely: a job whose core duty requires a listed\n"
             "never-claim is scored low on skills no matter how attractive it looks.\n"
-            'Output ONLY valid JSON, no prose: {"<id>": {' + keys + ', "overall": n}, ...} covering every id listed.\n')
+            # v0.7 (light-vs-Fable test 2026-10-19): fixed anchors keep every model on the same scale, and a verbatim quote per
+            # posting proves the judge read it (merge checks each quote against the posting text).
+            "Use this scale for overall, the same for every posting:\n"
+            "  90 = meets every REQUIRED item at the right level; the kind of job this person is aiming for.\n"
+            "  70 = meets the REQUIRED items; gaps only in preferred items or one minor required item.\n"
+            "  50 = meets most REQUIRED items but has one material gap (a missing core skill, or one level off).\n"
+            "  30 = misses a core REQUIRED item, or is the right field but a different specialty.\n"
+            "  10 = a different field or kind of work.\n"
+            "Read every posting in full before scoring it. For each id also give \"req\": the posting's own words (under 15 words,\n"
+            "copied exactly) for the requirement that most decided your score.\n"
+            'Output ONLY valid JSON, no prose: {"<id>": {' + keys + ', "overall": n, "req": "<quote>"}, ...} covering every id listed.\n')
 PROMPT_HEADER=prompt_header()
 
 if os.path.exists(_PH): PROMPT_HEADER=open(_PH,encoding="utf-8").read()
@@ -211,6 +221,21 @@ def merge(pa,pb):
     _bset=set(json.load(open(_bp,encoding="utf-8"))) if os.path.exists(_bp) and set(B)!=set(man) else set(man)
     if set(A)!=set(man) or set(B)!=_bset:
         sys.exit(f"rubric merge ABORTED: id sets differ (batch {len(man)}, A {len(A)}, B {len(B)}, B expected {len(_bset)}) - re-run the blind agents on the current prompt")
+    # v0.7 READING CHECK: each judge quotes the deciding requirement per posting; a quote that is not in the posting means the
+    # judge did not read it. Reported per judge; more than 20% unverifiable quotes = re-run that judge.
+    def _norm(t): return re.sub(r"[^a-z0-9]+"," ",str(t or "").lower()).strip()
+    for _tag,_run in (("A",A),("B",B)):
+        _bad=[]; _n=0
+        for k,v in _run.items():
+            q=_norm(v.get('req',''))
+            if not q: _bad.append(k); continue
+            _n+=1
+            try: _t=_norm(open(man[k]['jd_full'] if os.path.exists(man[k].get('jd_full','')) else man[k]['jd'],encoding='utf-8',errors='ignore').read())
+            except Exception: _t=""
+            if q not in _t: _bad.append(k)
+        if _run:
+            share=len(_bad)/len(_run)
+            print(f"reading check, judge {_tag}: {len(_run)-len(_bad)}/{len(_run)} quotes found in the postings"+(f" - WARNING: judge {_tag} may not have read {len(_bad)} posting(s) ({', '.join(_bad[:8])}); re-run it" if share>0.2 else ""))
     scr=json.load(open(os.path.join(TR,"minquals_screened.json"), encoding="utf-8"))
     by_url={v['url']:k for k,v in man.items()}
     rows=[]
