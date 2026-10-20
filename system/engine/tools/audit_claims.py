@@ -349,7 +349,7 @@ def write_pass(folder, files):
 def pass_status(folder):
     """(ok, message) - is there a fresh AUDIT_PASS.json covering every .docx now in the folder?"""
     p = os.path.join(folder, PASS_FILE)
-    docs = sorted(glob.glob(os.path.join(folder, "*.docx")))
+    docs = sorted(d for d in glob.glob(os.path.join(folder, "*.docx")) if not _dx.is_stray(d))   # v0.9 (M24): ~$ lock files are not documents
     if not docs:
         return False, f"no .docx in {folder}"
     if not os.path.exists(p):

@@ -33,8 +33,10 @@ def _host_sem(url):
     with _SEM_LOCK:
         if h not in _HOST_SEM: _HOST_SEM[h]=_th.BoundedSemaphore(_PER_HOST)
         return _HOST_SEM[h]
+from urlcanon import safe_http as _safe_http
 def _open(req,timeout=25,tries=4):
     url=req if isinstance(req,str) else req.full_url
+    _safe_http(url)   # v0.9 (audit H1): http(s) only
     last=None
     for k in range(tries):
         with _host_sem(url):
@@ -60,6 +62,7 @@ def _generic_fetch(url):
     # phenom/sap/icims/acers/...) which previously died as FETCHFAIL and wasted screen slots.
     import urllib.request as _u, re as _re, html as _h
     try:
+        _safe_http(url)
         raw=_open(_u.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=25).read().decode('utf-8','ignore')
         txt=_re.sub(r'<script.*?</script>|<style.*?</style>',' ',raw,flags=_re.S)
         txt=_re.sub(r'\s{2,}',' ',_re.sub(r'<[^>]+>',' ',_h.unescape(txt)))
@@ -106,6 +109,8 @@ def _adzuna_fetch(url):
     return None
 
 def fetch(url):
+    try: _safe_http(url)
+    except Exception as e: return f"__FETCHFAIL {e}"
     _ct=_corpus_text(url)
     if _ct: return _ct
     # 2026-10-09: a listing that came with its description (feeds.py neogov / json_list / usajobs) was cached at ingest
@@ -248,7 +253,14 @@ BLOCK={**_BUILTIN_BLOCK,**_USER_BLOCK}
 # soft-flag keys that auto-exclude a posting from the judgment queue (daily.py), e.g. a domain the user has never once
 # applied to. critic_rules.yaml -> screen_auto_exclude_soft: [key, ...]; default none.
 AUTO_EXCLUDE_SOFT=[str(x) for x in (_critic_rules().get("screen_auto_exclude_soft") or [])]
-YRS=re.compile(r"(\d+)\+?\s*(?:or more\s*)?years",re.I)
+YRS=re.compile(r"(\d+)\s*(?:-|–|to)\s*\d+\s*(?:\+\s*)?years|(\d+)\+?\s*(?:or more\s*)?years",re.I)   # v0.9 (M19): "3-5 years" -> 3, never 5
+def years_mentioned(scope):
+    """Experience bars in a text: the lower bound of a range; numbers over 25 ignored (company-age blurbs)."""
+    out=set()
+    for a,b in YRS.findall(scope or ""):
+        v=int(a or b)
+        if v<=25: out.add(v)
+    return sorted(out)
 # 2026-09-09 comp analysis: the market credits a PhD against years ("PhD and 1 year" = Senior at
 # TerraPower L11; "PhD with 0-3 years" at Pfizer; Lila titles PhD+1-5yr postdoc Senior). These
 # ladder clauses waive the >=5-yr STRETCH/YEARS knockout so Senior-titled roles reach judgment.
@@ -266,7 +278,7 @@ def _hit(pat,text,win=22):
     """True only for a NON-negated match. Window is deliberately TIGHT (22 chars): wide windows
     swallowed real requirements sitting next to unrelated 'no'/'not' text."""
     for m in re.finditer(pat,text or "",re.I):
-        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;\n]",text[m.end():m.end()+win])[0])   # same sentence only
+        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0])   # same clause only; v0.9 (M20): a comma / parenthesis after the match ends it ("required, no exceptions")
         if _NEG.search(ctx): continue
         if _ALT.search(text[max(0,m.start()-90):m.start()]): continue   # alternatives list, not a core requirement
         return True
@@ -282,7 +294,7 @@ _PR_EXCL=re.compile(r"not eligible|ineligible|are not|cannot|can not|excluded|do
 def _elig_hit(pat,text,win=22):
     """Eligibility-gate match that a permanent resident actually fails."""
     for m in re.finditer(pat,text or "",re.I):
-        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;\n]",text[m.end():m.end()+win])[0])   # same sentence only
+        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0])   # same clause only; v0.9 (M20): a comma / parenthesis after the match ends it ("required, no exceptions")
         if _NEG.search(ctx): continue
         span=text[max(0,m.start()-60):m.end()+60]
         if re.search(r"public\s+trust",span,re.I): continue          # Public Trust is open to permanent residents
@@ -324,7 +336,7 @@ def screen(rec):
     if _WA["clearance_possible"]: flags=[x for x in flags if x!="clearance"]
     if _WA["sponsorship_needed"] and _hit(_NO_SPONSOR,txt): flags.append("no-sponsorship")
     softflags=[k for k,p in BLOCK.items() if pf and _hit(p,pf) and k not in flags]
-    yrs=sorted({int(x) for x in YRS.findall(scope) if int(x)<=25})   # 2026-10-16 port: "over 80 years" is a company blurb, not an experience bar
+    yrs=years_mentioned(scope)
     waiver=bool(PHD_WAIVER.search(txt))
     # employer EXPLICITLY lists permanent residents as eligible next to a clearance line ("Only U.S. Citizens, Green
     # Card holders ... are eligible to apply. Security Clearance eligibility is required.") -> the clearance line is the

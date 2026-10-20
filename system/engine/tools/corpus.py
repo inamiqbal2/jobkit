@@ -8,11 +8,13 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import json,urllib.request,re,html,os,datetime,concurrent.futures as cf,sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from urlcanon import safe_http as _safe_http
 from userconfig import WS as ROOT   # JOBKIT: workspace = data root
 def strip(h):
     h=re.sub(r'<[^>]+>',' ',html.unescape(h or ''))
     return re.sub(r'\s{2,}',' ',h).strip()
 def J(u):
+    _safe_http(u)   # v0.9 (audit H1): http(s) only
     return json.load(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'}),timeout=30))
 def gh(s):
     d=J(f"https://boards-api.greenhouse.io/v1/boards/{s}/jobs?content=true")

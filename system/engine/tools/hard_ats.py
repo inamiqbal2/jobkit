@@ -7,6 +7,7 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import json,urllib.request,re,html,os,datetime,concurrent.futures as cf
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from urlcanon import safe_http as _safe_http
 from userconfig import WS as ROOT, queries as _queries   # JOBKIT: workspace = data root
 _REGP=os.path.join(ROOT,"tracking","registries","hard_registry.json")
 REG=json.load(open(_REGP, encoding="utf-8")) if os.path.exists(_REGP) else {}   # JOBKIT: assembled from registry packs; empty = arm idle
@@ -16,6 +17,7 @@ UA={'User-Agent':'Mozilla/5.0'}
 KW=_queries().get("hard_ats_terms") or []
 if REG and not KW: print("hard_ats: queries.yaml has no hard_ats_terms - the hard-ATS arm is idle", file=sys.stderr)
 def get(u,data=None,hdr=None):
+    _safe_http(u)   # v0.9 (audit H1): http(s) only
     h=dict(UA); h.update(hdr or {})
     return urllib.request.urlopen(urllib.request.Request(u,data=data,headers=h),timeout=25).read().decode('utf-8','ignore')
 def oracle(e):

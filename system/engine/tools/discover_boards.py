@@ -55,6 +55,7 @@ _BUDGET = {}   # employer -> requests spent
 
 def _get(u, headers=None, data=None, timeout=TIMEOUT):
     """GET/POST as text through the engine's fetch (GET) or urllib (POST). Raises on HTTP errors."""
+    from urlcanon import safe_http as _safe_http; _safe_http(u)   # v0.9 (audit H1)
     if data is None:
         return _fetch(u, headers={**BROWSER, **(headers or {})})      # feeds.fetch: 25 s timeout, gzip-aware
     h = dict(BROWSER); h.update(headers or {})

@@ -34,14 +34,18 @@ def main():
     def _save_summary():
         try: json.dump(_SUMMARY,open(_SUMP,"w",encoding="utf-8"),indent=1)
         except Exception: pass
-    _ERRLINE=re.compile(r"\b(error|failed|did not answer|RATE-LIMITED|TENANT DEAD|refused|timed out|timeout)\b",re.I)
+    _ERRLINE=re.compile(r"\b(error|failed|did not answer|RATE-LIMITED|TENANT DEAD|refused|timed out|timeout)\b",re.I)   # kept for the offline test only
+    _ERRMARK=re.compile(r"^\s*(?:[\w-]+(?: arm)? error[ :(]|.*\b(?:EVERY board failed|fetch failed|TENANT DEAD|RATE-LIMITED|registry load error)\b|Traceback \(most recent)",re.I)
     def _arm(name,cmd,check=False,cwd=None):
         """Run one discovery arm, echo its output, and record how it went (exit code, error lines, its own count line)."""
         r=subprocess.run(cmd,capture_output=True,text=True,encoding="utf-8",errors="replace",cwd=cwd)
         out=(r.stdout or "")+(("\n"+r.stderr) if r.stderr and r.stderr.strip() else "")
         print(out.rstrip())
-        errs=[l.strip() for l in out.splitlines() if _ERRLINE.search(l)]
-        count=re.search(rf"^{re.escape(name)}[^:]*:\s*(\d[\d,]*)",out,re.M|re.I)
+        # v0.9 (audit H7): an error is a line an arm PRINTS AS an error ("<arm> error (...)", "fetch failed", a traceback), never
+        # a word that happens to appear in a job title or in a success sentence ("3 of 40 boards did not answer")
+        errs=[l.strip() for l in out.splitlines() if _ERRMARK.search(l)]
+        # the count is what the arm handed on: unique candidates when it says so, else its first number
+        count=re.search(rf"^{re.escape(name)}[^:]*:[^\n]*?(\d[\d,]*)\s+unique",out,re.M|re.I) or re.search(rf"^{re.escape(name)}[^:]*:\s*(\d[\d,]*)",out,re.M|re.I)
         _SUMMARY["arms"][name]=dict(ok=(r.returncode==0),exit=r.returncode,errors=len(errs),first_error=(errs[0][:140] if errs else ""),
                                    count=(int(count.group(1).replace(",","")) if count else None))
         if check and r.returncode!=0:
@@ -93,7 +97,8 @@ def main():
     _co=_arm("corpus",[PY,os.path.join(T,"corpus.py")],check=True)
     _cm=re.search(r"corpus: (\d+) full-text postings from (\d+) boards(?: -> \S+)?(?: \((\d+) of \d+ boards did not answer)?",_co)
     if _cm: _SUMMARY["arms"]["corpus"].update(count=int(_cm.group(1)),boards=int(_cm.group(2)),boards_failed=int(_cm.group(3) or 0))
-    subprocess.run([PY,os.path.join(T,"match.py")],stdout=open(os.path.join(TR,"match_out.txt"),"w", encoding="utf-8"),check=True)
+    _mo=_arm("match",[PY,os.path.join(T,"match.py")],check=True)   # v0.9 (audit H6): a failure is a sentence, never a raw traceback
+    open(os.path.join(TR,"match_out.txt"),"w",encoding="utf-8").write(_mo)
     print(open(os.path.join(TR,"match_out.txt"), encoding="utf-8").read().split("TOP 40")[0])
     print("\n"+"="*20,"STEP 1a: SWEEP (Workday tenants only)","="*20)
     _arm("sweep",[PY,os.path.join(T,"sweep.py"),win,"--wd-only"],check=True)
@@ -193,7 +198,9 @@ def main():
         _last={}
         for _l in open(os.path.join(TR,"dispositions.jsonl"), encoding="utf-8"):
             if not _l.strip(): continue   # v0.8 (M6): a blank line is not a decision
-            _d=json.loads(_l); _last[_curl(_d['url'])]=_d['decision']   # LAST decision per CANONICAL URL wins (2026-09-15; canon 2026-10-01)
+            try: _d=json.loads(_l)
+            except ValueError: print(f"ledger: skipping one unreadable line in dispositions.jsonl ({_l[:60]!r})"); continue   # v0.9 (H8)
+            _last[_curl(_d['url'])]=_d['decision']   # LAST decision per CANONICAL URL wins (2026-09-15; canon 2026-10-01)
         judged={u for u,d in _last.items() if d not in ("WATCH","REOPEN","DEFER")}   # DEFER (v0.5, run.judge_top_n): not scored yet, comes back
     except FileNotFoundError: judged=set()
     # 2026-10-01 audit H3 (data audit: 13% of scorer reads were mirrors; one job was BUILT on LinkedIn and SKIP on Indeed the
@@ -316,8 +323,8 @@ def main():
     _qlen=len(backfill)+len(_scored)+len(_curated)+len(_disc)+len(_rest)
     topn=str(max(int(topn),_qlen))
     print(f"screen cap: {topn} (queue {_qlen}) - no candidate is left unscreened")
-    subprocess.run([PY,os.path.join(T,"screen_minquals.py"),os.path.join(TR,"queue_input.json"),topn],
-                   cwd=ROOT,stdout=open(os.path.join(TR,"screen_out.txt"),"w", encoding="utf-8"),check=True)
+    _so=_arm("screen",[PY,os.path.join(T,"screen_minquals.py"),os.path.join(TR,"queue_input.json"),topn],check=True,cwd=ROOT)   # v0.9 (H6)
+    open(os.path.join(TR,"screen_out.txt"),"w",encoding="utf-8").write(_so)
     scr=json.load(open(os.path.join(TR,"minquals_screened.json"), encoding="utf-8"))
     print(f"screened {len(scr)}")
     _SUMMARY["could_not_read"]=sum(1 for x in scr if x.get('verdict')=="FETCHFAIL")
@@ -368,11 +375,19 @@ def main():
     json.dump(_ncache,open(_ncp,"w", encoding="utf-8"),indent=0)
     print("\n"+"="*20,"STEP 3b: CRITIC (auto, per queue item)","="*20)
     # run the adversarial critic on every screened JD; verdict travels with the queue entry
-    for x in ok:     # 2026-10-01 audit H5: critic runs on gate-passers only (was 5,734 items for 75 survivors)
-        if x.get('jd'):
-            cr=subprocess.run([PY,os.path.join(T,"critic.py"),x['jd']],capture_output=True,text=True,encoding="utf-8",errors="replace").stdout
-            hard=re.findall(r"- ([A-Z][A-Z /:-]+[^\n]*)",cr)
-            x['critic']="HOLD: "+"; ".join(h.strip() for h in hard[:2]) if "[HOLD]" in cr else ("CLEAR"+(" ⚠soft" if "[WARN]" in cr else ""))
+    # v0.9 (audit H9): the critic runs IN THIS PROCESS (one import, ~0.01 s/item) instead of one interpreter per item
+    # (~0.5 s/item, ~70 s per run); its printed review goes to tracking/critic_out.txt, and the verdict is data, not stdout.
+    import io as _io, contextlib as _ctx, critic as _critic
+    with open(os.path.join(TR,"critic_out.txt"),"w",encoding="utf-8") as _cf:
+        for x in ok:     # 2026-10-01 audit H5: critic runs on gate-passers only (was 5,734 items for 75 survivors)
+            if x.get('jd'):
+                _buf=_io.StringIO()
+                try:
+                    with _ctx.redirect_stdout(_buf): _v=_critic.review(x['jd'])
+                except Exception as _e:
+                    _v=_critic.Verdict(hold=False,flags=[],softs=[("CRITIC-ERROR",f"{type(_e).__name__}")],lane_advisory=False,n_flags=0)
+                _cf.write(f"=== {x.get('src','')} - {x.get('title','')}\n{_buf.getvalue()}\n")
+                x['critic']=_critic.queue_line(_v)
     print("critic ran on all queue items")
     # AUTO-LEDGER (determinism directive): critic-HOLD items in hard eligibility classes are skipped by CODE.
     # The judgment queue now contains ONLY critic-CLEAR items; agent judgment shrinks to spine-reading.
@@ -416,7 +431,7 @@ def main():
     # Benchmark 2026-09-04 (tracking/matchbench): blind rubric AUC 0.91 vs deterministic 0.58 at
     # ranking interview-producers. Deterministic code preps the batch; the agent spawns two blind
     # scoring subagents and merges — see tools/rubric.py docstring for the ritual.
-    subprocess.run([PY,os.path.join(T,"rubric.py"),"prep"],cwd=ROOT)
+    _arm("rubric prep",[PY,os.path.join(T,"rubric.py"),"prep"],check=True,cwd=ROOT)   # v0.9 (H6): a failed prep stops here with a sentence
     print("\nNEXT: run the rubric ritual above (scorer A -> rubric.py prep-b -> scorer B -> rubric.py merge), then judge the")
     print("rubric-ordered queue top-down, build CLOSE-first, log every decision via")
     print("tools/decide.py <url> SKIP|BUILT|APPLIED \"reason\". Human approves sends.")
@@ -447,7 +462,9 @@ def main():
 
     # ═══ RUN SUMMARY (v0.5): the lines the report opens with. Also in tracking/run_summary.json. ═══
     _SUMMARY["queue"]=len(ok); _SUMMARY["candidates"]=len(cands)
-    try: _SUMMARY["judge"]=json.load(open(os.path.join(TR,"rubric","judge_plan.json"),encoding="utf-8"))
+    try:
+        _jp=json.load(open(os.path.join(TR,"rubric","judge_plan.json"),encoding="utf-8"))
+        _SUMMARY["judge"]=_jp if _jp.get("date")==datetime.date.today().isoformat() else dict(top_n=0,scored=0,deferred=0)   # v0.9 (M12): never yesterday's counts
     except Exception: pass
     _save_summary()
     print("\n"+"="*20,"RUN SUMMARY (put these facts in the report's first lines)","="*20)

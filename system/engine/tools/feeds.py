@@ -32,6 +32,7 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import json,urllib.request,urllib.parse,re,html,os,datetime,gzip,hashlib,concurrent.futures as cf
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from urlcanon import safe_http as _safe_http
 from userconfig import WS as ROOT, secrets as _secrets, get as _cfg, queries as _queries, location as _loc_cfg   # JOBKIT
 from eligibility import ELIG as _ADROP   # one shared eligibility filter
 TODAY=datetime.date.today()
@@ -45,6 +46,7 @@ ATS=re.compile(r"(greenhouse\.io|lever\.co|ashbyhq\.com|myworkdayjobs\.com)")
 _COUNTRY=(_loc_cfg().get("country") or "US").upper()
 _COUNTRY_NAME={"US":"United States","CA":"Canada","UK":"United Kingdom"}.get(_COUNTRY,_COUNTRY)
 def fetch(u,headers=None):
+    _safe_http(u)   # v0.9 (audit H1): http(s) only
     """GET as text. Some hosts (AJO, Firebase functions) send gzip bodies regardless of Accept-Encoding: decode them."""
     h=dict(UA); h.update(headers or {})
     b=urllib.request.urlopen(urllib.request.Request(u,headers=h),timeout=25).read()

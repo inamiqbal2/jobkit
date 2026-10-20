@@ -8,6 +8,7 @@ import random, time, urllib.error, json,urllib.request,re,datetime,os,sys,concur
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from eligibility import ELIG
 import funnel as _funnel
+from urlcanon import safe_http as _safe_http
 from userconfig import WS as ROOT, location as _loc_cfg, queries as _queries   # JOBKIT: workspace = data root
 REG=os.path.join(ROOT,"tracking","registries")
 TODAY=datetime.date.today(); WIN=int(sys.argv[1]) if len(sys.argv)>1 and sys.argv[1].isdigit() else 30
@@ -18,6 +19,7 @@ import geo as _geo
 T1=re.compile(_loc_cfg()["tier1_regex"] or r"Remote",re.I)     # JOBKIT: settings.yaml location.tier1_regex
 T2=re.compile(_loc_cfg()["tier2_regex"] or r"(?!x)x",re.I)     # JOBKIT: settings.yaml location.tier2_regex
 def J(u,data=None,hdr=None):
+    _safe_http(u)   # v0.9 (audit H1): http(s) only
     h={'User-Agent':'Mozilla/5.0'}; h.update(hdr or {})
     return json.load(urllib.request.urlopen(urllib.request.Request(u,data=data,headers=h),timeout=20))
 def gh(s): return [(j['title'],j['location']['name'],j['absolute_url'],(j.get('first_published') or '')[:10]) for j in J(f"https://boards-api.greenhouse.io/v1/boards/{s}/jobs")['jobs']]

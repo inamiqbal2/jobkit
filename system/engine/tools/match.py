@@ -109,6 +109,17 @@ _CITIZEN=re.compile(r'(must|shall) be a u\.?s\.? citizen(?![^\n;]{0,100}(?:perma
 _CLEARANCE=re.compile(r'active (security )?clearance',re.I)
 CITIZEN_ONLY=_NEVER if _WA['citizenship_only_roles_open'] else _CITIZEN
 CLEARANCE=_NEVER if _WA['clearance_possible'] else _CLEARANCE
+_NEG_WORDS=re.compile(r"\b(no|none|not|never|without|n/?a|may be contingent|contingent upon|if and when|may require)\b",re.I)
+def _elig_hit(pat,text,win=22):
+    """v0.9 (audit H4): a match counts only when the same clause does not negate it ("No security clearance required",
+    "Clearance: none required"), the same rule screen_minquals._hit applies. Never-match patterns short-circuit."""
+    if pat is _NEVER: return False
+    for m in pat.finditer(text or ""):
+        pre=re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1]
+        post=re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0]
+        if _NEG_WORDS.search(pre+" | "+post): continue
+        return True
+    return False
 from eligibility import ELIG as NOTJOB, non_us as NONUS_TEST   # shared eligibility + geo (country-aware)
 IN_COUNTRY=_geo.in_country
 
@@ -140,7 +151,7 @@ def main():
         if NONUS_TEST(r.get('loc',''), r.get('url',''), r.get('title','')): dropped['geo']+=1; continue
         if len(r['text'])<300: dropped['thin']+=1; continue
         if NOTJOB.search(r['title']): dropped['notjob']+=1; continue
-        if CITIZEN_ONLY.search(r['text']) or CLEARANCE.search(r['text']): dropped['inelig']+=1; continue
+        if _elig_hit(CITIZEN_ONLY, r['text']) or _elig_hit(CLEARANCE, r['text']): dropped['inelig']+=1; continue   # v0.9 (audit H4): "no clearance required" no longer drops
         docs.append(r)
     if not docs:
         json.dump([],open(os.path.join(ROOT,"tracking","matched.json"),"w", encoding="utf-8")); print(f"eligible docs scored: 0  (dropped: {dropped})"); return

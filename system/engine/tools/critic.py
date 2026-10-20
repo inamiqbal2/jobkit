@@ -108,13 +108,21 @@ def lane_history(txt):
     if not st: return None
     n,pos,neg=st
     return f"lane '{lane}' track record: {n} applied, +{pos}/-{neg}"
+class Verdict(dict):
+    """v0.9 (audit H9): what review() returns - a dict with hold (bool), flags [(name, evidence)], softs [(name, evidence)],
+    lane_advisory (bool), n_flags (int). Printing is unchanged; daily.py builds its queue line from this, not from stdout."""
+    def __int__(self): return int(self["n_flags"])
+    def __eq__(self, other): return int(self) == other if isinstance(other, int) else dict.__eq__(self, other)
+    __hash__ = dict.__hash__
+
+
 def review(path):
     if os.path.isdir(path):
         for cand in ("JobDescription.txt","JobDescription_FULL.txt","job-description.md","JD.txt"):
             fp=os.path.join(path,cand)
             if os.path.exists(fp): path=fp; break
         else:
-            print(f"CRITIC: no JD file found in {path}"); return 99
+            print(f"CRITIC: no JD file found in {path}"); return Verdict(hold=True, flags=[("NO-JD", path)], softs=[], lane_advisory=False, n_flags=99)
     t=open(path,encoding='utf-8',errors='ignore').read()
     # the critic must read the POSTING, not aggregator page chrome (Adzuna footers trip CONTRACT-GIG)
     try:
@@ -179,7 +187,7 @@ def review(path):
                 for n, m in flags:
                     print(f"      - {n}: {m}")
                 if _closed_note: print(f"  [WARN] {_closed_note}")
-                return flags
+                return Verdict(hold=False, flags=flags, softs=softs, lane_advisory=True, n_flags=len(flags))
             if _soft:
                 print("  [LANE] PRIORITY LANE: the advisory-class flags below weigh less; weigh the others.")
         print(f"  [HOLD] {len(flags)} FLAG(S) - verdict: HOLD unless explicitly overridden (log the override):")
@@ -187,6 +195,14 @@ def review(path):
     for n,ev in softs: print(f"  [WARN] {n} - \"{ev}\"")
     if _closed_note: print(f"  [WARN] {_closed_note}")
     if hist: print(f"  [STATS] {hist}")
-    return len(flags)
+    return Verdict(hold=bool(flags), flags=flags, softs=softs, lane_advisory=False, n_flags=len(flags))
+
+
+def queue_line(v):
+    """The one-line critic verdict daily.py puts on each queue entry."""
+    if v["hold"]: return "HOLD: " + "; ".join(n.strip() for n, _ in v["flags"][:2])
+    return "CLEAR" + (" ⚠soft" if v["softs"] else "")
+
+
 if __name__=="__main__":
-    sys.exit(0 if review(sys.argv[1])==0 else 1)
+    sys.exit(0 if int(review(sys.argv[1]))==0 else 1)

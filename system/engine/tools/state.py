@@ -99,8 +99,13 @@ def _built_folders():
         out[key]=(os.path.join("applications",d),emp,title)
     return out
 def _ledger():
-    try: return [json.loads(l) for l in open(LEDGER,encoding="utf-8") if l.strip()]
+    try: lines=[l for l in open(LEDGER,encoding="utf-8") if l.strip()]
     except FileNotFoundError: return []
+    out=[]
+    for l in lines:   # v0.9 (audit H8): one unreadable line (a crash mid-append) must not stop the whole system
+        try: out.append(json.loads(l))
+        except ValueError: print(f"ledger: skipping one unreadable line in dispositions.jsonl ({l[:60]!r})",file=sys.stderr)
+    return out
 _EMP_COLON=__import__("re").compile(r"^([A-Z][^:]{2,80}?):\s+(.+)$")
 _EMP_AT=__import__("re").compile(r"^(.+?)\s+(?:at|@)\s+([A-Z][^|]{2,80})$")
 _EMP_DASH=__import__("re").compile(r"^(.+?)\s+[-|\u2013\u2014]\s+([A-Z][A-Za-z0-9&'.,\- ]{2,80})$")
@@ -211,6 +216,37 @@ def _log_outcome(line):
     with open(OUTCOMES,"a",encoding="utf-8") as f:
         if new: f.write("# OUTCOMES LOG (narrative journal; numbers come from report.py / timeline.py)\n\n")
         f.write(f"- {datetime.date.today().isoformat()} {line}\n")
+def _learning_columns(url, given):
+    """v0.9 (audit H2): the analysis columns report.py / timeline.py group on, filled from what the engine already knows
+    about this posting (minquals_screened.json: tier, fit class, age, salary band, years bar; the rubric score; the lane the
+    critic's lane_rules give the text). Nothing the person said is overwritten (`given` wins)."""
+    out={}
+    if not url: return out
+    try:
+        from urlcanon import canon as _canon_url
+        cu=_canon_url(url)
+        import datetime as _dt
+        rec=None
+        for x in json.load(open(os.path.join(ROOT,"tracking","minquals_screened.json"),encoding="utf-8")):
+            if _canon_url(x.get("url","") or "")==cu: rec=x; break
+        if rec:
+            if rec.get("tier"): out["Tier"]="T"+str(rec["tier"])
+            if rec.get("fitclass"): out["Fit"]=f"{rec['fitclass']}"+(f" {rec['rubric']:g}" if rec.get("rubric") is not None else "")
+            if rec.get("age") not in (None,""):
+                try: out["Date Posted"]=(_dt.date.today()-_dt.timedelta(days=int(rec["age"]))).isoformat()
+                except Exception: pass
+            if rec.get("band_lo") and rec.get("band_hi"): out["Salary Range"]=f"${rec['band_lo']/1000:.0f}-{rec['band_hi']/1000:.0f}K"
+            if rec.get("yrs"): out["Yrs Bar"]=str(min(rec["yrs"]))
+            try:
+                from critic import lane_of as _lane_of
+                _t=open(rec["jd"],encoding="utf-8",errors="ignore").read() if rec.get("jd") else ""
+                _l=_lane_of(_t) if _t else None
+                if _l: out["Lane"]=_l
+            except Exception: pass
+    except Exception: pass
+    return {k:v for k,v in out.items() if k not in (given or {})}
+
+
 def applied(employer,pairs):
     """'I applied to <employer>': set Date Applied / Status / Channel on the open row for that employer, or create the row
     from the built application folder (Position, Job Link, Resume Used filled from the folder when not given).
@@ -255,6 +291,7 @@ def applied(employer,pairs):
         if not key.startswith("folder:"): r["Job Link"]=key
         docs=[x for x in os.listdir(os.path.join(ROOT,folder)) if x.lower().endswith(".docx")]
         if docs: r["Resume Used"]=os.path.join(folder,sorted(docs)[0])
+    r.update(_learning_columns(r.get("Job Link") or "", given))   # v0.9 (audit H2): Tier / Lane / Fit / Date Posted / Salary / Yrs Bar
     r.update(given)
     add([f"{k}={v}" for k,v in r.items()])
     if match and r.get("Job Link"):
@@ -272,7 +309,12 @@ def outcome(employer,kind,note=""):
     try: days=str((today-datetime.date.fromisoformat(row.get("Date Applied") or "")).days)
     except ValueError: pass
     if kind=="rejected":
-        pairs=["Status=rejected",f"Rejection/Interview={today.isoformat()} rejection","Reject Type=UNKNOWN"]   # UNKNOWN until the person says why (charters/learning.md)
+        # v0.9 (M16): the note may carry the one classification learning needs - "filled" / "timing" (position gone, no human read it)
+        # vs "fit" / "merit" (a person read it and passed); otherwise UNKNOWN until the person says
+        _rt="UNKNOWN"
+        if re.search(r"\b(filled|closed|timing|no longer|withdrawn)\b",note or "",re.I): _rt="TIMING"
+        elif re.search(r"\b(fit|merit|qualif|experience|not a match|another candidate)\b",note or "",re.I): _rt="MERIT"
+        pairs=["Status=rejected",f"Rejection/Interview={today.isoformat()} rejection",f"Reject Type={_rt}"]
     else:
         pairs=["Status=interviewing",f"Rejection/Interview={today.isoformat()} interview"]
     if days: pairs.append(f"Days to Resp={days}")

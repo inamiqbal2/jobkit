@@ -18,11 +18,13 @@ except Exception: pass
 import json, urllib.request, sys, os, datetime, re, concurrent.futures as cf
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from urlcanon import safe_http as _safe_http
 from userconfig import WS as ROOT   # JOBKIT: workspace = data root
 WL   = os.path.join(ROOT, "tracking", "watchlist.json")
 SNAP = os.path.join(ROOT, "tracking", "watch_snapshot.json")
 
 def _get(u):
+    _safe_http(u)   # v0.9 (audit H1): http(s) only
     return json.load(urllib.request.urlopen(
         urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0'}), timeout=20))
 

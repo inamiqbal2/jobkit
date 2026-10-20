@@ -16,6 +16,20 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, quote
 _DROP = {"utm_source","utm_medium","utm_campaign","utm_term","utm_content","gh_src","source","ref",
          "trk","refid","trackingid","position","pagenum","src","lipi","trkinfo","originalsubdomain","ccid"}
 _KEEP = {"gh_jid","jk","jobid","job_id","jid","id","req","reqid","requisitionid","posting","postingid","lever","ashby_jid"}
+class UnsafeURL(ValueError):
+    """A URL the engine must never fetch: anything that is not plain http(s) (file:, data:, ftp:, javascript: ...)."""
+
+
+def safe_http(url):
+    """v0.9 (audit H1): the engine fetches ONLY http(s). Job boards, feeds and scraped links are untrusted; a `file://`
+    link on a listing page would otherwise make the fetcher read a local file into the judges' context."""
+    s = str(url or "").strip()
+    sch = urlsplit(s).scheme.lower()          # "data:text/plain,..." and "javascript:..." have a scheme and no "//"
+    if sch not in ("http", "https"):
+        raise UnsafeURL(f"refusing to fetch a non-http(s) URL: {s[:80]!r}")
+    return s
+
+
 def canon(url: str) -> str:
     if not url: return url
     u = url.strip()

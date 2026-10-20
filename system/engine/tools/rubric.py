@@ -77,15 +77,21 @@ def cap_text(t,n):
     plus the requirements block kept whole, joined by a [...] marker. Short postings are returned untouched."""
     t=t or ""
     if n<=0 or len(t)<=n: return t
-    head_n=int(n*0.55)
-    head=t[:head_n]
-    m=_REQ.search(t,head_n)
+    # v0.9 (audit H5): the requirements block is found ANYWHERE in the posting (long Workday postings put it after a long
+    # company story); it is kept whole from its header, and the opening fills whatever room is left.
+    m=_REQ.search(t)
     if m:
-        start=max(head_n,t.rfind("\n",0,m.start())+1)
-        tail=t[start:start+(n-head_n)]
-    else:
-        tail=t[-(n-head_n):]
-    return head+"\n[... trimmed to "+str(n)+" characters; the requirements block follows ...]\n"+tail
+        start=t.rfind("\n",0,m.start())+1
+        if start==0 or m.start()-start>400:                            # no line break near the header (flattened text): start at the sentence
+            _sb=max(t.rfind(". ",0,m.start()),t.rfind("! ",0,m.start()))
+            start=_sb+2 if _sb>=0 else m.start()
+        tail_n=min(len(t)-start,int(n*0.6))                            # the block, kept whole up to 60 % of the budget
+        if start+tail_n<=n: return t[:n]                               # it already fits inside the first n characters
+        tail=t[start:start+tail_n]
+        head=t[:max(0,n-tail_n)]
+        return head+"\n[... trimmed to "+str(n)+" characters; the requirements block follows ...]\n"+tail
+    head_n=int(n*0.55)
+    return t[:head_n]+"\n[... trimmed to "+str(n)+" characters ...]\n"+t[-(n-head_n):]
 def prep():
     scr=json.load(open(os.path.join(TR,"minquals_screened.json"), encoding="utf-8"))
     items=[x for x in scr if x.get('fitclass') in ("CLOSE","STRETCH","LOOSE")
@@ -160,7 +166,7 @@ def prep():
             total_chars+=min(len(t),cap+120)
         else: total_chars+=len(_jdtext(jd))
         man[f"{i:02d}"]=dict(title=x.get('title',''),src=x.get('src',''),url=x.get('url',''),jd=jd,jd_full=x['jd'])
-    json.dump(dict(top_n=top_n,scored=len(man),deferred=len(deferred),cap_chars=cap,chars_per_scorer=total_chars,
+    json.dump(dict(date=TODAY,top_n=top_n,scored=len(man),deferred=len(deferred),cap_chars=cap,chars_per_scorer=total_chars,
                    est_input_tokens_per_scorer=int(total_chars/4)+3000),open(os.path.join(RB,"judge_plan.json"),"w",encoding="utf-8"),indent=1)
     mp=os.path.join(RB,f"batch_{TODAY}.json")
     # 2026-09-12 HIGH-1: if blind runs already exist for today and the batch changed, park them aside

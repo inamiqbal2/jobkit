@@ -38,6 +38,10 @@ TOOLS = os.path.join(ENGINE, "tools")
 WORKSPACE_NAME = "My Job Search"
 WS = os.environ.get("JOBKIT_WORKSPACE") or os.path.join(JOBKIT, WORKSPACE_NAME)
 WS = os.path.abspath(WS)
+if os.environ.get("JOBKIT_WORKSPACE") and not os.path.isdir(WS):   # v0.9 (audit M21): a relative or wrong JOBKIT_WORKSPACE must never create a second workspace
+    print(f"JOBKIT_WORKSPACE points at {WS}, which is not a folder. Unset it, or set it to the absolute path of your 'My Job Search' folder.", file=sys.stderr)
+    sys.exit(2)
+os.environ["JOBKIT_WORKSPACE"] = WS   # children inherit the absolute path
 VENV = os.path.join(SYSTEM, ".venv")
 VENV_PYTHON = os.path.join(VENV, "Scripts", "python.exe") if os.name == "nt" else os.path.join(VENV, "bin", "python")
 
@@ -409,6 +413,25 @@ def validate(cfg=None):
             err("location.commutable_metros should be a list of places, or []")
         for k in ("tier1_regex", "tier2_regex", "in_country_regex", "in_country_regex_loose", "foreign_regex_extra"):
             want_regex("location", k, loc.get(k))
+        # v0.9 (audit H3): a local-first / stay-local search with the shipped commuting pattern would set aside every
+        # non-remote posting forever; refuse until the commuting area is really filled in
+        _mode = str(loc.get("mode") or "").lower().replace("-", "_")
+        _t1 = str(loc.get("tier1_regex") or "").strip()
+        if _mode in ("local_only", "local_first", "unsure") and (_t1 in ("", "Remote") or not loc.get("commutable_metros")):
+            err(f"location.mode is {_mode} but the commuting area is not filled in (location.tier1_regex is still the default "
+                f"and/or commutable_metros is empty): every job outside 'Remote' would be set aside. Finish setup phase 4.")
+        # v0.9 (audit M25): a bad pattern in profile/signals.yaml would crash the run at import; say it here instead
+        try:
+            _sig = signals()
+            for _ln, _lv in (_sig.get("lanes") or {}).items():
+                for _sec in ("terms", "negatives"):
+                    for _t in ((_lv or {}).get(_sec) or []):
+                        want_regex(f"profile/signals.yaml lanes.{_ln}.{_sec}", "pattern", (_t or {}).get("pattern") if isinstance(_t, dict) else _t)
+            for _k, _lst in (_sig.get("priority_patterns") or {}).items():
+                for _p in (_lst or []):
+                    want_regex(f"profile/signals.yaml priority_patterns.{_k}", "pattern", _p)
+        except Exception as _e:
+            err(f"profile/signals.yaml could not be read: {_e}")
 
     lanes_v = cfg.get("lanes")
     packs = {os.path.basename(p)[:-5] for p in __import__("glob").glob(os.path.join(PACKS_DIR, "*.json"))}

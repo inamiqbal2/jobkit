@@ -15,8 +15,13 @@ from urlcanon import canon
 from userconfig import WS as ROOT, APPLICATIONS   # JOBKIT: workspace = data root
 LEDGER=os.path.join(ROOT,"tracking","dispositions.jsonl")
 def load():
-    try: return [json.loads(l) for l in open(LEDGER,encoding="utf-8") if l.strip()]
+    try: lines=[l for l in open(LEDGER,encoding="utf-8") if l.strip()]
     except FileNotFoundError: return []
+    out=[]
+    for l in lines:   # v0.9 (audit H8): one unreadable line (a crash mid-append) must not stop the whole system
+        try: out.append(json.loads(l))
+        except ValueError: print(f"ledger: skipping one unreadable line in dispositions.jsonl ({l[:60]!r})",file=sys.stderr)
+    return out
 def _folders_for(cu):
     """Every applications/<folder> whose JobDescription.txt APPLY line canonicalizes to cu."""
     import re
