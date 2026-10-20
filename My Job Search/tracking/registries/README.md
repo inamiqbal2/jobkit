@@ -8,9 +8,10 @@ They are ASSEMBLED by `system/engine/tools/registries.py assemble` from:
 2. `custom.json` in this folder - your own employers, same shape as a pack (see `custom.json.example`).
 
 ```
-system/.venv/bin/python system/engine/tools/registries.py list       # packs and what each contributes (* = selected)
-system/.venv/bin/python system/engine/tools/registries.py assemble   # (re)write the active files; old ones kept as .bak-<date>
-system/.venv/bin/python system/engine/tools/watch.py --init          # first watch-list snapshot
+# `<jobkit python>` = system/.venv/bin/python (macOS / Linux) or system\.venv\Scripts\python.exe (Windows)
+<jobkit python> system/engine/tools/registries.py list       # packs and what each contributes (* = selected)
+<jobkit python> system/engine/tools/registries.py assemble   # (re)write the active files; old ones kept as .bak-<date>
+<jobkit python> system/engine/tools/watch.py --init          # first watch-list snapshot
 ```
 Re-run `assemble` whenever you change `lanes[].packs` or `custom.json`.
 

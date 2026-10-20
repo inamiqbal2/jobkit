@@ -19,7 +19,7 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import os, sys, hashlib, datetime, stat, subprocess
 
-JOBKIT_VERSION = "v0.9"
+JOBKIT_VERSION = "v1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENGINE = os.path.dirname(HERE)
 MANIFEST = os.path.join(ENGINE, "MANIFEST.sha256")
