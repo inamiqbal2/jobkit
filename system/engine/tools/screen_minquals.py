@@ -244,9 +244,14 @@ def blocks(t):
 # Built-in (every user, switched by the work-authorization flags): clearance, citizen-only, no-sponsorship.
 # Everything the user genuinely does NOT have is WORKSPACE data: profile/critic_rules.yaml -> screen_block {key: regex}.
 # Empty = no field-specific knockouts (only years bars and eligibility act).
+# v1.0 (audit M28): the two built-in classes are eligibility.py's switched patterns (a never-matching regex when the person's
+# work-authorization flag opens the class), so the switch is applied once, here, and not again after the fact. Consequence:
+# a person with clearance_possible=true no longer gets a "clearance" SOFT flag from the preferred block (it is not a miss for them).
+from eligibility import (CITIZEN_ONLY as _CITIZEN_ONLY, CLEARANCE as _CLEARANCE, CLEARANCE_MENTION as _CLEARANCE_MENTION, NEVER_RX as _NEVER,
+                         NEGATION_RX as _NEG, PR_INCL_RX as _PR_INCL, PR_EXCL_RX as _PR_EXCL, negated_matches as _negated_matches, eligibility_hit)
 _BUILTIN_BLOCK={
- "clearance":r"security clearance|secret clearance|TS/SCI|Top Secret|polygraph|active clearance|obtain .{0,25}clearance",
- "citizen-only":r"(?:all )?(?:candidates|applicants|employees) must be u\.?s\.? citizens(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be u\.?s\.? citizens\b(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be a U\.?S\.? citizen(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|U\.?S\.? citizenship (is )?required(?![^\n;]{0,50}(?:or|/)\s*(?:a\s+)?(?:u\.?s\.?\s*)?(?:lawful\s+)?(?:permanent|green))|Candidate must be a US Citizen(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))",
+ "clearance":_CLEARANCE_MENTION,   # inside the min-quals block ANY mention is the requirement
+ "citizen-only":_CITIZEN_ONLY,
 }
 _USER_BLOCK={str(k):str(v) for k,v in ((_critic_rules().get("screen_block") or {}).items()) if v and str(k) not in _BUILTIN_BLOCK}
 BLOCK={**_BUILTIN_BLOCK,**_USER_BLOCK}
@@ -272,43 +277,14 @@ PHD_WAIVER=re.compile(r"Ph\.?D\.?.{0,80}(in lieu of|may substitute|counts? (for|
 # 2026-09-10: BLOCK patterns fired on NEGATED statements — "Security Clearance: None required"
 # and "No security clearance is required" both matched, and because clearance auto-ledgers as
 # INELIGIBLE those jobs died unseen (caught when LLNL scored 68 blind while the critic killed it).
-_NEG=re.compile(r"\b(no|none|not|never|without|n/?a)\b|may be contingent|contingent upon|if and when|may require",re.I)
+# v1.0 (audit M28): the negation guard itself (clause window, negation words) is eligibility.negated_matches, shared with
+# match.py and critic.py; only the alternatives-list test, a screener-specific reading of user knockouts, stays here.
 _ALT=re.compile(r"(one or more of|such as|e\.g\.|for example|including|and/or|familiarity with)[^.]{0,80}$",re.I)
 def _hit(pat,text,win=22):
-    """True only for a NON-negated match. Window is deliberately TIGHT (22 chars): wide windows
-    swallowed real requirements sitting next to unrelated 'no'/'not' text."""
-    for m in re.finditer(pat,text or "",re.I):
-        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0])   # same clause only; v0.9 (M20): a comma / parenthesis after the match ends it ("required, no exceptions")
-        if _NEG.search(ctx): continue
-        if _ALT.search(text[max(0,m.start()-90):m.start()]): continue   # alternatives list, not a core requirement
-        return True
-    return False
-
-# Permanent-resident wording (settings.yaml work_authorization.permanent_resident): replaying cached INELIGIBLE verdicts in
-# the original project showed dozens of postings that EXPLICITLY admit permanent residents being blocked ("Only U.S.
-# Citizens, Green Card holders, and political asylees ... are eligible", "citizens or PERM Resident") along with Public
-# Trust clearances (which permanent residents can hold). An eligibility match is IGNORED when the same sentence goes on
-# to admit permanent residents (and does not then say they are NOT eligible), or when it is a Public Trust.
-_PR_INCL=re.compile(r"green[- ]card|permanent residen|perm\.? resident|lawful(?:ly)? (?:permanent|admitted)|asylee|refugee|U\.?S\.? persons?",re.I)
-_PR_EXCL=re.compile(r"not eligible|ineligible|are not|cannot|can not|excluded|do not qualify|unable to (?:hire|employ|consider|sponsor|accept)|not able to|will not|no green|green card holders? (?:are|will) not",re.I)
-def _elig_hit(pat,text,win=22):
-    """Eligibility-gate match that a permanent resident actually fails."""
-    for m in re.finditer(pat,text or "",re.I):
-        ctx=(re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1] + " | " + re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0])   # same clause only; v0.9 (M20): a comma / parenthesis after the match ends it ("required, no exceptions")
-        if _NEG.search(ctx): continue
-        span=text[max(0,m.start()-60):m.end()+60]
-        if re.search(r"public\s+trust",span,re.I): continue          # Public Trust is open to permanent residents
-        sent=re.split(r"(?<=[.;\n])",text[m.start():m.start()+260])[0]
-        tail=text[m.end():m.end()+160]
-        if _WA.get("permanent_resident") and _PR_INCL.search(sent+" "+tail[:120]) and not _PR_EXCL.search(sent+" "+tail[:120]) \
-           and not re.search(r"clearance|TS/SCI|top secret|secret\b",m.group(0),re.I):
-            continue                                                     # the gate admits permanent residents and the user is one (settings.yaml work_authorization.permanent_resident)
-        return True
-    return False
-
-# Hard eligibility phrases are frequently OUTSIDE the min-quals block (EEO/footer sections), so
-# these are checked against the WHOLE posting, not just `scope`. 2026-09-10.
-_HARD_ELIG=r"(?:all )?(?:candidates|applicants|employees) must be u\.?s\.? citizens(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be u\.?s\.? citizens\b(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be a U\.?S\.? citizen(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|U\.?S\.? citizenship (is )?required(?![^\n;]{0,50}(?:or|/)\s*(?:a\s+)?(?:u\.?s\.?\s*)?(?:lawful\s+)?(?:permanent|green))|Only U\.S\.? Citizens|requires? .{0,30}(active|current) .{0,20}(?:\b(?:security|secret|DOE|Q|L|TS)\s+)?clearance|must (possess|hold|have) .{0,30}clearance|(able|ability) to obtain .{0,30}\b(?:security|secret|DOE|Q|L|TS|top secret)\b[^.\n]{0,15}clearance|obtain and (hold|maintain) .{0,25}(?:\b(?:security|secret|DOE|Q|L|TS)\s+)?clearance|DOE Q clearance"
+    """True only for a NON-negated match that is not inside an alternatives list ("familiarity with X, Y or Z")."""
+    t=text or ""
+    return any(not _ALT.search(t[max(0,m.start()-90):m.start()]) for m in _negated_matches(pat,t,win))
+_elig_hit=eligibility_hit   # a gate the person actually fails (negation, Public Trust and permanent-resident wording): eligibility.py
 
 _GC_ELIGIBLE=re.compile(r"(?:green[- ]card holders?|(?:lawful )?permanent residents?)[^.;]{0,90}\b(?:are|is)\s+eligible(?:\s+to\s+apply)?",re.I)
 def screen(rec):
@@ -330,10 +306,13 @@ def screen(rec):
     mn,pf=blocks(txt)
     scope = mn if mn else txt[:1500]
     flags=[k for k,p in BLOCK.items() if (_elig_hit(p,scope) if k in ("clearance","citizen-only") else _hit(p,scope))]
-    if _elig_hit(_HARD_ELIG,txt) and "citizen-only" not in flags: flags.append("citizen-only")
-    # JOBKIT: settings.yaml work_authorization flags decide which eligibility classes are knockouts for THIS user
-    if _WA["citizenship_only_roles_open"]: flags=[x for x in flags if x!="citizen-only"]
-    if _WA["clearance_possible"]: flags=[x for x in flags if x!="clearance"]
+    # Hard eligibility phrases are frequently OUTSIDE the min-quals block (EEO/footer sections), so the GATE-FORM patterns are
+    # checked against the WHOLE posting (2026-09-10). v1.0 (audit M28): each under its OWN class - before, a whole-posting
+    # clearance gate was filed as "citizen-only", so a person with citizenship open but clearance closed never saw that knockout
+    # and the reverse person was excluded from a job open to them. The switched patterns never match for an open class
+    # (settings.yaml work_authorization flags), so no filter is needed afterwards.
+    for k,p in (("citizen-only",_CITIZEN_ONLY),("clearance",_CLEARANCE)):
+        if k not in flags and _elig_hit(p,txt): flags.append(k)
     if _WA["sponsorship_needed"] and _hit(_NO_SPONSOR,txt): flags.append("no-sponsorship")
     softflags=[k for k,p in BLOCK.items() if pf and _hit(p,pf) and k not in flags]
     yrs=years_mentioned(scope)

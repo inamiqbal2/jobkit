@@ -20,7 +20,7 @@ import json,re,os,sys,glob
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from userconfig import WS as ROOT, work_auth as _work_auth, signals as _signals, thresholds as _user_thresholds, path as _wspath
+from userconfig import WS as ROOT, signals as _signals, thresholds as _user_thresholds, path as _wspath
 import geo as _geo
 T=lambda p:re.sub(r'[#*`\[\]|>-]',' ',open(p,encoding='utf-8',errors='ignore').read())
 
@@ -102,25 +102,13 @@ def is_stub_text(t):
     """One stub definition for every arm: funnel.stub_text."""
     import funnel; return funnel.stub_text(t)
 
-# ── ELIGIBILITY DROPS (corpus arm) - each pattern acts only when the matching work-authorization flag is closed ──
-_WA=_work_auth()
-_NEVER=re.compile(r'(?!x)x')
-_CITIZEN=re.compile(r'(must|shall) be a u\.?s\.? citizen(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|u\.?s\.? citizenship (is )?required(?![^\n;]{0,50}(?:or|/)\s*(?:a\s+)?(?:u\.?s\.?\s*)?(?:lawful\s+)?(?:permanent|green))|citizens? only|(?:all )?(?:candidates|applicants|employees) must be u\.?s\.? citizens(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be u\.?s\.? citizens\b(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))',re.I)  # 'citizen, lawful permanent resident' wording does not count as citizen-only
-_CLEARANCE=re.compile(r'active (security )?clearance',re.I)
-CITIZEN_ONLY=_NEVER if _WA['citizenship_only_roles_open'] else _CITIZEN
-CLEARANCE=_NEVER if _WA['clearance_possible'] else _CLEARANCE
-_NEG_WORDS=re.compile(r"\b(no|none|not|never|without|n/?a|may be contingent|contingent upon|if and when|may require)\b",re.I)
-def _elig_hit(pat,text,win=22):
-    """v0.9 (audit H4): a match counts only when the same clause does not negate it ("No security clearance required",
-    "Clearance: none required"), the same rule screen_minquals._hit applies. Never-match patterns short-circuit."""
-    if pat is _NEVER: return False
-    for m in pat.finditer(text or ""):
-        pre=re.split(r"[.;\n]",text[max(0,m.start()-win):m.start()])[-1]
-        post=re.split(r"[.;,(\n]",text[m.end():m.end()+win])[0]
-        if _NEG_WORDS.search(pre+" | "+post): continue
-        return True
-    return False
-from eligibility import ELIG as NOTJOB, non_us as NONUS_TEST   # shared eligibility + geo (country-aware)
+# ── ELIGIBILITY DROPS (corpus arm). v1.0 (audit M28): the patterns, the work-authorization switch and the negation guard live
+# in eligibility.py - this arm is an EARLY filter and the screener re-decides every survivor, so it fires only on GATE-FORM
+# phrases (eligibility.CLEARANCE_RX, wider than the old 'active clearance' but exactly the forms the screener would have
+# excluded anyway) and now applies the permanent-resident guard the screener always had (eligibility_hit). The old names stay
+# as aliases for daily.py and the tests. ──
+from eligibility import (ELIG as NOTJOB, non_us as NONUS_TEST, CITIZEN_ONLY, CLEARANCE, NEVER_RX as _NEVER, NEGATION_RX as _NEG_WORDS,
+                         CITIZEN_ONLY_RX as _CITIZEN, CLEARANCE_RX as _CLEARANCE, eligibility_hit as _elig_hit)   # shared eligibility + geo (country-aware)
 IN_COUNTRY=_geo.in_country
 
 def judgment_gate(score,sg,sx,gates=None,stub=False):
