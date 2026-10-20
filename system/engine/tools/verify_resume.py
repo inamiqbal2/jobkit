@@ -210,10 +210,12 @@ def main():
                     # 90-93 as measured by LibreOffice: MS Word renders ~1 line looser, so
                     # >93% here risks spilling to page 2 in Word/Pages (observed 2026-08-24; ceiling 94->93 on 2026-10-01
                     # after two 94%-fill builds rendered as 2 pages).
-                    good = 90 <= f <= 93
+                    # v0.9 (audit M10): below 90% is a WARN - a thin profile (new grad, career changer) has nothing approved
+                    # left to add, and the honesty whitelist must never be padded to hit a number. Above the ceiling stays a FAIL.
+                    good = f <= 93
                     ok &= good
-                    note = "PASS" if good else ("FAIL - underfilled, ADD REAL SUBSTANCE" if f < 90
-                                               else "FAIL - Word spill risk, trim")
+                    note = "PASS" if 90 <= f <= 93 else ("WARN - under 90%: add approved substance if any exists, never padding" if f < 90
+                                                         else "FAIL - Word spill risk, trim")
                     print(f"FILL ................. {f}% {note}")
         else:
             print("PAGES/FILL ........... SKIPPED (LibreOffice not available)")

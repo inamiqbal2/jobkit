@@ -42,7 +42,7 @@ step 7 and say so plainly ("The boards answered; nothing new fits well enough to
 ## Step 3 - Two blind judges
 `rubric.py prep` already ran inside daily.py; read `tracking/rubric/prompt_<today>.txt`. Only the top
 `run.judge_top_n` postings by match score (default 40; priority-lane postings first) are in it - the rest were
-ledgered DEFER and come back next run; each posting is trimmed to `run.jd_text_cap_chars` (default 6000) with its
+written to `tracking/deferred.jsonl` and come back next run (the run summary says about how many runs that takes); each posting is trimmed to `run.jd_text_cap_chars` (default 6000) with its
 requirements block whole (`tracking/rubric/judge_plan.json` has the counts; settings.yaml documents both knobs).
 Two blind scorers, the second only where it matters (2026-10-16):
 1. **Scorer A** - spawn ONE subagent (Agent tool). Model: `settings.yaml run.judge_model` when set (light mode: sonnet);

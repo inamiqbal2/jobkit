@@ -198,8 +198,8 @@ that subset (or every id) and tags single-judge scores "A-only". Every merged sc
 `tracking/rubric/score_history.jsonl`; `rubric.best_recent(url)` is the 14-day best, used by the auto-skip guard and by
 `decide.py`'s SKIP guard (`skip_guard`: REQ:"..." quote or a hard tag needed at or above the build line).
 `settings.yaml run.judge_top_n` (default 40) caps how many postings the two blind scorers read per run (ranked by the
-deterministic match score, priority-lane postings first); the rest are ledgered `DEFER` by `rubric.py prep` and re-surface on
-the next run (`daily.py` does not count DEFER as judged). `run.jd_text_cap_chars` (default 6000) trims each posting for the
+deterministic match score, priority-lane postings first); the rest are written to `tracking/deferred.jsonl` by `rubric.py prep` (v0.9; one line per
+posting per day, with the first deferral date) and re-surface on the next run; the decision ledger holds decisions only. `run.jd_text_cap_chars` (default 6000) trims each posting for the
 scorers (`rubric.cap_text`: the opening plus the requirements block, written to `tracking/rubric/jd_<id>_<date>.txt`; the
 full text stays in `tracking/jds/` for the critic and the build). `tracking/rubric/judge_plan.json` records scored / deferred
 / characters per scorer; the daily report's first lines say "about N postings scored". Both scorers are spawned with the

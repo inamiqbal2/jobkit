@@ -105,9 +105,13 @@ def prep():
     # DEFER as judged). Each posting is trimmed to the cap with its requirements block kept whole.
     _ro=_run_opts(); top_n=int(_ro["judge_top_n"] or 0); cap=int(_ro["jd_text_cap_chars"] or 0)
     from lanes import is_priority as _LANE
+    _JDC={}
     def _jdtext(p):
-        try: return open(p,encoding='utf-8',errors='ignore').read()
-        except Exception: return ''
+        """v0.9 (audit M5): each JD file is read once per prep (it used to be re-read inside the sort key)."""
+        if p not in _JDC:
+            try: _JDC[p]=open(p,encoding='utf-8',errors='ignore').read()
+            except Exception: _JDC[p]=''
+        return _JDC[p]
     def _score(x): return float(x.get('score') or x.get('jdmatch') or 0)
     # v0.7 LOCATION MODE (settings.yaml location.mode, chosen at setup). "Local" = the commuting-area pattern (location.tier1_regex,
     # which includes Remote) matches the posting's location or the first part of its text (multi-site postings list cities there).
@@ -140,21 +144,26 @@ def prep():
     items.sort(key=lambda x:(0 if _LANE(x.get('title','') or '',_jdtext(x['jd'])) else 1,_locrank(x),-_score(x)))
     deferred=items[top_n:] if top_n and len(items)>top_n else []
     items=items[:top_n] if top_n else items
+    runs_to_clear=0
     if deferred:
-        _led=set()
-        dp=os.path.join(TR,"dispositions.jsonl")
+        # v0.9 (audit M6): deferrals live in their own file, tracking/deferred.jsonl - one line per posting per day - so the
+        # decision ledger (dispositions.jsonl) holds decisions only and stays small. The ledger never held DEFER as a decision
+        # (daily.py's judged-set excluded it), so older DEFER lines there are harmless.
+        dp=os.path.join(TR,"deferred.jsonl"); _today=set(); _first={}
         if os.path.exists(dp):
             for l in open(dp,encoding="utf-8"):
-                try:
-                    _d=json.loads(l)
-                    if _d.get('decision')!="DEFER" or _d.get('date')==TODAY: _led.add(_curl(_d['url']))   # v0.8 (M6): one DEFER line per day
-                except Exception: pass
+                try: _d=json.loads(l)
+                except ValueError: continue
+                _u=_curl(_d['url']); _first.setdefault(_u,_d.get('date',TODAY))
+                if _d.get('date')==TODAY: _today.add(_u)
         with open(dp,"a",encoding="utf-8") as f:
             for x in deferred:
-                if _curl(x['url']) in _led: continue
-                f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),decision="DEFER",
+                if _curl(x['url']) in _today: continue
+                f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),first=_first.get(_curl(x['url']),TODAY),
                     reason=f"not scored - below the top {top_n} by match score (run.judge_top_n); re-surfaces next run if still open - {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
-        print(f"rubric prep: {len(deferred)} posting(s) deferred (below the top {top_n} by match score; settings.yaml run.judge_top_n) - they come back next run")
+        # v0.9 (audit M9): say what the queue means in runs, not just a count
+        runs_to_clear=-(-len(deferred)//max(top_n,1))
+        print(f"rubric prep: {len(deferred)} posting(s) deferred (below the top {top_n} by match score; settings.yaml run.judge_top_n) - they come back next run; at {top_n} a run that is about {runs_to_clear} more run(s) if nothing new arrives")
     man={}; total_chars=0
     for i,x in enumerate(items):
         jd=x['jd']
@@ -166,7 +175,7 @@ def prep():
             total_chars+=min(len(t),cap+120)
         else: total_chars+=len(_jdtext(jd))
         man[f"{i:02d}"]=dict(title=x.get('title',''),src=x.get('src',''),url=x.get('url',''),jd=jd,jd_full=x['jd'])
-    json.dump(dict(date=TODAY,top_n=top_n,scored=len(man),deferred=len(deferred),cap_chars=cap,chars_per_scorer=total_chars,
+    json.dump(dict(date=TODAY,top_n=top_n,scored=len(man),deferred=len(deferred),runs_to_clear=runs_to_clear,cap_chars=cap,chars_per_scorer=total_chars,
                    est_input_tokens_per_scorer=int(total_chars/4)+3000),open(os.path.join(RB,"judge_plan.json"),"w",encoding="utf-8"),indent=1)
     mp=os.path.join(RB,f"batch_{TODAY}.json")
     # 2026-09-12 HIGH-1: if blind runs already exist for today and the batch changed, park them aside

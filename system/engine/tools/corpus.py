@@ -13,9 +13,18 @@ from userconfig import WS as ROOT   # JOBKIT: workspace = data root
 def strip(h):
     h=re.sub(r'<[^>]+>',' ',html.unescape(h or ''))
     return re.sub(r'\s{2,}',' ',h).strip()
+import threading as _th, urllib.parse as _up
+_HOST_LIMIT=6; _HOST_SEM={}; _HOST_LOCK=_th.Lock()
+def _sem(u):
+    """v0.9 (audit M3): at most _HOST_LIMIT requests in flight per host (156 Greenhouse boards used to mean 20 at once on one host)."""
+    h=_up.urlsplit(u).netloc.lower()
+    with _HOST_LOCK:
+        if h not in _HOST_SEM: _HOST_SEM[h]=_th.BoundedSemaphore(_HOST_LIMIT)
+        return _HOST_SEM[h]
 def J(u):
     _safe_http(u)   # v0.9 (audit H1): http(s) only
-    return json.load(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'}),timeout=30))
+    with _sem(u):
+        return json.load(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0'}),timeout=30))
 def gh(s):
     d=J(f"https://boards-api.greenhouse.io/v1/boards/{s}/jobs?content=true")
     return [dict(src=s,title=j['title'],loc=j['location']['name'],url=j['absolute_url'],
@@ -45,16 +54,20 @@ def wk(s):
 def sr(s):
     d=J(f"https://api.smartrecruiters.com/v1/companies/{s}/postings?limit=100")
     out=[]
-    for p in d.get('content',[])[:100]:
-        txt=p.get('name','')
+    def _detail(p):
         try:
             det=J(f"https://api.smartrecruiters.com/v1/companies/{s}/postings/{p['id']}")
             sec=(det.get('jobAd',{}) or {}).get('sections',{}) or {}
-            txt=' '.join(strip(str(x.get('text',''))) for x in sec.values() if isinstance(x,dict))
-        except Exception as ex: print(f"corpus error (smartrecruiters {s} posting {p.get('id')}): {type(ex).__name__}"); continue   # v0.8 (M12): a posting without text is a failure, not a thin JD
-        loc=p.get('location') or {}
-        out.append(dict(src=s,title=p.get('name',''),loc=(loc.get('city','') or '')+', '+(loc.get('country','') or '').upper(),
-            url=f"https://jobs.smartrecruiters.com/{s}/{p['id']}",posted=(p.get('releasedDate') or '')[:10],updated='',text=txt[:7000]))
+            return p,' '.join(strip(str(x.get('text',''))) for x in sec.values() if isinstance(x,dict))
+        except Exception as ex: print(f"corpus error (smartrecruiters {s} posting {p.get('id')}): {type(ex).__name__}"); return p,None   # v0.8 (M12): a posting without text is a failure, not a thin JD
+    # v0.9 (audit M1): the up-to-100 detail requests of one tenant used to run one after another inside a single worker
+    # (2-4 min on the critical path); they now fan out, still under the per-host limit
+    with cf.ThreadPoolExecutor(6) as _ex:
+        for p,txt in _ex.map(_detail,d.get('content',[])[:100]):
+            if txt is None: continue
+            loc=p.get('location') or {}
+            out.append(dict(src=s,title=p.get('name',''),loc=(loc.get('city','') or '')+', '+(loc.get('country','') or '').upper(),
+                url=f"https://jobs.smartrecruiters.com/{s}/{p['id']}",posted=(p.get('releasedDate') or '')[:10],updated='',text=txt[:7000]))
     return out
 F={'gh':gh,'lever':lv,'ashby':ab,'workable':wk,'smartrecruiters':sr}
 def main():

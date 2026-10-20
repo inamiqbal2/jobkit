@@ -34,20 +34,26 @@ def main():
     def _save_summary():
         try: json.dump(_SUMMARY,open(_SUMP,"w",encoding="utf-8"),indent=1)
         except Exception: pass
+    import threading as _thr, concurrent.futures as _cf
+    _PRINT_LOCK=_thr.Lock()
     _ERRLINE=re.compile(r"\b(error|failed|did not answer|RATE-LIMITED|TENANT DEAD|refused|timed out|timeout)\b",re.I)   # kept for the offline test only
     _ERRMARK=re.compile(r"^\s*(?:[\w-]+(?: arm)? error[ :(]|.*\b(?:EVERY board failed|fetch failed|TENANT DEAD|RATE-LIMITED|registry load error)\b|Traceback \(most recent)",re.I)
-    def _arm(name,cmd,check=False,cwd=None):
-        """Run one discovery arm, echo its output, and record how it went (exit code, error lines, its own count line)."""
+    def _arm(name,cmd,check=False,cwd=None,header=None):
+        """Run one discovery arm, echo its output, and record how it went (exit code, error lines, its own count line).
+        `header` (v0.9, M2): printed with the output once the arm is done, so arms run concurrently without interleaving."""
         r=subprocess.run(cmd,capture_output=True,text=True,encoding="utf-8",errors="replace",cwd=cwd)
         out=(r.stdout or "")+(("\n"+r.stderr) if r.stderr and r.stderr.strip() else "")
-        print(out.rstrip())
+        with _PRINT_LOCK:
+            if header: print("\n"+"="*20,header,"="*20)
+            print(out.rstrip())
         # v0.9 (audit H7): an error is a line an arm PRINTS AS an error ("<arm> error (...)", "fetch failed", a traceback), never
         # a word that happens to appear in a job title or in a success sentence ("3 of 40 boards did not answer")
         errs=[l.strip() for l in out.splitlines() if _ERRMARK.search(l)]
         # the count is what the arm handed on: unique candidates when it says so, else its first number
         count=re.search(rf"^{re.escape(name)}[^:]*:[^\n]*?(\d[\d,]*)\s+unique",out,re.M|re.I) or re.search(rf"^{re.escape(name)}[^:]*:\s*(\d[\d,]*)",out,re.M|re.I)
+        idle=bool(re.search(r"\barm is idle\b",out))   # v0.9 (audit M13): "no search terms / no boards" is said, not shown as "0 found; ok"
         _SUMMARY["arms"][name]=dict(ok=(r.returncode==0),exit=r.returncode,errors=len(errs),first_error=(errs[0][:140] if errs else ""),
-                                   count=(int(count.group(1).replace(",","")) if count else None))
+                                   count=(int(count.group(1).replace(",","")) if count else None),idle=idle)
         if check and r.returncode!=0:
             _save_summary(); raise SystemExit(f"{name} failed (exit {r.returncode}); see the output above")
         return out
@@ -100,12 +106,13 @@ def main():
     _mo=_arm("match",[PY,os.path.join(T,"match.py")],check=True)   # v0.9 (audit H6): a failure is a sentence, never a raw traceback
     open(os.path.join(TR,"match_out.txt"),"w",encoding="utf-8").write(_mo)
     print(open(os.path.join(TR,"match_out.txt"), encoding="utf-8").read().split("TOP 40")[0])
-    print("\n"+"="*20,"STEP 1a: SWEEP (Workday tenants only)","="*20)
-    _arm("sweep",[PY,os.path.join(T,"sweep.py"),win,"--wd-only"],check=True)
-    print("\n"+"="*20,"STEP 1b: FEEDS (VC boards, aggregators, small ATS, custom pages)","="*20)
-    _arm("feeds",[PY,os.path.join(T,"feeds.py")])
-    print("\n"+"="*20,"STEP 1c: HARD-ATS (Oracle/ADP/Eightfold/Phenom/SAP/iCIMS)","="*20)
-    _arm("hard-ATS",[PY,os.path.join(T,"hard_ats.py")])
+    # v0.9 (audit M2): the three arms hit disjoint hosts and write disjoint files, so they run at the same time (2-3 min saved);
+    # each one's output is printed whole, under its own banner, when it finishes
+    with _cf.ThreadPoolExecutor(3) as _ex:
+        _fs=[_ex.submit(_arm,"sweep",[PY,os.path.join(T,"sweep.py"),win,"--wd-only"],True,None,"STEP 1a: SWEEP (Workday tenants only)"),
+             _ex.submit(_arm,"feeds",[PY,os.path.join(T,"feeds.py")],False,None,"STEP 1b: FEEDS (VC boards, aggregators, small ATS, custom pages)"),
+             _ex.submit(_arm,"hard-ATS",[PY,os.path.join(T,"hard_ats.py")],False,None,"STEP 1c: HARD-ATS (Oracle/ADP/Eightfold/Phenom/SAP/iCIMS)")]
+        for _f in _fs: _f.result()   # a check=True failure (sweep) re-raises its SystemExit sentence here
     # every arm failed = effectively offline (a captive portal, a firewall): say so, do not report "nothing new"
     _a=_SUMMARY["arms"]; _boards=_a.get("corpus",{}).get("boards") or 0; _bfail=_a.get("corpus",{}).get("boards_failed") or 0
     _arm_results=[(_a.get(k,{}).get("count") or 0) for k in ("corpus","sweep","feeds","hard-ATS")]
@@ -473,10 +480,11 @@ def main():
     for _k,_lab in (("sweep","Workday boards"),("feeds","listing feeds"),("hard-ATS","other employer sites (Oracle/ADP/iCIMS/...)"),("watch","watched employers")):
         _x=_a.get(_k,{})
         if not _x: continue
+        if _x.get("idle"): print(f"{_lab}: idle - no search terms / boards registered for this arm (tracking/registries/queries.yaml)"); continue
         _st=("failed to run" if not _x.get("ok") else (f"{_x['errors']} fetch error(s)" if _x.get("errors") else "ok"))
         print(f"{_lab}: "+(f"{_x['count']} found; " if _x.get("count") is not None else "")+_st+(f" - {_x['first_error']}" if _x.get("first_error") else ""))
     print(f"postings that could not be read (page refused or timed out): {_SUMMARY['could_not_read']}")
-    print(f"for judgment: {len(ok)} posting(s)"+(f"; blind scorers: about {_SUMMARY['judge'].get('scored',0)} posting(s) scored, {_SUMMARY['judge'].get('deferred',0)} deferred below the top {_SUMMARY['judge'].get('top_n')}" if _SUMMARY.get("judge") else ""))
+    print(f"for judgment: {len(ok)} posting(s)"+(f"; blind scorers: about {_SUMMARY['judge'].get('scored',0)} posting(s) scored, {_SUMMARY['judge'].get('deferred',0)} deferred below the top {_SUMMARY['judge'].get('top_n')}"+(f" (about {_SUMMARY['judge'].get('runs_to_clear')} more run(s) to reach them all at this rate)" if _SUMMARY['judge'].get('runs_to_clear') else "") if _SUMMARY.get("judge") else ""))
 
 
 

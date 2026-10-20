@@ -161,6 +161,7 @@ def main():
     cos=cosine_similarity(X[0:1],X[1:]).ravel()
     refs=lane_ref_docs()
     cosg={n:(cosine_similarity(vec.transform([txt]),X[1:]).ravel() if txt else [0.0]*len(docs)) for n,txt in refs.items()}
+    if len(docs)>=200: _fit_save(vec,X[0:1],{n:(vec.transform([txt]) if txt else None) for n,txt in refs.items()})   # v0.9 (M4): score_texts reuses this space
     sig=[sig_score(d['title']+' '+d['text']) for d in docs]
     out=[]
     for i,(d,c,s) in enumerate(zip(docs,cos,sig)):
@@ -192,12 +193,32 @@ def strip_aggregator(t):
         return first3+'\n'+body
     return t
 _FIT=None
+_FITP=os.path.join(ROOT,"tracking","tfidf_fit.pkl")
+def _fit_sig():
+    """v0.9 (audit M4): identity of the fitted space - the corpus file (size, mtime) and the profile text."""
+    import hashlib
+    cp=os.path.join(ROOT,"tracking","corpus.jsonl")
+    try: st=os.stat(cp); c=(st.st_size,int(st.st_mtime))
+    except OSError: c=(0,0)
+    return (c,hashlib.md5(profile_doc().encode("utf-8","ignore")).hexdigest())
+def _fit_save(vec,P,L):
+    try:
+        import pickle
+        with open(_FITP,"wb") as f: pickle.dump((_fit_sig(),vec,P,L),f)
+    except Exception as e: print(f"match: TF-IDF cache not written ({type(e).__name__})",file=sys.stderr)
+def _fit_load():
+    try:
+        import pickle
+        with open(_FITP,"rb") as f: sig,vec,P,L=pickle.load(f)
+        return (vec,P,L) if sig==_fit_sig() else None
+    except Exception: return None
 def score_texts(pairs):
     """Title-blind score for arbitrary (title, text) pairs on the SAME fixed scales as the corpus arm
     ('the only thing that matters is a match with the job description').
     Fits the TF-IDF space once per process on profile + corpus, then transforms the extras.
     Returns per pair: (score, sig, sigx, gates) where gates = {lane: {'dom', 'cos'}}."""
     global _FIT
+    if _FIT is None: _FIT=_fit_load()   # v0.9 (audit M4): the space match.py fitted minutes ago on the same corpus
     if _FIT is None:
         cp=os.path.join(ROOT,"tracking","corpus.jsonl")
         rows=[json.loads(l) for l in open(cp, encoding="utf-8")] if os.path.exists(cp) else []
@@ -213,6 +234,7 @@ def score_texts(pairs):
         X=vec.fit_transform([prof]+docs+extra)
         L={n:(vec.transform([txt]) if txt else None) for n,txt in lane_ref_docs().items()}
         _FIT=(vec,X[0:1],L)
+        if not extra: _fit_save(vec,X[0:1],L)
     vec,P,L=_FIT
     out=[]
     for title,text in pairs:
