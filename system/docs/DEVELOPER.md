@@ -107,6 +107,8 @@ generated view; `tracker.csv` is the plain one and is never read back.
 ## Self-checks
 ```
 system/.venv/bin/python system/engine/tools/userconfig.py        # workspace, modules, lanes, build format, targets
+system/.venv/bin/python system/engine/tools/userconfig.py --validate   # plain-language problems in settings.yaml (exit 1 on an error)
+system/.venv/bin/python system/engine/tools/userconfig.py --schema     # every settings.yaml key (v1.0 SCHEMA); paste into ARCHITECTURE.md between the schema markers
 system/.venv/bin/python system/engine/tools/registries.py list   # packs (* = selected); `assemble` writes the active registries
 system/.venv/bin/python system/engine/tools/approved_claims.py   # loaded claims summary (bullets, frozen, pending, cv sections)
 system/.venv/bin/python system/engine/tools/geo.py               # the geography table in use

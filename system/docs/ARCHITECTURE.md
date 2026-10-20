@@ -22,6 +22,12 @@ engine ever needs a personal value, it reads it through `system/engine/tools/use
 `applications/`, `keys.json`). Tool paths (for `subprocess`) come from the engine folder.
 A user may keep several workspaces (e.g. two searches) and switch by environment variable.
 
+v1.0 (audit M26): importing `userconfig` reads no settings (`load()` runs on the first `get()`; `MODULES` fills itself on first use).
+`userconfig.configure(ws)` re-points `WS` and every WS-derived constant (`TRACKING`, `PROFILE`, ..., `SECRETS`, `USER_YAML`,
+`SIGNALS_YAML`, `QUERIES_YAML`), exports `JOBKIT_WORKSPACE` and clears every cache. Call it before importing the engine modules:
+a module that already ran `from userconfig import WS as ROOT` keeps its old path, because Python copied the value at import.
+The import-time rule is unchanged: a `JOBKIT_WORKSPACE` that is not a folder exits 2 (v0.9, audit M21).
+
 ## Workspace layout
 
 ```
@@ -63,28 +69,119 @@ My Job Search/
 
 ## settings.yaml schema (authoritative copy with comments: `My Job Search/settings.yaml.example`; same keys as the v0.3 user.yaml)
 
-| key | type | consumed by |
-|---|---|---|
-| `identity.{name, first_name, email, phone, city_state, links[]}` | strings | resume_builder (contact line, core properties), verify_resume (parse test) |
-| `work_authorization.resume_line` | string | resume_builder contact line; audit_claims requires it verbatim on resumes |
-| `work_authorization.{citizenship_only_roles_open, clearance_possible, export_controlled_open, sponsorship_needed, permanent_resident}` | bool | eligibility.AUTH, screen_minquals (knockout classes), critic (INELIGIBLE check), match (INELIG corpus drop) |
-| `location.{home, country, commute_radius_miles, commutable_metros[], relocation}` | mixed | judgment agent + profile_blind; `country` selects the `geo.py` table (US/CA/UK built in) used by match/sweep/daily/eligibility |
-| `location.{in_country_regex, in_country_regex_loose, foreign_regex_extra}` (optional) | regex | overrides of the `geo.py` table (required for a country without one) |
-| `location.{tier1_regex, tier2_regex}` | regex | daily.py / sweep.py geography tiers (T1 commutable+remote, T2 nearby, T3 rest) |
-| `lanes[].{name, description, example_titles[], never_claims[], priority, packs[]}` | list | state.py canonical lanes; `priority: true` enables lanes.py (patterns in signals.yaml); `packs` -> registries.py assemble. Signature terms live in `profile/signals.yaml`, search terms in `tracking/registries/queries.yaml` |
-| `thresholds.{build_default_min_rubric, commutable_min_rubric, auto_skip_below_rubric, jd_gate, band_midpoint_ceiling, low_band_top}` | numbers/null | critic (band advisory), screen (LOWBAND), daily tripwire, judgment agent; `jd_gate` here is only the fallback when signals.yaml has no thresholds |
-| `exclusions.{employers[], role_types[], contract_work, postdocs}` | list/bool | eligibility.excluded_employer (src/URL only); `role_types` = regexes appended word-bounded to the title-eligibility filter; critic CONTRACT-GIG switch; `postdocs: false` drops postdoctoral TITLES (eligibility.ELIG, 2026-10-09); judgment |
-| `salary.{floor, target, currency}` | numbers | judgment notes only, never a silent filter |
-| `modules.{inbox_sweep, outreach}` | bool, default false | daily.py STEP 0b, inbox_sweep.py, outreach charter |
-| `run.{adzuna, linkedin_guest, indeed_jobspy, window_days}` | bool/int | feeds.py arm switches; `linkedin_guest` and `indeed_jobspy` default OFF since v0.3 (unofficial scrapes; opt-in), `adzuna` = official API with a free key |
-| `build.{resume_filename, min_experience_entries, location_line_default}` | mixed | resume_builder, consistency |
-| `build.{format, cv_filename, cv_min_pages, cv_max_pages}` (2026-10-09) | `resume` \| `academic_cv`, str, int, int | `academic_cv`: resume_builder.AcademicCV (multi-page CV), verify_resume (page range instead of the 1-page/fill checks), audit_claims (every CV line must trace to approved_claims.yaml) |
-| `targets.{phd_positions, fixed_term_ok, hourly_ok}` (2026-10-09, optional) | bool | eligibility.ELIG: `phd_positions` switches OFF the new-grad/campus title drop and critic GRAD-GATE; `fixed_term_ok` switches OFF the temp/temporary title drop; `hourly_ok` (v0.2) switches OFF the critic's "BELOW LEVEL: technician/HS tier" advisory |
-| `targets.track` (v0.3) | `industry` \| `academic` \| `government` \| `nonprofit` \| `mix` | onboarding only: which phases are asked (publications/teaching/references for academic; the USAJobs key step for government) and the resume-vs-CV default |
-| `targets.employers[]` (v0.3) | list of names | `tools/discover_boards.py`: finds and verifies each employer's board, writes `custom.json` (or a watch entry) |
-| `education[].{institution, dates, line}` | list | resume_builder.education() |
-| `verification.employer_tokens[]` | list | verify_resume parse test (only when present in the docx) |
-| `rubric.protect_title_regex` (optional) | regex | rubric.py: archetype never auto-skipped on score |
+v1.0 (audit M27): the one source is `SCHEMA` in `system/engine/tools/userconfig.py` (type, default, required phase, choices,
+range, consumers, one-line doc). The accessors take their defaults from it, `validate()` iterates it, and the table below is
+`userconfig.py --schema` pasted between the markers - do not edit the rows by hand; `tests/test_settings_schema.py` fails
+when the two drift or when a tool reads a key that is not in `SCHEMA`. "filled in" = the onboarding phase that writes the
+key (`required` = a "missing" note until then; `optional` = set by hand; `reserved` = accepted but read by nothing yet).
+Keys that are not read by the engine itself (`location.home`, `salary.*`, `lanes[].description`, `targets.track`) are what the
+onboarding skill and the judgment agent read from the file; they stay in the schema so a filled file validates.
+
+<!-- schema:begin (generated by `system/engine/tools/userconfig.py --schema`) -->
+| key | type | default | filled in | consumed by | what it does |
+|---|---|---|---|---|---|
+| `identity` | section |  | required (phase 2) | resume_builder (contact line, core properties), verify_resume (parse test), audit_claims (person pool) | who the resume is for |
+| `identity.name` | str | `""` | required (phase 2) | resume_builder, audit_claims, verify_resume | full name as it prints at the top of the resume |
+| `identity.first_name` | str | `""` | phase 2 | verify_resume | used by the resume parse test (must survive docx -> pdf -> text) |
+| `identity.email` | str | `""` | required (phase 2) | resume_builder, verify_resume, audit_claims | contact line |
+| `identity.phone` | str | `""` | phase 2 | resume_builder, verify_resume, audit_claims | printed verbatim; the parse test looks for this exact string |
+| `identity.city_state` | str | `""` | phase 2 | resume_builder | ATS location prefill; OFF the contact line by default (see build.location_line_default) |
+| `identity.links` | list | `[]` | phase 2 | resume_builder, audit_claims | printed in this order on the contact line; [] for none |
+| `work_authorization` | section |  | required (phase 3) | eligibility.AUTH, screen_minquals (knockout classes), critic (INELIGIBLE), match (INELIG corpus drop), resume_builder, audit_claims | Article I.2: the engine never assumes a status |
+| `work_authorization.resume_line` | str | `""` | required (phase 3) | resume_builder contact line; audit_claims | the exact words printed on the resume contact line ("" prints nothing); audit_claims requires it verbatim |
+| `work_authorization.citizenship_only_roles_open` | bool | `false` | required (phase 3) | eligibility, screen_minquals, critic, match | true if "must be a U.S. citizen" roles are open to you |
+| `work_authorization.clearance_possible` | bool | `false` | required (phase 3) | eligibility, screen_minquals, critic, match | true if you can obtain or hold a security clearance |
+| `work_authorization.export_controlled_open` | bool | `false` | required (phase 3) | eligibility, screen_minquals, critic, match | true if ITAR / "U.S. person" / export-controlled roles are open |
+| `work_authorization.sponsorship_needed` | bool | `false` | required (phase 3) | eligibility, screen_minquals, critic, match | true if you need visa sponsorship (adds a knockout for "no sponsorship") |
+| `work_authorization.permanent_resident` | bool | `false` | required (phase 3) | eligibility, screen_minquals, critic, match | true if you hold permanent residency: postings that explicitly admit permanent residents are then open even when citizenship_only_roles_open is false |
+| `location` | section |  | required (phase 4) | geo, eligibility, daily, sweep, decide, rubric, funnel, feeds; judgment agent + profile_blind | where the search happens and how much location matters |
+| `location.home` | str | `""` | phase 4 | judgment agent + profile_blind (not read by the engine) | home city and state, in plain words |
+| `location.country` | str | `"US"` | required (phase 4) | geo.py table selection used by match/sweep/daily/eligibility | ONE two-letter country of search; US / CA / UK have built-in geography tables (geo.py), any other code needs the three regex overrides |
+| `location.in_country_regex` | regex | `""` | phase 4 | geo.py | override: a location string that reads as INSIDE the country (strict; corpus arm); required for a country without a geo table |
+| `location.in_country_regex_loose` | regex | `""` | phase 4 | geo.py | override: same, loose (Workday / hard-ATS placeholders like "3 Locations") |
+| `location.foreign_regex_extra` | regex | `""` | phase 4 | geo.py | override: extra foreign-place cues to drop (e.g. "United States\|USA" for a non-US user) |
+| `location.commute_radius_miles` | int 0-1000 | `0` | phase 4 | judgment agent + profile_blind (not read by the engine) | commuting radius in miles |
+| `location.commutable_metros` | list | `[]` | phase 4 | validate() stay-local guard; judgment agent + profile_blind | plain words for the judgment agent and the rubric profile, e.g. ["Denver CO", "Boulder CO"]; must be filled for a local_only / local_first / unsure search |
+| `location.relocation` | yes \| no \| case-by-case | `"case-by-case"` | phase 4 | location_mode() fallback | kept for older workspaces; location.mode is what the engine follows (missing mode: no -> local_only, yes -> fit_first, else local_first) |
+| `location.mode` | local_only \| local_first \| fit_first \| unsure | `""` | phase 4 | location_mode(): decide.skip_guard, rubric prompt, scoring() default | local_only = stay local, jobs elsewhere are set aside before judging \| local_first = jobs elsewhere need away_bar \| fit_first = location barely matters \| unsure = like local_first, but every strong job elsewhere is put to you as a question |
+| `location.away_bar` | int 0-100 | `70` | phase 4 | decide.skip_guard | local_first / unsure: the score a job elsewhere needs before a resume is built for it |
+| `location.never_places` | list of str | `[]` | phase 4 | rubric / decide (never_places), judgment agent | places you would never move to, in plain words |
+| `location.remote` | ok \| preferred \| no | `"ok"` | phase 4 | rubric prompt, judgment agent | how remote work is treated |
+| `location.other_countries` | list of str | `[]` | phase 4 | eligibility.non_us | other countries you would work in (names or codes); ["any"] = anywhere |
+| `location.other_countries_regex` | regex | `""` | phase 4 | eligibility.non_us | place words for those countries when they are not US / CA / UK (drafted at setup) |
+| `location.tier1_regex` | regex | `"Remote"` | phase 4 | daily.py / sweep.py geography tiers | commutable places + remote as a pattern, e.g. "Denver\|Boulder\|Colorado\|\\bCO\\b\|Remote" (T1 = commutable + remote) |
+| `location.tier2_regex` | regex | `""` | phase 4 | daily.py / sweep.py geography tiers | nearby places you would consider (T2); "" = none (the engine's default never matches) |
+| `lanes` | list of blocks |  | required (phase 5) | state.py canonical lanes; lanes.py (priority); registries.py assemble (packs) | 1-6 target lanes in plain words; packs pick the job boards. Signature terms live in profile/signals.yaml, search terms in tracking/registries/queries.yaml |
+| `lanes[].name` | str | `""` | required (phase 5) | state.py, lanes.py | short canonical label (state.db Lane column warns on anything else) |
+| `lanes[].description` | str | `""` | phase 5 | onboarding / judgment agent (not read by the engine) | the work in one or two sentences |
+| `lanes[].example_titles` | list | `[]` | phase 5 | onboarding / judgment agent (not read by the engine) | titles that belong to the lane |
+| `lanes[].never_claims` | list | `[]` | phase 5 | onboarding (approved_claims never_claims) | things people in this lane claim that you must never claim |
+| `lanes[].priority` | bool | `false` | phase 5 | lanes.py via priority_lane_names() | true = the lane is screened FOR and never auto-skipped (patterns: profile/signals.yaml priority_patterns) |
+| `lanes[].packs` | list | `[]` | phase 5 | registries.py assemble via selected_packs() | job-board packs from system/engine/registries/packs/ ([] = none); every name must exist |
+| `targets` | section |  | phase 5 | eligibility.ELIG, critic, discover_boards | what KINDS of positions are in scope, and who you would love to work for |
+| `targets.track` | industry \| academic \| government \| nonprofit \| mix | `""` | phase 5 | onboarding (not read by the engine) | onboarding only: which phases are asked (publications / teaching / references for academic; the USAJobs key step for government) and the resume-vs-CV default |
+| `targets.position_types` | list of str | `[]` | phase 5 | targets(): each type switches off the matching title drop / critic gate | what you are looking for: full_time, part_time, internships, co_ops, new_grad, fellowships, unpaid_research, phd_positions, postdocs, contract, temporary, hourly; anything NOT listed is set aside |
+| `targets.phd_positions` | bool | `false` | phase 5 | eligibility.ELIG, critic GRAD-GATE | legacy flag (v0.6): funded PhD positions / studentships are targets - the new-grad / campus title drop and the critic's GRAD-GATE are off |
+| `targets.fixed_term_ok` | bool | `false` | phase 5 | eligibility.ELIG | legacy flag: "temporary" / fixed-term titles are not an eligibility drop |
+| `targets.hourly_ok` | bool | `false` | phase 5 | critic | legacy flag: hourly-paid / high-school-minimum postings are NOT flagged "BELOW LEVEL" by the critic |
+| `targets.internships_ok` | bool | `false` | phase 5 | eligibility.ELIG | legacy flag: internship titles are kept (same as position_types: [internships]) |
+| `targets.coops_ok` | bool | `false` | phase 5 | eligibility.ELIG | legacy flag: co-op / apprenticeship titles are kept (same as position_types: [co_ops]) |
+| `targets.new_grad_ok` | bool | `false` | phase 5 | eligibility.ELIG, critic GRAD-GATE | legacy flag: new-grad / early-career / graduate-program titles are kept (same as position_types: [new_grad]) |
+| `targets.unpaid_ok` | bool | `false` | phase 5 | eligibility.ELIG | legacy flag: unpaid / volunteer postings are kept (same as position_types: [unpaid_research]) |
+| `targets.part_time_ok` | bool | `true` | phase 5 | eligibility.ELIG | legacy flag: part-time titles are kept (absent = kept; position_types: [part_time] says the same) |
+| `targets.employers` | list | `[]` | phase 5 | discover_boards.py: finds and verifies each employer's board, writes custom.json (or a watch entry) | up to ~10 employers you would be glad to work for, by name |
+| `scoring` | section |  | phase 14 | rubric.py prompt header | what the blind judges score BESIDES skills and experience (always scored) |
+| `scoring.location` | yes \| a little \| no | `""` | phase 14 | rubric.py | yes \| a little \| no; missing = yes, or no when location.mode is fit_first |
+| `scoring.career_fit` | yes \| no | `"yes"` | phase 14 | rubric.py | yes = a job that does not use / grow your strengths scores lower; no = any job you can get |
+| `scoring.pay` | yes \| no | `"no"` | phase 14 | rubric.py | yes = posted pay against the profile's PAY line counts |
+| `scoring.remote` | yes \| no | `"no"` | phase 14 | rubric.py | yes = remote / hybrid terms count |
+| `thresholds` | section |  | phase 14 | critic (band advisory), screen (LOWBAND), daily tripwire, decide, rubric, match | the score lines; auto_skip_below_rubric <= commutable_min_rubric <= build_default_min_rubric |
+| `thresholds.build_default_min_rubric` | int 0-100 | `60` | phase 14 | decide, rubric, daily, critic | dual-blind average at / above this = build by default |
+| `thresholds.commutable_min_rubric` | int 0-100 | `45` | phase 14 | decide | inside commutable_metros, build from this line |
+| `thresholds.auto_skip_below_rubric` | int 0-100 | `40` | phase 14 | decide, rubric | below this, both scorers agreeing, non-stub JD -> auto-ledger SKIP |
+| `thresholds.jd_gate` | number 0-1 | `0.28` | phase 14 | match (fallback) | FALLBACK only: profile/signals.yaml thresholds.jd_gate wins when present |
+| `thresholds.band_midpoint_ceiling` | int or null >= 0 | `null` | phase 14 | critic | e.g. 140000 -> critic prints an ADVISORY above it; null = off |
+| `thresholds.low_band_top` | int or null >= 0 | `null` | phase 14 | screen_minquals | e.g. 90000 -> queue tags LOWBAND below it; null = off |
+| `exclusions` | section |  | phase 5 | eligibility, critic | what is never shown |
+| `exclusions.employers` | list of regex | `[]` | phase 5 | eligibility.excluded_employer | regex or plain names, matched on SOURCE / URL only, never JD text |
+| `exclusions.role_types` | list of regex | `[]` | phase 5 | eligibility (appended to the title filter) | title-level eligibility drops (regexes, word-bounded, case-insensitive); only what YOU name |
+| `exclusions.contract_work` | bool | `false` | phase 5 | critic CONTRACT-GIG | false = contract / 1099 / freelance / contract-to-hire postings are OUT (absent = OUT) |
+| `exclusions.postdocs` | bool | `true` | phase 5 | eligibility.ELIG | false = postdoctoral TITLES are dropped; the template ships false, an ABSENT key keeps them (the v0.2 reading) |
+| `salary` | section |  | phase 6 | onboarding -> profile_blind PAY line; judgment agent | pay expectations; judgment notes only, never a silent filter |
+| `salary.floor` | int or null >= 0 | `null` | phase 6 | onboarding / judgment agent (not read by the engine) | lowest yearly pay you would accept (a number, e.g. 85000) |
+| `salary.target` | int or null >= 0 | `null` | phase 6 | onboarding / judgment agent (not read by the engine) | the pay you are aiming for |
+| `salary.currency` | str | `"USD"` | reserved | none yet | currency of floor and target (reserved: accepted, read by nothing yet) |
+| `modules` | section |  | phase 14 | daily.py STEP 0b, inbox_sweep.py, outreach charter | optional engine modules, OFF by default |
+| `modules.inbox_sweep` | bool | `false` | phase 14 | daily.py STEP 0b, inbox_sweep.py | Gmail read-only sweep; requires the agent's Gmail tool |
+| `modules.outreach` | bool | `false` | phase 14 | outreach charter | outreach drafting charter |
+| `run` | section |  | phase 14 | feeds.py, daily.py, rubric.py, setup.py | discovery arms (employer boards always run; these are extras) and the cost knobs |
+| `run.adzuna` | bool | `false` | phase 16 | feeds.py | OFFICIAL free API (developer.adzuna.com); true needs adzuna_id / adzuna_key in keys.json |
+| `run.linkedin_guest` | bool | `false` | phase 16 | feeds.py | OPT-IN: public guest cards scraped from linkedin.com (terms of service; unversioned, rate-limited) |
+| `run.indeed_jobspy` | bool | `false` | phase 16 | feeds.py, setup.py (installs jobspy) | OPT-IN, same caveat (Indeed's terms); needs python-jobspy (requirements-optional.txt) |
+| `run.window_days` | int 1-365 | `30` | phase 14 | daily.py | recency window on UPDATED date (charters/search.md) |
+| `run.judge_top_n` | int 0-500 | `40` | phase 14 | rubric.py prep | only the top N postings by the deterministic match score go to the two blind scorers each run; the rest are deferred (0 = score everything) |
+| `run.jd_text_cap_chars` | int 500-100000 | `6000` | phase 14 | rubric.cap_text | the scorers read at most this many characters of each posting (the requirements block is always kept whole) |
+| `run.judgment_check` | bool | `true` | phase 14 | daily.py | warn when a job at or above the build line goes 7 days without a decision |
+| `run.judge_model` | str | `""` | phase 14 | daily skill (scorer spawn) | light mode: model for the two judges, e.g. "sonnet"; "" = the strongest available |
+| `rubric` | section |  | optional | rubric.py | the blind judges |
+| `rubric.b_band` | list of int | `[30, 70]` | optional | rubric.py prep-b / merge | scorer B re-reads only postings scorer A put in this band (rubric.py prep-b) |
+| `rubric.protect_title_regex` | regex | `""` | optional | rubric.py auto-skip guard | titles the judges are known to under-score for YOU; never auto-skipped ("" = none) |
+| `build` | section |  | phase 5 | resume_builder, verify_resume, audit_claims, consistency | how the documents are built |
+| `build.format` | resume \| academic_cv | `"resume"` | phase 5 | resume_builder, verify_resume, audit_claims, consistency | resume = one-page industry resume (verify = 1 page, 90-93% fill) \| academic_cv = multi-page CV (resume_builder.AcademicCV; verify = cv_min_pages..cv_max_pages; audit_claims checks EVERY line) |
+| `build.resume_filename` | .docx filename | `"Resume.docx"` | phase 5 | consistency, audit_claims | every built resume uses this exact filename (phase 5 sets "Resume_<First>_<Last>.docx") |
+| `build.cv_filename` | .docx filename | `"CV.docx"` | phase 5 | consistency, audit_claims | academic_cv only: the CV filename (must start with "CV" for the audit's CV mode) |
+| `build.cv_min_pages` | int 1-20 | `2` | phase 5 | verify_resume | academic_cv: the page range verify_resume enforces (lower bound) |
+| `build.cv_max_pages` | int 1-20 | `3` | phase 5 | verify_resume | academic_cv: the page range verify_resume enforces (upper bound) |
+| `build.min_experience_entries` | int 0-10 | `3` | phase 5 | resume_builder | resume_builder warns below this many experience entries |
+| `build.location_line_default` | str | `"Open to relocation"` | phase 5 | resume_builder | contact-line text for roles outside commutable_metros |
+| `build.no_pdf_copies` | bool | `false` | optional | verify_resume | true = verify_resume fails when a Resume_ / CV_ / CoverLetter_ PDF sits in the folder (send .docx only) |
+| `education` | list of blocks |  | phase 7 | resume_builder.education(), audit_claims (person pool) | printed by resume_builder.education(); newest first |
+| `education[].institution` | str | `""` | required (phase 7) | resume_builder, audit_claims | the school |
+| `education[].dates` | str | `""` | phase 7 | resume_builder, audit_claims | e.g. "Sep 2018 - May 2022" |
+| `education[].line` | str | `""` | phase 7 | resume_builder, audit_claims | "<degree> in <field>, <city, state>  \|  Thesis: <title>" |
+| `verification` | section |  | phase 13 | verify_resume | verify_resume.py parse test |
+| `verification.employer_tokens` | list of str | `[]` | phase 13 | verify_resume parse test | the employer names on your resume; checked only when the resume mentions them |
+<!-- schema:end -->
 
 ## profile/approved_claims.yaml schema (authoritative copy: `My Job Search/profile/approved_claims.yaml.example`)
 
