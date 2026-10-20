@@ -217,7 +217,7 @@ STEP output and byte-identical queue, critic and ledger files).
 - **Exit statuses** are one table (`exitcodes.py`, see below); `decide.py`, `state.py`, `rubric.py`, `daily.py` use argparse
   (`--help`); every documented invocation form is unchanged.
 - Fixed on the way: `"<employer> rejected me"` crashed since v0.9 (missing import).
-- Tests: 10 suites, 83 cases (`tests/test_cli_v10.py`, `test_daily_dedupe.py`, `test_eligibility.py`, `test_settings_schema.py` new).
+- Tests: 10 suites, 88 cases (`tests/test_cli_v10.py`, `test_daily_dedupe.py`, `test_eligibility.py`, `test_settings_schema.py` new).
 
 ## What changed in v0.9 (second code audit, 2026-10-20)
 
