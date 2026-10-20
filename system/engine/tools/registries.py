@@ -22,7 +22,7 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import json, os, sys, glob, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from userconfig import WS, REGISTRIES, ENGINE, selected_packs, path as _wspath
+from userconfig import REGISTRIES, ENGINE, selected_packs, path as _wspath
 
 PACKS_DIR = os.path.join(ENGINE, "registries", "packs")
 CUSTOM = os.path.join(REGISTRIES, "custom.json")

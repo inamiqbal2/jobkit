@@ -4,9 +4,8 @@ Recomputes every standing hypothesis cold from state.db. Usage: <jobkit python> 
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
-import sqlite3, os, datetime, sys
+import os, datetime, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from userconfig import WS as ROOT   # JOBKIT: workspace = data root
 from state import conn as _state_conn   # creates the db/table on a fresh workspace instead of "no such table"
 def main():
     """The computed board (v0.9: wrapped so importing this module prints nothing)."""

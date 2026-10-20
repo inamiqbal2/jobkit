@@ -39,7 +39,7 @@ system/
                    experience: [] - a fresh install assembles no board list and loads no bullet until the interview.
   docs/            ARCHITECTURE.md (engine/workspace contract, every schema) · HANDOFF_TO_NEW_USER.md (plain) · this file ·
                    REFACTOR_PLAN.md · EXAMPLES_FROM_ORIGINAL.md (a fictional user's rules) · REGRESSION_2026-10-08.md · UX_TEST_2026-10-09.md
-  release.sh       builds the shippable zip (fresh clone, single commit, tag original-v0.8, manifest, token grep; the token list lives outside the repo)
+  release.sh       builds the shippable zip (fresh clone, single commit, tag original-v0.9, manifest, token grep; the token list lives outside the repo)
 ```
 The folder name `My Job Search` contains spaces on purpose (it is what a non-programmer expects to see); every tool
 resolves it through `userconfig.WS` and every documented command quotes it.
@@ -69,18 +69,18 @@ resolves it through `userconfig.WS` and every documented command quotes it.
 ## The source lock (v0.4)
 - `system/engine/MANIFEST.sha256`: SHA-256 of every file under `system/engine/` (minus itself, `__pycache__`, OS litter),
   written by `manifest.py generate` (the release script runs it). `manifest.py check` / `status` compare the tree to it;
-  setup.py prints `Engine: original (v0.8)` or `Engine: MODIFIED - N files (see 'show my modifications')`.
+  setup.py prints `Engine: original (v0.9)` or `Engine: MODIFIED - N files (see 'show my modifications')`.
 - `manifest.py lock` makes every file AND folder under `system/engine` read-only (`chmod a-w`; Windows `attrib +R` on
   files). Python keeps importing and running everything; it just stops writing `.pyc` caches there. `unlock` reverses it.
   Git needs the unlock before it can check files out into the folder, which is why the commands below unlock first.
   The same applies to deleting an install from a shell: `rm -rf` refuses read-only folders, so `setup.py --unlock`
   (or `chmod -R u+w system/engine`) first. Finder / Explorer move the folder to the trash as usual.
-- Git: the release ships with `.git` initialised, one commit, tag `original-v0.8`. "modify: <what>" = explain, yes,
+- Git: the release ships with `.git` initialised, one commit, tag `original-v0.9`. "modify: <what>" = explain, yes,
   `setup.py --unlock`, change, commit on branch `modified` (`MOD <date>: <what> - <why>`), `setup.py --lock`. The
   manifest is NOT regenerated after a modification: it stays the fingerprint of the original, which is what makes
-  setup.py report `MODIFIED - N files`. "show my modifications" = `git log original-v0.8..modified` + `git diff --stat`.
+  setup.py report `MODIFIED - N files`. "show my modifications" = `git log original-v0.9..modified` + `git diff --stat`.
   "revert to original" = unlock, `git rm -r -q system/engine` (so files a modification added go too), `git checkout
-  original-v0.8 -- system/engine`, commit `REVERT to original-v0.8`, lock -> `Engine: original (v0.8)`. None of it
+  original-v0.9 -- system/engine`, commit `REVERT to original-v0.9`, lock -> `Engine: original (v0.9)`. None of it
   touches `My Job Search/` (which is git-ignored apart from its templates anyway). `manifest.py generate` is for the
   release script only.
 
@@ -191,6 +191,31 @@ role noun with no digits. Unreadable files are FAIL lines; `~$` lock files and `
 whitelist is built from the keys that hold approved wording (`_APPROVED_KEYS`), never from the whole file.
 `system/engine/tools/tests/test_audit_channels.py` holds the probes that once passed and must now fail.
 
+## What changed in v0.9 (second code audit, 2026-10-20)
+
+Safety and correctness: every fetch helper refuses non-http(s) URLs (`urlcanon.safe_http`); the screener's years bar is the
+lower bound of a range and a negating clause ends at punctuation; the corpus arm applies the same negation guard before
+dropping a posting on citizenship / clearance; `rubric.cap_text` keeps a late requirements block; the audit ignores lock
+files and `.bak-` folders; a malformed ledger line is skipped with a warning; a nonexistent `JOBKIT_WORKSPACE` is refused;
+stay-local location modes refuse an empty commute definition; `profile/signals.yaml` patterns are validated at load.
+
+Orchestrator honesty (`daily.py`): match / screen / rubric prep run through the arm wrapper, so a failure ends the run with a
+plain sentence and a saved `run_summary.json`; an error is a line an arm prints as one, never a word in a job title;
+`judge_plan.json` is dated; idle arms are named; the critic runs in-process (`critic.Verdict`).
+
+Learning loop: `state.py applied` self-fills Tier / Fit / Date Posted / Salary Range / Yrs Bar / Lane from the screened
+record; `rejected me` classifies TIMING vs MERIT from the note; `report.py` no longer runs at import; "where am I?" runs
+`report.py` / `timeline.py` once ten applications are recorded.
+
+Speed: SmartRecruiters details fan out per tenant; at most six requests in flight per host; sweep / feeds / hard-ATS run
+concurrently; each JD is read once in prep; the TF-IDF space is fitted once per corpus (`tracking/tfidf_fit.pkl`);
+deferrals live in `tracking/deferred.jsonl` and the summary says about how many runs the deferred queue takes.
+A full daily run (no judges) on the Riley test workspace: 86 s.
+
+Resume fill under 90 % is a WARN (a thin profile has nothing approved left to add; padding is never the answer).
+Windows: `<jobkit python>` placeholder in all agent-facing commands, `[\/]` paths in `consistency.py`, a poppler guard,
+"git is not installed" distinguished from "not a git repository". Tests: `tests/test_guards_v09.py` (11 cases).
+
 ## Cost knobs and the blind judges (v0.5; conditional scorer B since 2026-10-16)
 Scorer B reads only the postings scorer A placed in the borderline band (`settings.yaml rubric.b_band`, default [30, 70]):
 `rubric.py prep-b <run_A>` writes `prompt_B_<date>.txt` and `b_ids_<date>.json`; `merge` accepts a run B covering exactly
@@ -216,7 +241,7 @@ described in `system/docs/ARCHITECTURE.md` and shown filled in `system/examples/
 
 ## Release (`system/release.sh`)
 `system/release.sh [version] [out_dir]` does the whole thing: fresh `git clone` of this repo into a temp folder, strip
-`.git`, `git init`, `manifest.py generate`, single commit `jobkit v0.5`, tag `original-v0.8`, grep the staged tree for personal
+`.git`, `git init`, `manifest.py generate`, single commit `jobkit v0.5`, tag `original-v0.9`, grep the staged tree for personal
 tokens (the pattern list is `~/Downloads/jobkit_release/scrub_patterns.txt`, outside the repo; `SCRUB_PATTERNS=` overrides; must be 0
 hits), zip to `<out_dir>/jobkit_v0.5_<date>.zip`. `release.sh` itself is removed from the stage and never ships without `.venv`, `__pycache__`, run artifacts or extracted
 intake, and write `EMAIL_NOTE_<date>.md` next to it. The shipped `My Job Search/` holds templates, the intake README and

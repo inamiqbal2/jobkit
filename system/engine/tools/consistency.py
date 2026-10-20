@@ -41,7 +41,7 @@ def company_of(folder):
                 if len(parts) >= 2:
                     cands.append(parts[1])
                 break
-    prefix = os.path.basename(folder.rstrip("/")).split("_")[0]
+    prefix = os.path.basename(folder.rstrip("/\\")).split("_")[0]
     cands.append(prefix)
     spaced = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", prefix)
     if spaced != prefix:
@@ -59,7 +59,7 @@ def prior_rows(folder):
     if not os.path.exists(DB):
         print(f"no db at {DB}"); return []
     c = sqlite3.connect(DB)
-    me = os.path.basename(folder.rstrip("/"))
+    me = os.path.basename(folder.rstrip("/\\"))
     rows, seen = [], set()
     for cand in company_of(folder):
         q = 'SELECT "#",Company,Position,"Date Applied",Status,"Resume Used" FROM applications ' \
@@ -84,7 +84,7 @@ def prior_rows(folder):
 def resume_path(resume_used):
     """'Resume Used' -> local docx path. Accepts file:///.../applications/X/<RESUME>,
     'applications/X', 'applications/X (note)'. Returns (path or None, folder)."""
-    m = re.search(r"applications/([A-Za-z0-9_\-]+)", resume_used or "")
+    m = re.search(r"applications[\\/]([A-Za-z0-9_\-]+)", resume_used or "")   # v0.9 (audit M22): Windows paths too
     if not m:
         return None, None
     fold = m.group(1)
@@ -146,7 +146,7 @@ def word_diff(a, b):
 def main():
     if len(sys.argv) < 2:
         print(__doc__); return 2
-    folder = sys.argv[1].rstrip("/")
+    folder = sys.argv[1].rstrip("/\\")
     if not os.path.isabs(folder):
         folder = os.path.join(ROOT, folder) if not os.path.exists(folder) else os.path.abspath(folder)
     new_docx = os.path.join(folder, RESUME)

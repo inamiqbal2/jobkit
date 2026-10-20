@@ -56,7 +56,7 @@ when commutable; file name = `build.cv_filename` / `build.resume_filename`. Neve
 script that the YAML does not already approve. A statement or cover letter (statement of purpose / research statement /
 academic cover letter) is composed from `profile/templates/` and the person's confirmed facts; it is checked for
 never-claims and for every number's source, not line by line, so write only what the evidence files say. After saving it,
-mark it as a letter: `system/.venv/bin/python system/engine/tools/docxtext.py --stamp-letter <file.docx>` (a file named
+mark it as a letter: `<jobkit python> system/engine/tools/docxtext.py --stamp-letter <file.docx>` (a file named
 CoverLetter_*/Statement_* counts as a letter by name; anything else unmarked is audited as a resume and will fail).
 The script needs no path tricks: `system/.venv` carries a `.pth` that makes `system/engine/tools` importable, so
 `from resume_builder import Resume` and `from approved_claims import ...` work as they are (the example scripts

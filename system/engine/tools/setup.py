@@ -471,7 +471,11 @@ def engine_status():
             note += f"; {mods} commit(s) on branch 'modified' (modifications and reverts)"
         row("Program history (git)", OK if tag else WARN, note)
     else:
-        row("Program history (git)", WARN, "not a git repository: 'modify:' and 'revert to original' need the shipped .git folder")
+        import shutil as _sh   # v0.9 (audit M22): say which of the two it is
+        if not _sh.which("git"):
+            row("Program history (git)", WARN, "git is not installed: 'modify:' and 'revert to original' need it (https://git-scm.com/downloads)")
+        else:
+            row("Program history (git)", WARN, "not a git repository: 'modify:' and 'revert to original' need the shipped .git folder")
     if NO_LOCK:
         row("Engine lock", WARN, "--no-lock: system/engine left writable")
     else:

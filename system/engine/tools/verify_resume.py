@@ -128,8 +128,12 @@ def fill_pct(pdf, tmpdir):
     """Find where content ends on page 1, as % of page height."""
     from PIL import Image
     prefix = os.path.join(tmpdir, "pg")
-    subprocess.run(["pdftoppm", "-jpeg", "-r", "100", "-f", "1", "-l", "1", pdf, prefix],
-                   capture_output=True)
+    try:
+        subprocess.run(["pdftoppm", "-jpeg", "-r", "100", "-f", "1", "-l", "1", pdf, prefix],
+                       capture_output=True)
+    except FileNotFoundError:   # v0.9 (audit M22): no poppler (Windows without it) is a reported gap, not a traceback
+        print("FILL ................. SKIPPED (pdftoppm / poppler not installed; the page count still comes from the PDF)")
+        return None
     imgs = [f for f in os.listdir(tmpdir) if f.startswith("pg") and f.endswith(".jpg")]
     if not imgs:
         return None

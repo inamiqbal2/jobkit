@@ -24,7 +24,7 @@ up' and we continue from there." Nothing else runs on an unfinished setup (it wo
 facts).
 
 ## Step 2 - The pipeline
-`system/.venv/bin/python system/engine/tools/daily.py` (window from settings.yaml), output to `tracking/daily_run.log`
+`<jobkit python> system/engine/tools/daily.py` (window from settings.yaml), output to `tracking/daily_run.log`
 (the run can take long; run it in the background and read the log). It discovers, screens, dedupes
 against the ledger, runs the critic, writes `tracking/queue_<today>.md` and `tracking/rubric/batch_<today>.json`
 + `prompt_<today>.txt`. Arms that lack a key print one line and are skipped (USAJobs, Adzuna); an arm that
@@ -51,12 +51,12 @@ Two blind scorers, the second only where it matters (2026-10-16):
    only the files the prompt names (`profile/profile_blind.md` + the JD files) and writes `tracking/rubric/run_A_<today>.json`
    (JSON only, every id, the exact schema in the prompt). With more than ~120 postings, split A into two subagents over the
    two halves of the id list (same header, each half's lines) and join their JSON into run_A yourself.
-2. `system/.venv/bin/python system/engine/tools/rubric.py prep-b tracking/rubric/run_A_<today>.json` writes
+2. `<jobkit python> system/engine/tools/rubric.py prep-b tracking/rubric/run_A_<today>.json` writes
    `prompt_B_<today>.txt` with only the postings A scored 30-69 (settings.yaml rubric.b_band). Below 30 A alone is a clear
    reject, 70+ a clear build; the borderline band is where a second blind reading changes decisions.
 3. **Scorer B** - spawn a second, independent subagent on `prompt_B_<today>.txt`, verbatim; it writes `run_B_<today>.json`.
 Never give either scorer match scores, critic lines, the queue, outcomes, or the other's output.
-Then `system/.venv/bin/python system/engine/tools/rubric.py merge tracking/rubric/run_A_<today>.json tracking/rubric/run_B_<today>.json`
+Then `<jobkit python> system/engine/tools/rubric.py merge tracking/rubric/run_A_<today>.json tracking/rubric/run_B_<today>.json`
 (use the absolute workspace paths). It averages where both scored (A-only elsewhere, tagged in the queue), auto-ledgers clear
 rejects (< 40, judges agreeing, non-stub, not the priority lane, and not at or above the build line in the last 14 days)
 and rewrites the queue in rubric order. If merge refuses because the id sets differ, re-run the scorer whose file is
@@ -90,7 +90,7 @@ item, read the posting's saved JD (path on the queue line), the critic line, the
 - Never a skip ground alone: an agency pay band, a working condition, a never-claim outside the required
   block, a years bar when the JD credits an advanced degree, a judgment on a truncated JD (fetch the full
   text first). "When in doubt, build": drafting is free; the person decides what is sent.
-Ledger every decision: `system/.venv/bin/python system/engine/tools/decide.py "<url>" SKIP|BUILT|WATCH "<reason in one line>"`.
+Ledger every decision: `<jobkit python> system/engine/tools/decide.py "<url>" SKIP|BUILT|WATCH "<reason in one line>"`.
 decide.py refuses a SKIP of a posting at or above the build line (today or in the last 14 days) unless the reason quotes the
 failed requirement as `REQ:"<the posting's words>"` or carries a hard tag (INELIGIBLE, EXPIRED, CLOSED, NOT-IN-COUNTRY,
 NEVER-CLAIM, USER-RULE:<rule>, DUPLICATE:<ledgered url or folder>); it also refuses a location-only skip in the stretch band
@@ -110,7 +110,7 @@ whole folder after the last rebuild: it writes `AUDIT_PASS.json`, and `decide.py
 `decide.py` lines for everything judged (done in step 4; BUILT after a successful build). Do NOT add rows to
 `state.db` for builds: a row is added only when the person says they applied ("I applied to X" ->
 `state.py applied "X"`, which fills Position / Job Link / Resume Used from the built folder; add `Lane=...`
-when known). Then refresh the tracker: `system/.venv/bin/python system/engine/tools/state.py tracker` (decide.py
+when known). Then refresh the tracker: `<jobkit python> system/engine/tools/state.py tracker` (decide.py
 already does this after every BUILT / WATCH; this call makes sure `My Job Search/tracker.csv` reflects today's run
 before the report is written).
 

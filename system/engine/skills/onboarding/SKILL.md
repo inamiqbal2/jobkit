@@ -81,7 +81,7 @@ Write: status row 1 done; note "intake: <n> files read <date>" or "no documents;
 The person dropped files into `My Job Search/intake/`. You turn them into DRAFTS and then run phases 2-13 as a
 read-back instead of an interrogation. Nothing from a document becomes an approved claim without the read-back
 (CONSTITUTION II: claims inherited from an old resume are guilty until verified).
-1. **Extract.** `system/.venv/bin/python system/engine/tools/intake.py`. Say what it found in one line ("I read 3
+1. **Extract.** `<jobkit python> system/engine/tools/intake.py`. Say what it found in one line ("I read 3
    files: a 2024 resume, a cover letter and your thesis abstract; one photo I cannot read."). A PDF that came out
    empty is a scan: ask for a Word or text version. Read `intake/_extracted/INDEX.md` and then EVERY extracted
    file in full (they are short; never skim the one that matters most).
@@ -398,7 +398,7 @@ employers for business, marketing, sales", plus the science/engineering packs wh
 "Which of these should I search? Pick any." -> packs on the matching lanes.
 Then: "Name up to 10 employers you would love to work for; I will find their job pages. (e.g. UCHealth,
 Denver Health / Stripe, Notion / the state wildlife agency, a university lab)" -> `targets.employers`.
-Run `system/.venv/bin/python system/engine/tools/discover_boards.py --assemble` (it reads targets.employers; or pass the names).
+Run `<jobkit python> system/engine/tools/discover_boards.py --assemble` (it reads targets.employers; or pass the names).
 It probes Greenhouse / Lever / Ashby / SmartRecruiters / Workable / iCIMS / NEOGOV under variants of each name,
 web-searches the careers page and scans it for Workday / Oracle / ADP / Eightfold / Phenom / Radancy boards,
 verifies each with a live call, registers verified boards in custom.json, and makes a MANUAL watch entry for

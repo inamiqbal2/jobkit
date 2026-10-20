@@ -11,7 +11,7 @@ Usage: <jobkit python> tools/daily.py [window_days] [screen_top_n]"""
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
-import subprocess, sys, os, json, sqlite3, datetime, re
+import subprocess, sys, os, json, datetime, re
 ENGINE_TOOLS=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,ENGINE_TOOLS)
 from userconfig import WS as ROOT, MODULES as _MODULES, location as _loc_cfg, critic_rules as _critic_rules, thresholds as _thresholds   # JOBKIT: workspace = data root
 import geo as _geo

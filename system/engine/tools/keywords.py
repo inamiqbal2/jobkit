@@ -8,7 +8,6 @@ import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
 import sys, re, os
-from docx import Document
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import PROFILE as _PROFILE, load_yaml as _load_yaml
 
