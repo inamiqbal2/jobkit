@@ -16,13 +16,18 @@ try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: n
 except Exception: pass
 import sys, os, re, sqlite3
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from userconfig import WS as ROOT, work_auth as _work_auth, exclusions as _exclusions, thresholds as _thresholds, critic_rules as _rules, targets as _targets   # JOBKIT
+from userconfig import WS as ROOT, exclusions as _exclusions, thresholds as _thresholds, critic_rules as _rules, targets as _targets   # JOBKIT
+from eligibility import CITIZEN_ONLY as _CITIZEN_ONLY, CLEARANCE_MENTION as _CLEARANCE_MENTION, NEVER_RX as _NEVER, NEGATION_RX as _NEG, negated_match as _negated_match   # v1.0 (audit M28): one regex dialect
 _R=_rules()
 
 # ── GENERIC checks (every user; switched by settings.yaml flags) ───────────────────────────────────────────────────
-_GENERIC=[
- ("INELIGIBLE: citizenship/clearance (per settings.yaml work_authorization flags; ITAR/export-control is a TAG, not this)",
-  r"security clearance|secret clearance|TS/SCI|Top Secret|polygraph[^.\n]{0,40}(?:required|clearance)|(?:clearance|TS/SCI)[^.\n]{0,40}polygraph|active clearance|must be a U\.?S\.? citizen(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|U\.?S\.? citizenship (is )?required(?![^\n;]{0,50}(?:or|/)\s*(?:a\s+)?(?:u\.?s\.?\s*)?(?:lawful\s+)?(?:permanent|green))|Only U\.S\. Citizens|(?:all )?(?:candidates|applicants|employees) must be u\.?s\.? citizens(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))|must be u\.?s\.? citizens\b(?![^\n;]{0,100}(?:permanent resident|green card|u\.?s\.? person|lawful))"),
+# v1.0 (audit M28): the citizenship / clearance regex is eligibility.py's, switched PER CLASS by the work-authorization flags
+# (before, a person with clearance_possible=true but citizenship closed was still HELD on every clearance mention). A HOLD
+# is visible and overridable, so the critic reads the ANY-MENTION tier (CLEARANCE_MENTION), not the gate-form tier the
+# silent drops use. No class left closed -> no INELIGIBLE check at all.
+_INELIG=[p.pattern for p in (_CITIZEN_ONLY,_CLEARANCE_MENTION) if p is not _NEVER]
+_GENERIC=([("INELIGIBLE: citizenship/clearance (per settings.yaml work_authorization flags; ITAR/export-control is a TAG, not this)",
+            "|".join(f"(?:{p})" for p in _INELIG))] if _INELIG else [])+[
  ("GRAD-GATE: New College Grad / campus req (closed to an experienced candidate)", r"new college grad|university grad|campus hire|class of 20\d\d"),
  ("CONTRACT-GIG: contract / 1099 / freelance / AI-training gig (settings.yaml exclusions.contract_work: false)",
   # 2026-10-16 port: a bare "1099" was a location/requisition code ("Remote (1099)", "US-NY-1099") as often as a tax form; it
@@ -30,8 +35,7 @@ _GENERIC=[
   r"(?<![(\w-])1099(?![)\w-])(?=[^.\n]{0,30}\b(?:contract\w*|basis|position|role|worker|employ\w*|engagement)\b)|\b(?:W-?2|contract\w*|basis|as an?)\b[^.\n]{0,20}(?<![(\w-])1099(?![)\w-])|independent contractor|\bfreelance (?:role|position|contract|basis|opportunit\w+|engagement)|\bcontract (?:role|position|basis|opportunity|assignment|engagement)\b|contract-to-hire|\bAI (?:trainer|tutor)s?\b|expert (?:contributor|annotator)s?\b|paid per (?:task|hour)\b|this is a contract\b"),
  ("BELOW LEVEL: technician/HS tier", r"high school (degree|diploma)|(?<![a-zA-Z])GED(?![a-zA-Z])|\$\s?\d[\d.,]*\s*(?:/|per)\s*h(?:ou)?r\b|\bhourly (?:pay|wage|rate for this)|\bthis is an hourly\b|non-?exempt hourly"),
 ]
-_WA=_work_auth(); _EX=_exclusions()
-if _WA["citizenship_only_roles_open"] and _WA["clearance_possible"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("INELIGIBLE")]
+_EX=_exclusions()
 if _EX["contract_work"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("CONTRACT-GIG")]
 if _targets()["phd_positions"] or _targets()["new_grad_ok"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("GRAD-GATE")]   # v0.7: a new graduate's own target is never a gate
 if _targets()["hourly_ok"]: _GENERIC=[c for c in _GENERIC if not c[0].startswith("BELOW LEVEL")]   # v0.2: technician / hourly posts are the target (settings.yaml targets.hourly_ok)   # 2026-10-09: graduate positions are the target (settings.yaml targets.phd_positions)
@@ -136,17 +140,15 @@ def review(path):
     # advisory so a human decides.
     _PR_OK=re.compile(r"(green[- ]card holders?[^.\n]{0,60}(are )?eligible|permanent residents?[^.\n]{0,40}(are )?eligible to apply|U\.?S\.? persons?\s*\(i\.e\.[^)]*permanent resident)",re.I)
     _pr_welcomed=bool(_PR_OK.search(t))
-    # conditional boilerplate ("may be contingent upon your ability to obtain ... clearance") is not a requirement
-    _NEG=re.compile(r"\b(no|none|not|never|without|n/?a|may be contingent|contingent upon|if and when|may require|could require|some (roles|positions)|certain (roles|positions))\b",re.I)
     for name,pat in CHECKS:
-        # skip NEGATED matches ("Security Clearance: None required", "no clearance is required") - but only a negation in
-        # the SAME sentence within 60 characters before / 40 after counts (audit v0.4 bug 12: a 130-character window let
-        # "No security clearance required." cancel "$22/hour" two sentences later)
-        m=None
-        for _m in re.finditer(pat,t,re.I):
-            _pre=t[max(0,_m.start()-60):_m.start()]; _pre=re.split(r"[.;\n]",_pre)[-1]
-            _post=t[_m.end():_m.end()+40]; _post=re.split(r"[.;\n]",_post)[0]
-            if not _NEG.search(_pre+" | "+_post): m=_m; break
+        # skip NEGATED matches ("Security Clearance: None required", "no clearance is required"; conditional boilerplate such as
+        # "may be contingent upon ... clearance" is not a requirement) - only a negation in the SAME clause counts (audit v0.4
+        # bug 12: a 130-character window let "No security clearance required." cancel "$22/hour" two sentences later).
+        # v1.0 (audit M28): the guard is eligibility.negated_match, shared with match.py and the screener. Two readings changed
+        # here: the clause window shrank from 60 before / 40 after to the screener's 22 (fewer unrelated "no"/"not" words can
+        # cancel a real requirement - a false HOLD is visible, a false pass is not), and a comma or an opening parenthesis now
+        # ends the clause after the match (M20: "clearance required, no exceptions" failed open here).
+        m=_negated_match(pat,t)
         if m:
             if _pr_welcomed and name.startswith("INELIGIBLE"):
                 flags.append(("ELIGIBILITY-CONFLICT (advisory, NOT a knockout): JD names a clearance BUT also states permanent residents may apply - human call",m.group(0)[:70]))

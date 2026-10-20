@@ -24,10 +24,13 @@ import re, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import location as _loc_cfg
 
-_US_STATES = (r"AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|"
-              r"RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|D\.?C\.?"
-              # 2026-10-09: U.S. territories and freely-associated locations count as inside the United States
-              r"|PR|GU|VI|AS|MP")
+# v1.0 (audit M28): the ONE US state/territory code list - eligibility.py (US-primary site test, foreign-city state lookahead)
+# imports it; its own copy lacked D.C. and the territories, so "San Juan, PR" / "Washington, D.C." read as non-US there.
+US_STATES = (r"AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|"
+             r"RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|D\.?C\.?"
+             # 2026-10-09: U.S. territories and freely-associated locations count as inside the United States
+             r"|PR|GU|VI|AS|MP")
+_US_STATES = US_STATES   # historical private name
 _US_TERRITORIES = r"Puerto Rico|\bGuam\b|Saipan|Northern Mariana|American Samoa|Pago Pago|U\.?S\.? Virgin Islands|St\.? (?:Thomas|Croix|John)\b|Tutuila|Rota\b|Tinian"
 _REMOTE_NOT_ELSEWHERE = r"Remote(?!\s*[-–(,]?\s*(?:Germany|UK|U\.K\.|Europe|EMEA|Canada|India|APAC|Netherlands|Ireland|Israel|Japan|Korea))"
 
