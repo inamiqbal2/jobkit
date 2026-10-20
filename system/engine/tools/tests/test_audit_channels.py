@@ -155,9 +155,72 @@ class TestLoaderReservedNames(unittest.TestCase):
                 f.write('identity: {name: "T P", first_name: T, email: t@x.com, phone: "1", city_state: "A, PA"}\nwork_authorization: {resume_line: "U.S. Citizen"}\nlanes: []\n')
             with open(os.path.join(ws, "profile", "approved_claims.yaml"), "w") as f:
                 f.write('experience:\n  - key: SUMMARIES\n    org: X\n    dates: "2020 - 2021"\n    role: R\n    loc: L\n    bullets: {EXPERIENCE: "Did a thing."}\n')
-            out = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {TOOLS!r}); import approved_claims"],
+            # v1.0 (audit M26): the refusal fires on the first LOAD (load(), a name import, Resume(), the audit), no longer on
+            # `import approved_claims` itself, which reads nothing. Same wording, same non-zero exit.
+            out = subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {TOOLS!r}); import approved_claims; approved_claims.load()"],
                                  env=dict(os.environ, JOBKIT_WORKSPACE=ws), capture_output=True, text=True)
             self.assertNotEqual(out.returncode, 0)
             self.assertIn("reserved", out.stderr); self.assertIn("SUMMARIES", out.stderr)
         finally:
             shutil.rmtree(ws, ignore_errors=True)
+
+
+class TestLazyLoader(unittest.TestCase):
+    """v1.0 (audit M26): importing approved_claims / audit_claims reads no file; claims_loader.load() is explicit, cached and
+    shared; a missing YAML is one sentence; a reserved name is refused by every entry point that builds or audits."""
+    SETTINGS = 'identity: {name: "T P", first_name: T, email: t@x.com, phone: "1", city_state: "A, PA"}\nwork_authorization: {resume_line: "U.S. Citizen"}\nlanes: []\n'
+    RESERVED = 'experience:\n  - key: SUMMARIES\n    org: X\n    dates: "2020 - 2021"\n    role: R\n    loc: L\n    bullets: {EXPERIENCE: "Did a thing."}\n'
+
+    def setUp(self):
+        self.ws = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.ws, ignore_errors=True)
+
+    def _run(self, code):
+        return subprocess.run([sys.executable, "-c", f"import sys; sys.path.insert(0, {TOOLS!r})\n" + code],
+                              env=dict(os.environ, JOBKIT_WORKSPACE=self.ws), capture_output=True, text=True)
+
+    def _reserved_ws(self):
+        os.makedirs(os.path.join(self.ws, "profile"))
+        with open(os.path.join(self.ws, "settings.yaml"), "w") as f: f.write(self.SETTINGS)
+        with open(os.path.join(self.ws, "profile", "approved_claims.yaml"), "w") as f: f.write(self.RESERVED)
+
+    def test_import_in_empty_workspace_is_silent(self):
+        out = self._run("import approved_claims, audit_claims, resume_builder, consistency, keywords; print('imported')")
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertEqual(out.stdout.strip(), "imported"); self.assertEqual(out.stderr, "")
+
+    def test_import_does_not_validate_the_yaml(self):
+        self._reserved_ws()   # a YAML the loader refuses: import must still succeed, so nothing was read at import
+        out = self._run("import approved_claims, audit_claims; print('imported')")
+        self.assertEqual(out.returncode, 0, out.stderr); self.assertEqual(out.stdout.strip(), "imported")
+
+    def test_loader_in_empty_workspace_gives_a_sentence(self):
+        out = self._run("import approved_claims as a, claims_loader as cl\n"
+                        "c = a.load(); assert not c.loaded() and not a.loaded(); assert a.load() is c and cl.load() is c\n"
+                        "print(c.missing_sentence())\n"
+                        "try:\n    from approved_claims import ERMC\nexcept ImportError as e:\n    print('IMPORTERR', e)\n")
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("approved_claims.yaml is missing", out.stdout); self.assertIn("run onboarding", out.stdout)
+        self.assertIn("IMPORTERR approved_claims has no name 'ERMC'", out.stdout); self.assertNotIn("Traceback", out.stderr)
+
+    def test_audit_cli_refuses_reserved_name_before_reading_any_docx(self):
+        self._reserved_ws()
+        out = subprocess.run([sys.executable, os.path.join(TOOLS, "audit_claims.py"), self.ws],
+                             env=dict(os.environ, JOBKIT_WORKSPACE=self.ws), capture_output=True, text=True)
+        self.assertEqual(out.returncode, 2, out.stderr)
+        self.assertIn("reserved", out.stderr); self.assertIn("SUMMARIES", out.stderr); self.assertNotIn("Traceback", out.stderr)
+
+    def test_builder_and_name_import_refuse_reserved_name(self):
+        self._reserved_ws()
+        for code in ("from resume_builder import Resume; Resume()", "from approved_claims import SUMMARIES"):
+            out = self._run(code)
+            self.assertNotEqual(out.returncode, 0, code); self.assertIn("reserved", out.stderr); self.assertIn("SUMMARIES", out.stderr)
+
+    def test_facade_names_are_all_reserved(self):
+        """A YAML name that shadowed a facade attribute would be served silently by the module, never by __getattr__."""
+        sys.path.insert(0, TOOLS)
+        import approved_claims, claims_loader
+        public = {n for n in vars(approved_claims) if not n.startswith("__")}
+        self.assertTrue(public <= claims_loader._ENGINE_NAMES, public - claims_loader._ENGINE_NAMES)
