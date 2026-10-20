@@ -216,6 +216,18 @@ Resume fill under 90 % is a WARN (a thin profile has nothing approved left to ad
 Windows: `<jobkit python>` placeholder in all agent-facing commands, `[\/]` paths in `consistency.py`, a poppler guard,
 "git is not installed" distinguished from "not a git repository". Tests: `tests/test_guards_v09.py` (11 cases).
 
+## Exit statuses (v1.0, `system/engine/tools/exitcodes.py`)
+
+| code | name | meaning |
+|---|---|---|
+| 0 | OK | did what was asked |
+| 1 | FAILED | ran, and the check it exists to make did not pass (audit FAIL, setup blocked, manifest changed) |
+| 2 | REFUSED | would not act: bad arguments, a guard said no (SKIP guard, BUILT gate, never-places), a settings error |
+| 3 | OFFLINE | could not reach the job boards (connectivity probe failed / every board failed to answer) |
+
+A Python traceback (the interpreter's own exit 1) is always a bug to report. `decide.py`, `state.py`, `rubric.py` and
+`daily.py` take `--help`; their documented forms are unchanged.
+
 ## Cost knobs and the blind judges (v0.5; conditional scorer B since 2026-10-16)
 Scorer B reads only the postings scorer A placed in the borderline band (`settings.yaml rubric.b_band`, default [30, 70]):
 `rubric.py prep-b <run_A>` writes `prompt_B_<date>.txt` and `b_ids_<date>.json`; `merge` accepts a run B covering exactly

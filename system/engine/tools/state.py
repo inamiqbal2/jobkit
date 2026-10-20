@@ -17,7 +17,7 @@ decide.py after a BUILT or WATCH decision, so it always reflects the ledger. Nev
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
-import sqlite3, csv, sys, os, datetime, json
+import sqlite3, csv, sys, os, datetime, json, re   # v1.0: re was missing since v0.9's M16 (outcome 'rejected' crashed)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import WS as ROOT, lane_names as _lane_names, TRACKER_CSV, APPLICATIONS   # JOBKIT: workspace = data root
 DB=os.path.join(ROOT,"tracking","state.db"); CSV=os.path.join(ROOT,"tracking","jobs.csv")
@@ -351,14 +351,28 @@ def add(pairs):
         k,v=p.split('=',1); assert k in COLS, f"unknown column {k}"; r[k]=v
     c.execute(f"INSERT INTO applications ({','.join(Q(x) for x in COLS)}) VALUES ({','.join('?'*len(COLS))})",[r[k] for k in COLS])
     c.commit(); export_csv(); print(f"row {n} added")
-if __name__=="__main__":
-    cmd=sys.argv[1] if len(sys.argv)>1 else "stats"
+def _cli(argv=None):
+    """v1.0 (audit M29): argparse subcommands with the exact forms CLAUDE.md and the skills use; exit statuses from exitcodes.py
+    (applied / outcome return 0 ok, 1 nothing to act on, 2 ambiguous or refused)."""
+    import argparse
+    from exitcodes import OK
+    ap=argparse.ArgumentParser(prog="state.py",description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp=ap.add_subparsers(dest="cmd")
+    sp.add_parser("stats"); sp.add_parser("tracker"); sp.add_parser("import-csv"); sp.add_parser("export-csv")
+    p=sp.add_parser("set",help="set <row#> Col=value ..."); p.add_argument("row"); p.add_argument("pairs",nargs="*")
+    p=sp.add_parser("add",help="add Col=value ..."); p.add_argument("pairs",nargs="*")
+    p=sp.add_parser("applied",help='applied "<employer>" [Col=value ...]'); p.add_argument("employer"); p.add_argument("pairs",nargs="*")
+    p=sp.add_parser("outcome",help='outcome "<employer>" rejected|interview ["<note>"]'); p.add_argument("employer"); p.add_argument("kind"); p.add_argument("note",nargs="?",default="")
+    a=ap.parse_args(argv)
+    cmd=a.cmd or "stats"
     if cmd=="import-csv": import_csv()
     elif cmd=="export-csv": export_csv()
     elif cmd=="stats": stats()
-    elif cmd=="set": set_row(sys.argv[2],sys.argv[3:])
-    elif cmd=="add": add(sys.argv[2:])
+    elif cmd=="set": set_row(a.row,a.pairs)
+    elif cmd=="add": add(a.pairs)
     elif cmd=="tracker": tracker()
-    elif cmd=="applied": sys.exit(applied(sys.argv[2],sys.argv[3:]) or 0)
-    elif cmd=="outcome": sys.exit(outcome(sys.argv[2],sys.argv[3],sys.argv[4] if len(sys.argv)>4 else "") or 0)
-    else: print(__doc__)
+    elif cmd=="applied": return applied(a.employer,a.pairs) or OK
+    elif cmd=="outcome": return outcome(a.employer,a.kind,a.note) or OK
+    return OK
+if __name__=="__main__":
+    sys.exit(_cli())

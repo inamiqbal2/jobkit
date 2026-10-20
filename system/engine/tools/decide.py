@@ -9,8 +9,9 @@ Usage: <jobkit python> decide.py <url> SKIP|BUILT|APPLIED|WATCH|REOPEN "<reason>
 BUILT is GATED (v0.5, CONSTITUTION I.8): it is refused unless an application folder whose JobDescription.txt APPLY line
 is this URL exists AND carries a fresh AUDIT_PASS.json (written by audit_claims.py when every .docx in the folder passed;
 the sha256 of each .docx must still match). Exit 2 with a plain message otherwise - nothing is ledgered."""
-import sys,json,os,datetime,re
+import sys,json,os,datetime,re,argparse
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
+from exitcodes import OK,REFUSED   # v1.0 (audit M29): named exit statuses, one table in exitcodes.py
 from urlcanon import canon
 from userconfig import WS as ROOT, APPLICATIONS   # JOBKIT: workspace = data root
 LEDGER=os.path.join(ROOT,"tracking","dispositions.jsonl")
@@ -104,20 +105,25 @@ def skip_guard(cu,reason):
 if __name__=="__main__":
     try: sys.stdout.reconfigure(encoding="utf-8",errors="replace")
     except Exception: pass
-    if len(sys.argv)>1 and sys.argv[1]=="--list":
-        for d in load()[-int(sys.argv[2] if len(sys.argv)>2 else 20):]:
+    # v1.0 (audit M29): argparse with the exact forms the skills use - `decide.py <url> <DECISION> "<reason>"` and `decide.py --list [n]`
+    ap=argparse.ArgumentParser(prog="decide.py",description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter,add_help=True)
+    ap.add_argument("--list",nargs="?",const=20,type=int,metavar="N",help="show the last N decisions (default 20)")
+    ap.add_argument("url",nargs="?"); ap.add_argument("decision",nargs="?"); ap.add_argument("reason",nargs="?")
+    a=ap.parse_args()
+    if a.list is not None:
+        for d in load()[-a.list:]:
             print(f"{d['date']} {d['decision']:<8} {d['url'][:70]} - {d['reason'][:80]}")
-        sys.exit(0)
-    if len(sys.argv)<4:
-        print(__doc__); sys.exit(2)
-    url,decision,reason=sys.argv[1],sys.argv[2].upper(),sys.argv[3]
+        sys.exit(OK)
+    if not (a.url and a.decision and a.reason is not None):
+        print(__doc__); sys.exit(REFUSED)
+    url,decision,reason=a.url,a.decision.upper(),a.reason
     if decision not in ("SKIP","BUILT","APPLIED","WATCH","REOPEN","DEFER"):
-        print("decision must be SKIP|BUILT|APPLIED|WATCH|REOPEN (DEFER is written by rubric.py prep only)"); sys.exit(2)
+        print("decision must be SKIP|BUILT|APPLIED|WATCH|REOPEN (DEFER is written by rubric.py prep only)"); sys.exit(REFUSED)
     cu=canon(url)   # 2026-10-01 audit H3: one job, one ledger key (tracking params / greenhouse host variants collapsed)
     if decision=="SKIP" and not reason.startswith("AUTO("):
         ok,msg=skip_guard(cu,reason)
         if not ok:
-            print(msg); sys.exit(2)
+            print(msg); sys.exit(REFUSED)
     if decision=="BUILT":
         # v0.8 (M4): never build for a place the person ruled out
         from userconfig import location as _loc0
@@ -129,10 +135,10 @@ if __name__=="__main__":
                 except OSError: pass
             _hit=[p for p in _never if re.search(r"\b"+re.escape(str(p).strip())+r"\b",_hdr,re.I)]
             if _hit and not re.search(r"\bremote\b",_hdr,re.I):
-                print(f"BUILT refused: the posting is in {_hit[0]}, a place you said you would never move to (settings.yaml location.never_places)."); sys.exit(2)
+                print(f"BUILT refused: the posting is in {_hit[0]}, a place you said you would never move to (settings.yaml location.never_places)."); sys.exit(REFUSED)
         ok,msg=built_gate(cu)
         if not ok:
-            print(msg); sys.exit(2)
+            print(msg); sys.exit(REFUSED)
         print(f"audit gate: {msg}")
     os.makedirs(os.path.dirname(LEDGER),exist_ok=True)
     with open(LEDGER,"a",encoding="utf-8") as f:

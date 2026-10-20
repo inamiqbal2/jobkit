@@ -349,7 +349,15 @@ def merge(pa,pb):
         print(f"  {x['rubric']:5.1f}{w:6s} {_c:>6s} {x['src'][:18]:18s} {x['title'][:50]}")
 
 if __name__=="__main__":
-    if len(sys.argv)>1 and sys.argv[1]=="prep": prep()
-    elif len(sys.argv)>2 and sys.argv[1]=="prep-b": prep_b(sys.argv[2])
-    elif len(sys.argv)>3 and sys.argv[1]=="merge": merge(sys.argv[2],sys.argv[3])
+    # v1.0 (audit M29): argparse subcommands with the exact forms the daily skill uses (prep / prep-b <run_A> / merge <run_A> <run_B>)
+    import argparse
+    ap=argparse.ArgumentParser(prog="rubric.py",description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp=ap.add_subparsers(dest="cmd")
+    sp.add_parser("prep",help="batch + prompt for the two blind scorers")
+    p=sp.add_parser("prep-b",help="scorer B's prompt from run A"); p.add_argument("run_a")
+    p=sp.add_parser("merge",help="merge the two runs"); p.add_argument("run_a"); p.add_argument("run_b")
+    a=ap.parse_args()
+    if a.cmd=="prep": prep()
+    elif a.cmd=="prep-b": prep_b(a.run_a)
+    elif a.cmd=="merge": merge(a.run_a,a.run_b)
     else: print(__doc__)
