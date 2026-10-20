@@ -97,8 +97,8 @@ def resume_path(resume_used):
 
 def extract(path):
     """The configured story items from one docx."""
-    from docx import Document
-    paras = [(p.text.strip(), p.style.name) for p in Document(path).paragraphs]
+    import docxtext   # v0.8: all text channels
+    paras = [(p.text.strip(), p.style.name) for p, _ in docxtext.paragraphs(path)]
     out = {k: [] for k in LABELS}
 
     def bullets_after(i):

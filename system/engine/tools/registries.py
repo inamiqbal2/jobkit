@@ -11,7 +11,6 @@ Inputs
 Outputs (My Job Search/tracking/registries/ unless noted; every file is REWRITTEN, a dated .bak of the old one is kept)
   registry.json        [kind, slug, note]                 corpus.py (gh/lever/ashby/workable/smartrecruiters full text)
   wd_registry.json     [host, tenant, site, note]         sweep.py (Workday keyword search)
-  registry2.json       []                                 legacy; kept empty (Workday goes in wd_registry.json)
   hard_registry.json   {arm: [entries], "_readme"}        hard_ats.py (oracle/adp/eightfold/phenom/sap_html/icims_html)
   feeds_registry.json  {"feeds": [entries]}               feeds.py (packs' `misc` + `feeds` sections)
   ../watchlist.json    {"companies": [entries]}           watch.py
@@ -98,7 +97,6 @@ def assemble(verbose=True):
     hard = {"_readme": f"assembled {datetime.date.today().isoformat()} by system/engine/tools/registries.py from packs {[n for n, _ in sel]}", **hard}
     _write(os.path.join(REGISTRIES, "registry.json"), boards)
     _write(os.path.join(REGISTRIES, "wd_registry.json"), wd)
-    _write(os.path.join(REGISTRIES, "registry2.json"), [])
     _write(os.path.join(REGISTRIES, "hard_registry.json"), hard)
     _write(os.path.join(REGISTRIES, "feeds_registry.json"), {"feeds": feeds})
     _write(WATCHLIST, {"companies": watch})

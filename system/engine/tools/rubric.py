@@ -19,6 +19,7 @@ except Exception: pass
 import sys, os, json, datetime, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from urlcanon import canon as _curl
+import funnel as _funnel
 from userconfig import WS as ROOT, get as _cfg, run_options as _run_opts   # JOBKIT: workspace = data root
 TR=os.path.join(ROOT,"tracking")
 RB=os.path.join(TR,"rubric")
@@ -117,8 +118,14 @@ def prep():
         _away=[x for x in items if not _local(x)]
         if _away:
             dp0=os.path.join(TR,"dispositions.jsonl")
+            _seen=set()   # v0.8 (M6): a same-day re-run must not append the same AUTO(location) line again
+            if os.path.exists(dp0):
+                for l in open(dp0,encoding="utf-8"):
+                    try: _seen.add(_curl(json.loads(l)['url']))
+                    except Exception: pass
             with open(dp0,"a",encoding="utf-8") as f:
                 for x in _away:
+                    if _curl(x['url']) in _seen: continue
                     f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),decision="SKIP",
                         reason=f"AUTO(location): outside your commuting area - you chose to stay local (settings.yaml location.mode) - {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
             print(f"rubric prep: {len(_away)} posting(s) outside your commuting area set aside (you chose to stay local)")
@@ -132,7 +139,9 @@ def prep():
         dp=os.path.join(TR,"dispositions.jsonl")
         if os.path.exists(dp):
             for l in open(dp,encoding="utf-8"):
-                try: _d=json.loads(l); _led.add(_curl(_d['url'])) if _d.get('decision')!="DEFER" else None
+                try:
+                    _d=json.loads(l)
+                    if _d.get('decision')!="DEFER" or _d.get('date')==TODAY: _led.add(_curl(_d['url']))   # v0.8 (M6): one DEFER line per day
                 except Exception: pass
         with open(dp,"a",encoding="utf-8") as f:
             for x in deferred:
@@ -264,14 +273,13 @@ def merge(pa,pb):
     # and four were auto-skipped. A thin or boilerplate-only JD now goes to the human instead.
     _QUAL=re.compile(r"(qualificat|responsib|requirement|years? of experience|degree in|bachelor|master|ph\.?d|you will|what you)",re.I)
     def _stub(x):
-        """True when the saved JD is too thin, or reads as navigation chrome, to judge on."""
+        """True when the saved JD is too thin, or reads as navigation chrome, to judge on (funnel.stub_text)."""
         jd=x.get('jd')
         if not jd or not os.path.exists(jd): return True
-        try: t=open(jd,encoding='utf-8',errors='ignore').read()
+        try: return _funnel.stub_text(open(jd,encoding='utf-8',errors='ignore').read())
         except Exception: return True
-        body=t.split('==========')[-1] if '==========' in t else t
-        body=re.sub(r"\s+"," ",body).strip()
-        return len(body) < 700 or not _QUAL.search(body)
+    from userconfig import thresholds as _th
+    _AUTO_SKIP=float(_th()["auto_skip_below_rubric"])   # v0.8 (code audit H4): the documented setting now decides; it was hard-coded 40
     _PROTECT=re.compile(_cfg("rubric.protect_title_regex", r"(?!x)x") or r"(?!x)x",re.I)   # JOBKIT: archetype the rubric is known to under-score for THIS user (settings.yaml rubric.protect_title_regex); default none
     # PRIORITY LANE: the user's declared target job type never auto-skips on rubric score. See tools/lanes.py.
     from lanes import is_priority as _LANE
@@ -287,17 +295,17 @@ def merge(pa,pb):
     _auto=0
     with open(dp,"a", encoding="utf-8") as f:
         for x in rows:
-            if x['rubric']<40 and x['rubric_delta']<15 and not _PROTECT.search(x.get('title','')) \
+            if x['rubric']<_AUTO_SKIP and x['rubric_delta']<15 and not _PROTECT.search(x.get('title','')) \
                     and not _LANE(x.get('title','') or '', _jdtext(x.get('jd','') or '')) \
                     and not _stub(x) and _curl(x['url']) not in _led \
                     and not (x.get('best14') and x['best14']>=_cfg("thresholds.build_default_min_rubric",60)):
-                f.write(json.dumps(dict(date=TODAY,url=x['url'],decision="SKIP",
-                    reason=f"AUTO(rubric): dual-blind avg {x['rubric']:.0f} (Δ{x['rubric_delta']}) below 40 — {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
+                f.write(json.dumps(dict(date=TODAY,url=_curl(x['url']),decision="SKIP",
+                    reason=f"AUTO(rubric): dual-blind avg {x['rubric']:.0f} (Δ{x['rubric_delta']}) below {_AUTO_SKIP:.0f} — {x.get('src','')[:20]} {x.get('title','')[:50]}"))+"\n")
                 x['fitclass']="AUTOSKIP"; _auto+=1
                 print(f"  AUTO-SKIP(rubric {x['rubric']:.0f}): {x.get('src','')[:18]} - {x.get('title','')[:55]}")
     _stubs=[x for x in rows if x.get('fitclass')!="AUTOSKIP" and _stub(x)]
     for x in _stubs: x['stub_jd']=True
-    print(f"auto-ledgered {_auto} clear rubric rejects (avg<40, delta<15, non-archetype, non-PRIORITY-LANE, non-stub)")
+    print(f"auto-ledgered {_auto} clear rubric rejects (avg<{_AUTO_SKIP:.0f}, delta<15, non-archetype, non-PRIORITY-LANE, non-stub)")
     if _stubs:
         print(f"  WARN: {len(_stubs)} item(s) had a THIN/BOILERPLATE JD - auto-skip withheld, sent to judgment:")
         for x in _stubs: print(f"      {x.get('src','')[:16]} - {x.get('title','')[:60]} (rubric {x.get('rubric')})")

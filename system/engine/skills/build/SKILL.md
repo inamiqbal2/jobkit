@@ -53,8 +53,11 @@ for the exact shape). Rules: open the summary with the posting's role noun; tenu
 numeric years bar at or below the person's years; hands-on vs used wording exactly as approved; at least
 `build.min_experience_entries` entries; the location line per `build.location_line_default` or the metro
 when commutable; file name = `build.cv_filename` / `build.resume_filename`. Never type a sentence into the
-script that the YAML does not already approve. A statement (statement of purpose / research statement /
-academic cover letter) is composed the same way from `profile/templates/` and approved sentences only.
+script that the YAML does not already approve. A statement or cover letter (statement of purpose / research statement /
+academic cover letter) is composed from `profile/templates/` and the person's confirmed facts; it is checked for
+never-claims and for every number's source, not line by line, so write only what the evidence files say. After saving it,
+mark it as a letter: `system/.venv/bin/python system/engine/tools/docxtext.py --stamp-letter <file.docx>` (a file named
+CoverLetter_*/Statement_* counts as a letter by name; anything else unmarked is audited as a resume and will fail).
 The script needs no path tricks: `system/.venv` carries a `.pth` that makes `system/engine/tools` importable, so
 `from resume_builder import Resume` and `from approved_claims import ...` work as they are (the example scripts
 still add the engine to `sys.path` by hand; that is harmless). Run it with the venv python; the workspace is found

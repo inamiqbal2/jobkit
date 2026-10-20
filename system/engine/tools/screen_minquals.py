@@ -313,7 +313,8 @@ def screen(rec):
     rec=dict(rec,jd=_jp)
     _b=_band(txt)
     if _b: rec["band_lo"],rec["band_hi"]=_b; rec["lowband"]=bool(_LBT and _b[1]<int(_LBT))   # JOBKIT: settings.yaml thresholds.low_band_top
-    if _EXPIRED.search(txt or ""): rec["fitclass"]="EXCLUDED"; rec["minq"]="EXPIRED posting"
+    if _EXPIRED.search(txt or ""):   # v0.8 (code audit H3): return at once - the earlier mark was overwritten by the final return
+        return dict(rec,verdict="EXPIRED",fitclass="EXCLUDED",minq="EXPIRED posting",pref="",flags=["expired"],soft=[],yrs=[],waiver=False)
     mn,pf=blocks(txt)
     scope = mn if mn else txt[:1500]
     flags=[k for k,p in BLOCK.items() if (_elig_hit(p,scope) if k in ("clearance","citizen-only") else _hit(p,scope))]

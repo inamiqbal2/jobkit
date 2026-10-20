@@ -509,10 +509,10 @@ def main():
     if any(x.get("kind") in ("getro","ats_links") or "{kw}" in str(x.get("base","")) for x in whole) and not BOARD_TERMS:
         print("feeds: queries.yaml has no board_terms - keyword-searched boards return nothing")
     with cf.ThreadPoolExecutor(6) as ex:
-        futs=[ex.submit(_WHOLE[e["kind"]],e) for e in whole]
-        for f in futs:
+        futs=[(e,ex.submit(_WHOLE[e["kind"]],e)) for e in whole]
+        for e,f in futs:
             try: res+=f.result()
-            except Exception: pass
+            except Exception as ex_: print(f"feeds error ({e.get('kind')}:{e.get('name','?')}): {type(ex_).__name__}")   # v0.8 (M12): said, not swallowed
     seen=set(); uniq=[]
     for src,title,loc,url,dt in res:
         k=url.rstrip('/')

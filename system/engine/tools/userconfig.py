@@ -211,7 +211,7 @@ def exclusions():
     return {
         "employers": list(e.get("employers", []) or []),
         "role_types": list(e.get("role_types", []) or []),
-        "contract_work": bool(e.get("contract_work", True)),
+        "contract_work": bool(e.get("contract_work", False)),   # v0.8 (M13): absent = OUT, as the template says
         "postdocs": bool(e.get("postdocs", True)),
     }
 

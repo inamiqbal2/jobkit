@@ -58,11 +58,6 @@ ELIG = re.compile(_GENERIC_ELIG + (("|" + _RT) if _RT else ""), re.I)
 # EXPORT-CONTROL TAG. By default NOT an eligibility drop: the queue marks export-controlled / U.S.-person /
 # residency-gated postings "⚠ITAR" so judgment can apply a user rule (e.g. prefer untagged for a while). When
 # settings.yaml work_authorization.export_controlled_open is FALSE the tag becomes a knockout (export_knockout()).
-EXPORT = re.compile(
-    r"\bITAR\b|International Traffic in Arms|export[- ]control|export administration regulations"
-    r"|U\.?S\.? persons?\b|export licen[cs]e|10 CFR (Part )?810"
-    r"|(lawful )?permanent residen(t|ce)|green[- ]card", re.I)
-
 # 2026-10-01 audit: the first EXPORT regex tagged 3 of 5 queue items on NDAA country-restriction boilerplate
 # ("citizens of the People's Republic of China ... who are not Lawful Permanent Residents") and on inclusive
 # EEO text. Tag ONLY real gates: strong export terms, or a citizen/permanent-resident requirement in gate form.

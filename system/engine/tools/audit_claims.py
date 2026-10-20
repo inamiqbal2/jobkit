@@ -2,7 +2,7 @@
 """Honesty audit for built documents. Run on EVERY .docx before it is shown to the person (CONSTITUTION I.1, I.8).
 All claim boundaries come from My Job Search/profile/approved_claims.yaml (via approved_claims.py).
 
-WHITELIST (v0.5, audit bug 5): a resume or CV is a list of approved sentences, nothing else.
+WHITELIST (since v0.5): a resume or CV is a list of approved sentences, nothing else.
   Every non-structural paragraph of a resume (Resume*.docx / build.resume_filename) or CV (CV*.docx / build.cv_filename)
   must equal, whitespace-normalized and case-insensitive, a text the YAML approves: an experience / education / field /
   teaching tuple line ("org dates", "role loc"), a named bullet, a project title or bullet, a skills line, a cv.* item,
@@ -38,18 +38,43 @@ from userconfig import build as _build_cfg, get as _cfg, EVIDENCE as _EVIDENCE
 PASS_FILE = "AUDIT_PASS.json"
 
 
-def _is_cv(path):
-    base = os.path.basename(path).lower()
-    return base.startswith("cv") or base == os.path.basename(str(_build_cfg().get("cv_filename", ""))).lower()
+import docxtext as _dx
 
 
-def _is_resume(path):
+def _kind(path, doc=None):
+    """v0.8 (code audit H2): what a .docx IS decides how strictly it is audited, and the decision fails CLOSED.
+    resume_builder stamps every resume / CV; the build skill stamps letters (docxtext.stamp_letter). A stamp wins. Without a
+    stamp the configured filenames decide; a file with neither is audited as a RESUME - the strict path - never as a letter."""
+    k = _dx.kind(doc if doc is not None else path)
+    if k:
+        return k
     base = os.path.basename(path).lower()
-    return base.startswith("resume") or base == os.path.basename(str(_build_cfg().get("resume_filename", ""))).lower() or _is_cv(path)
+    if base == os.path.basename(str(_build_cfg().get("cv_filename", ""))).lower() or base.startswith("cv"):
+        return "cv"
+    if base == os.path.basename(str(_build_cfg().get("resume_filename", ""))).lower() or base.startswith("resume"):
+        return "resume"
+    if re.match(r"(coverletter|cover_letter|cover-letter|letter|statement)", base):
+        return "letter"
+    return "resume"
+
+
+def _is_cv(path, doc=None):
+    return _kind(path, doc) == "cv"
+
+
+def _is_resume(path, doc=None):
+    return _kind(path, doc) in ("resume", "cv")
 
 
 def _norm_dates(d):
     return re.sub(r"\bSept\b\.?", "Sep", str(d or ""))
+
+
+def _builder_footer_lines():
+    """The only footer text a jobkit document may carry: the AcademicCV page footer (name + 'Curriculum Vitae')."""
+    name = str(_cfg("identity.name", "") or "").strip()
+    # resume_builder._page_footer writes "<name> - Curriculum Vitae - page " + a PAGE field; the field renders as a digit
+    return [f"{name} - Curriculum Vitae - page", f"{name} - Curriculum Vitae - page 1", name] if name else []
 
 
 def _approved_set():
@@ -85,10 +110,24 @@ def _approved_set():
     return ok
 
 
+# v0.8 (code audit H6): a heading is recognised by STRUCTURE - the bottom border resume_builder._heading draws under every
+# section title - never by "any short ALL-CAPS line". A plain paragraph in capitals is a claim like any other.
+from docx.oxml.ns import qn as _qn
+def _is_builder_heading(q):
+    pPr = q._p.pPr
+    if pPr is None or pPr.find(_qn("w:pBdr")) is None:
+        return False
+    t = q.text.strip()
+    return bool(t) and len(t.split()) <= 6 and not re.search(r"[.;:]|\d", t)
+_PREFIX_OK = re.compile(r"^[A-Za-z][A-Za-z ,'&/()\-]{0,58}$")   # a role-noun opener: letters only, no digits, no claims with numbers
+
+
 def _traceability(paras):
     """Untraceable paragraphs of a resume / CV (see module docstring). Returns a list of offending texts."""
     ok = _approved_set()
     n = _ac._norm
+    labels = {n(l) for l, _ in {**_ac.SKILLS_LINES, **_ac.CV_SKILLS}.values()} | {n(c[0]) for c in _ac.CONSTANTS.values() if isinstance(c, tuple) and len(c) == 2} \
+             | {n(_ac.PUBS[0]) if _ac.PUBS else ""} | {n(p["title"]) for p in _ac.PROJECTS.values() if isinstance(p, dict) and p.get("title")}
     summaries = {n(v) for v in _ac.SUMMARIES.values() if v}
     tenures = {n(t) for t in (_ac.TENURE, _ac.TENURE_SHORT) if t}
     name = str(_cfg("identity.name", "") or "").strip()
@@ -104,26 +143,32 @@ def _traceability(paras):
         is_list = q.style.name.startswith("List")
         if name and t == name:
             continue                                            # name line (structure)
-        if (i == 1 and name and nonempty[0].text.strip() == name) or (email and email in t) or (phone and phone in t):
-            continue                                            # contact line (structure)
-        if t.upper() == t and len(t.split()) <= 6 and not is_list:
-            continue                                            # section heading (structure)
+        if i == 1 and name and nonempty[0].text.strip() == name and (email in t or phone in t):
+            continue                                            # contact line = the line right under the name, carrying the email or phone
+        if _is_builder_heading(q) and not is_list:
+            continue                                            # section heading = a paragraph the builder drew with its border
         tn = n(re.sub(r"^\d+\.\s*", "", t))                      # numbered publication
         if tn in ok:
             continue
         # "Label : approved text" - the label is structure, the text must be approved
         m = re.match(r"^([^:]{1,40}?)\s*:\s*(.+)$", t)
-        if m and len(m.group(1).split()) <= 5 and n(m.group(2)) in ok:
-            continue
+        if m and n(m.group(1)) in labels and n(m.group(2)) in ok:
+            continue                                            # label = an approved label (skills line, constant, project title)
         # "<role noun prefix (<= 60 chars)>: <approved summary>[ <approved tenure line>]"
         body = tn.rstrip(" .;,")
         for tl in tenures:
             tl = tl.rstrip(" .;,")
             if body.endswith(" " + tl):
                 body = body[: -len(tl) - 1].rstrip(" .;,")
-        if any(body.endswith(sm.rstrip(" .;,")) and len(body) - len(sm.rstrip(" .;,")) <= 60 for sm in summaries):
+        for sm in summaries:
+            sm = sm.rstrip(" .;,")
+            if body.endswith(sm):
+                prefix = body[: -len(sm)].rstrip(" :")
+                if not prefix or (len(prefix) <= 60 and _PREFIX_OK.match(prefix) and not re.search(r"\d", prefix)):
+                    break
+        else:
+            bad.append(t[:80])
             continue
-        bad.append(t[:80])
     return bad
 
 
@@ -207,10 +252,24 @@ def check(path):
     problems = []
     if not _ac.loaded():
         return ["profile/approved_claims.yaml is missing - nothing can be audited (run onboarding first)"]
-    doc = Document(path)
-    paras = [q for q in doc.paragraphs]
+    try:
+        doc = Document(path)
+    except Exception as e:   # v0.8 (M9): an unreadable file is a FAIL line, never a traceback that aborts the folder
+        return [f"unreadable .docx ({type(e).__name__}) - rebuild it"]
+    # v0.8 (H1): EVERY text channel - body, tables, headers, footers, text boxes - not just body paragraphs
+    located = _dx.paragraphs(doc)
+    paras = [q for q, _ in located]
     t = " ".join(p.text for p in paras)
-    is_resume = _is_resume(path)
+    is_resume = _is_resume(path, doc)
+    offpage = [f"{where}: {q.text.strip()[:60]}" for q, where in located if where != "body" and q.text.strip()]
+    if is_resume and offpage:
+        # a resume / CV built by jobkit has no tables, headers or footers (the CV page footer is the builder's own and is
+        # whitelisted below); anything else there is text the person did not approve
+        own_footer = {_ac._norm(x) for x in _builder_footer_lines()}
+        extra = [x for (q, where), x in zip([(q, w) for q, w in located if w != "body" and q.text.strip()], offpage)
+                 if re.sub(r"\s*\d+$", "", _ac._norm(q.text.strip())).strip() not in own_footer]
+        if extra:
+            problems.append(f"text outside the page body (tables / headers / footers): {extra[:4]}")
 
     hits = [w for w in _ac.FORBIDDEN if re.search(r"(?<![A-Za-z])" + re.escape(w) + r"(?![A-Za-z])", t, re.I)]
     if hits:
@@ -254,7 +313,9 @@ def check(path):
     if is_resume and _ac.WORK_AUTH_LINE and _ac.WORK_AUTH_LINE not in t:
         problems.append("MISSING work-auth line")
     if is_resume:
-        untraced = _traceability(paras)
+        # the builder's own CV page footer is structure, not a claim (its text is whitelisted above); every other paragraph is checked
+        _own = {_ac._norm(x) for x in _builder_footer_lines()}
+        untraced = _traceability([q for q, where in located if not (where == "footer" and re.sub(r"\s*\d+$", "", _ac._norm(q.text.strip())).strip() in _own)])
         if untraced:
             problems.append(f"{'CV' if _is_cv(path) else 'resume'} traceability: {len(untraced)} line(s) not in approved_claims.yaml: {untraced[:3]}")
     else:
@@ -321,6 +382,7 @@ if __name__ == "__main__":
     folders = {}
     for a in args:
         files = [a] if a.endswith(".docx") else sorted(glob.glob(os.path.join(a, "**", "*.docx"), recursive=True))
+        files = [f for f in files if not _dx.is_stray(f)]   # v0.8 (M9): Word lock files and .bak-<date> backups are not documents
         for f in files:
             pr = check(f)
             bad += bool(pr)
@@ -328,7 +390,7 @@ if __name__ == "__main__":
             print(("FAIL  " if pr else "PASS  ") + _short(f) + ("  | " + "; ".join(pr) if pr else ""))
     total = sum(len(v) for v in folders.values())
     for folder, items in folders.items():
-        all_docs = {os.path.abspath(d) for d in glob.glob(os.path.join(folder, "*.docx"))}
+        all_docs = {os.path.abspath(d) for d in glob.glob(os.path.join(folder, "*.docx")) if not _dx.is_stray(d)}
         audited = {os.path.abspath(f) for f, _ in items}
         if not any(failed for _, failed in items) and audited >= all_docs:
             # a clean run covering every .docx in the folder -> the pass marker decide.py BUILT needs

@@ -1,9 +1,13 @@
 # CHARTER: RESUME BUILD (load when building / tailoring)
 
-## Hand-build EVERYTHING (there is no template factory)
-Fresh per posting: summary, EVERY experience bullet, project selection + descriptions, skills lines.
-Facts never change; only emphasis, ordering, vocabulary. Tailoring = rephrasing REAL experience in the
-employer's language. Key skills go INSIDE experience bullets, not only in the skills block.
+## Build from approved lines only (there is no template factory, and no rewording on the fly)
+Per posting you choose WHICH approved lines appear and in WHAT ORDER: the summary for the lane, the experience entries
+and bullets the entry scorer ranks highest, the projects, the skills lines. Every sentence on the page must equal a
+line in `profile/approved_claims.yaml` word for word; `audit_claims.py` refuses anything else. Facts never change and
+neither does wording, except by two legal routes: (1) a wording the person already confirmed as equivalent
+(`profile/claim_lexicon.yaml`; `keywords.py --category` lists the swaps that apply to this posting), or (2) a new
+sentence the person confirms now (read it back, add it to the YAML, then use it). The posting's own words appear on the
+resume only through those two routes.
 
 ## Source-of-truth chain (nothing reaches a resume without a trail)
 `profile/evidence/<job>.md` (RAW FACTS; NDA rules at the top) -> `profile/skills-inventory.md` +
@@ -34,11 +38,11 @@ No build until evidence files + approved_claims.yaml exist and `audit_claims.py`
    looser; above 93% risks a page-2 spill) · parse test · date order · readability (summary <= 45 words,
    bullets <= 22 words, <= 4 bullets per entry target) · no repeated adjacent openers · American English.
    `audit_claims.py` PASS. `consistency.py <folder>` PASS or a deliberate, noted difference.
-6. Keyword coverage pass (mandatory): `keywords.py <docx> <jd>` - MISSING-CLAIMABLE terms are added
-   VERBATIM (recruiters ctrl-F literal strings; synonym-only presence fails their search); UTIL only with
-   the hedged phrasing; ASK -> confirm with the user first; NEVER -> report as an honest gap, never add.
-   First occurrence of each key acronym gets spell-out + abbreviation. Science synonyms are matched worse
-   than business terms by ATS AI - never rely on synonym equivalence.
+6. Keyword coverage pass (mandatory): `keywords.py <docx> <jd>` - a MISSING-CLAIMABLE term is one the person HAS; it
+   reaches the page only by choosing an approved line that contains it, a confirmed lexicon equivalent, or a new
+   sentence the person confirms (read back first). UTIL only with the hedged phrasing; ASK -> confirm with the user
+   first; NEVER -> report as an honest gap, never add. Recruiters search literal strings, so prefer the approved line
+   that carries the exact term over one that carries a synonym.
 7. Job card for the user: [FIT · BAND · TIER] + employer apply link first; resume path; honest gaps stated.
 Folder = `applications/<Company>_<Role>/`; file ALWAYS `build.resume_filename`.
 

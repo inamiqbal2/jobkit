@@ -86,7 +86,7 @@ def lane_stats(lane):
     if not os.path.exists(db) or not lane: return None
     c=sqlite3.connect(db)
     try:
-        n,pos,neg=c.execute("""SELECT COUNT(*),SUM(Status IN ('interviewing','advanced','closed')),
+        n,pos,neg=c.execute("""SELECT COUNT(*),SUM(Status IN ('interviewing','advanced','offer')),
             SUM(Status='rejected') FROM applications WHERE Lane=?""",(lane,)).fetchone()
     except sqlite3.Error: return None
     return (n or 0,pos or 0,neg or 0)
@@ -97,7 +97,7 @@ def closed_lanes():
     if not os.path.exists(db): return {}
     c=sqlite3.connect(db); out={}
     try:
-        for lane,n,pos,neg in c.execute("""SELECT Lane,COUNT(*),SUM(Status IN ('interviewing','advanced','closed')),
+        for lane,n,pos,neg in c.execute("""SELECT Lane,COUNT(*),SUM(Status IN ('interviewing','advanced','offer')),
                 SUM(Status='rejected') FROM applications WHERE Lane<>'' GROUP BY Lane"""):
             if (n or 0)>=CLOSED_MIN_APPLIED and (pos or 0)<=CLOSED_MAX_POSITIVE: out[lane]=(n or 0,pos or 0,neg or 0)
     except sqlite3.Error: pass

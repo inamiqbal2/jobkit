@@ -285,7 +285,7 @@ def stats():
     print("STATUS:",dict(g("SELECT Status,COUNT(*) FROM applications GROUP BY Status")))
     print("\nLANE (responded only):")
     for lane,n,pos,neg in g("""SELECT Lane,COUNT(*),
-        SUM(CASE WHEN Status IN ('interviewing','advanced','closed') THEN 1 ELSE 0 END),
+        SUM(CASE WHEN Status IN ('interviewing','advanced','offer') THEN 1 ELSE 0 END),
         SUM(CASE WHEN Status='rejected' THEN 1 ELSE 0 END)
         FROM applications WHERE Lane!='' GROUP BY Lane"""):
         print(f"  {lane:16} applied {n:2} | +{pos or 0} / -{neg or 0}")

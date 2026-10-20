@@ -126,7 +126,7 @@ def title_present(title, rtext):
     return None
 
 def check(resume_path, jd_path):
-    rtext = " ".join(p.text for p in Document(resume_path).paragraphs)
+    import docxtext; rtext = " ".join(p.text for p, _ in docxtext.paragraphs(resume_path))   # v0.8: all text channels
     jtext = open(jd_path, encoding="utf-8", errors="ignore").read()
     if "==========" in jtext: jtext = jtext.split("==========", 1)[1]   # v0.2: the job-card header (SOURCE/APPLY/FIT) is not JD text
     in_jd = {t: (s, c) for t, (s, c) in LEX.items() if _found(t, s, jtext)}
@@ -145,7 +145,7 @@ def check(resume_path, jd_path):
     print(f"JD lexicon terms found: {len(in_jd)}   (lexicon: {LEX_SOURCE})")
     print("\n-- PRESENT:")
     for t, note in present: print(f"  + {t}  ({note})")
-    print("\n-- MISSING but CLAIMABLE - ADD VERBATIM to the resume:")
+    print("\n-- MISSING but CLAIMABLE - the person HAS these; use an approved line that carries the term, a confirmed lexicon equivalent, or confirm a new sentence:")
     for t in add: print(f"  + {t}")
     print("\n-- MISSING, classification UTIL/ASK - add with correct phrasing or confirm with the user:")
     for t, c in ask: print(f"  ? {t} [{c}]" + (f"  (UTIL = only with a hedged phrase: {' / '.join(HEDGED)})" if c == "UTIL" and HEDGED else ""))
@@ -158,8 +158,7 @@ def lexicon_swaps(resume_path, jd_path, category=None):
     the posting uses a confirmed equivalent. Advisory: the build may use the posting's wording; the audit accepts it."""
     from claim_lexicon import for_category, _pat
     try:
-        from docx import Document
-        rt = "\n".join(p.text for p in Document(resume_path).paragraphs)
+        import docxtext; rt = docxtext.text(resume_path)
     except Exception:
         rt = open(resume_path, encoding="utf-8", errors="ignore").read() if os.path.exists(resume_path) else ""
     jt = open(jd_path, encoding="utf-8", errors="ignore").read()

@@ -114,6 +114,17 @@ if __name__=="__main__":
         if not ok:
             print(msg); sys.exit(2)
     if decision=="BUILT":
+        # v0.8 (M4): never build for a place the person ruled out
+        from userconfig import location as _loc0
+        _never=[p for p in _loc0().get("never_places",[]) if str(p).strip()]
+        if _never:
+            _hdr=""
+            for _f in _folders_for(cu):
+                try: _hdr+=open(os.path.join(_f,"JobDescription.txt"),encoding="utf-8",errors="replace").read(400)
+                except OSError: pass
+            _hit=[p for p in _never if re.search(r"\b"+re.escape(str(p).strip())+r"\b",_hdr,re.I)]
+            if _hit and not re.search(r"\bremote\b",_hdr,re.I):
+                print(f"BUILT refused: the posting is in {_hit[0]}, a place you said you would never move to (settings.yaml location.never_places)."); sys.exit(2)
         ok,msg=built_gate(cu)
         if not ok:
             print(msg); sys.exit(2)

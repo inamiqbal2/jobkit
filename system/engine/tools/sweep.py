@@ -7,6 +7,7 @@ except Exception: pass
 import random, time, urllib.error, json,urllib.request,re,datetime,os,sys,concurrent.futures as cf
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from eligibility import ELIG
+import funnel as _funnel
 from userconfig import WS as ROOT, location as _loc_cfg, queries as _queries   # JOBKIT: workspace = data root
 REG=os.path.join(ROOT,"tracking","registries")
 TODAY=datetime.date.today(); WIN=int(sys.argv[1]) if len(sys.argv)>1 and sys.argv[1].isdigit() else 30
@@ -98,17 +99,9 @@ if not TERMS: print("sweep: queries.yaml has no workday_terms - the Workday arm 
 
 def main():
     jobs=[]
-    wd_only="--wd-only" in sys.argv  # boards arm now covered by corpus.py+match.py full-text matching
-    if not wd_only:
-        reg=json.load(open(os.path.join(REG,"registry.json"), encoding="utf-8"))
-        def r1(v):
-            k,s,_=v
-            try: return (s,F[k](s))
-            except Exception: return (s,[])
-        with cf.ThreadPoolExecutor(20) as ex:
-            for s,rows in ex.map(r1,[v for v in reg if v[0] in F]): jobs+=[(s,)+r for r in rows]
+    # v0.8 (code audit LOW): this arm sweeps Workday only. The GH/Lever/Ashby/Workable/SmartRecruiters boards are read in full by
+    # corpus.py; the old keyword sweep of them here was dead code (daily.py always passed --wd-only) and is gone.
     wd=[f"{h}|{t}|{s}" for h,t,s,n in json.load(open(os.path.join(REG,"wd_registry.json"), encoding="utf-8"))]
-    wd+=[r[1] for r in json.load(open(os.path.join(REG,"registry2.json"), encoding="utf-8")) if r[0]=="workday"]
     with cf.ThreadPoolExecutor(min(20,max(4,len(wd)))) as ex:   # one worker per TENANT, never several per host
         for sp,rows in zip(wd,ex.map(wds,wd)): jobs+=[(sp.split('|')[1],)+r for r in rows]
     _WD_SRC={sp.split('|')[1] for sp in wd}
@@ -128,7 +121,7 @@ def main():
         if ELIG.search(title): continue
         if not _geo.in_country_loose(loc or ''): continue   # non_us() (URL/title aware) runs once more in daily.py for every arm
         tier="1" if T1.search(loc or '') else ("2" if T2.search(loc or '') else "3")
-        band="FRESH" if age<=7 else ("RECENT" if age<=14 else "OPEN")
+        band=_funnel.band(age)
         hits.append(dict(band=band,tier=tier,age=age,src=src,title=title,loc=loc,url=url))
     hits.sort(key=lambda h:({'FRESH':0,'RECENT':1,'OPEN':2}[h['band']],int(h['tier']),h['age']))
     out=os.path.join(ROOT,"tracking","candidates.json")

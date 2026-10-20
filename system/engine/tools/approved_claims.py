@@ -22,11 +22,14 @@ Everything is also reachable as CLAIMS (the raw dict). Nothing here is person-sp
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
-import os, sys, re
+import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import APPROVED_CLAIMS_YAML, load_yaml, work_auth
 
 CLAIMS = load_yaml(APPROVED_CLAIMS_YAML, default={}) or {}
+# v0.8 (code audit H7): names from the person's YAML (entry keys, bullet names, constants, skills labels) are collected here and
+# exported as module names only at the END of loading, after a check that none collides with the module's own names.
+_EXPORTS = {}
 
 # ---- experience entries --------------------------------------------------------------------
 EXPERIENCE = []            # list of dicts as in the YAML (key, org, dates, role, loc, bullets, ...)
@@ -39,17 +42,17 @@ for _e in CLAIMS.get("experience", []) or []:
         continue
     EXPERIENCE.append(_e)
     ENTRY[_k] = (_e.get("org", ""), _e.get("dates", ""), _e.get("role", ""), _e.get("loc", ""))
-    globals()[_k] = ENTRY[_k]
+    _EXPORTS[_k] = ENTRY[_k]
     _bl = _e.get("bullets", {}) or {}
     if isinstance(_bl, dict):
         _texts = []
         for _bn, _bt in _bl.items():
             BULLETS[str(_bn)] = str(_bt)
-            globals()[str(_bn)] = str(_bt)
+            _EXPORTS[str(_bn)] = str(_bt)
             _texts.append(str(_bt))
     else:
         _texts = [str(x) for x in _bl]
-    globals()[f"{_k}_BULLETS"] = _texts
+    _EXPORTS[f"{_k}_BULLETS"] = _texts
     if _e.get("frozen"):
         FROZEN[_e.get("org", "")] = list(_texts)
 
@@ -61,16 +64,16 @@ for _vn, _vv in (CLAIMS.get("entry_variants", {}) or {}).items():
     _vv = _vv or {}
     _base = ENTRY.get(str(_vv.get("base", "")), ("", "", "", ""))
     ENTRY_VARIANTS[str(_vn)] = (str(_vv.get("org", _base[0])), str(_vv.get("dates", _base[1])), str(_vv.get("role", _base[2])), str(_vv.get("loc", _base[3])))
-    globals()[str(_vn)] = ENTRY_VARIANTS[str(_vn)]
+    _EXPORTS[str(_vn)] = ENTRY_VARIANTS[str(_vn)]
 # bullet_bank: {NAME: text} -> approved bullets not tied to one entry (dissertation / publication bullets)
 for _bn, _bt in (CLAIMS.get("bullet_bank", {}) or {}).items():
     BULLETS[str(_bn)] = str(_bt)
-    globals()[str(_bn)] = str(_bt)
+    _EXPORTS[str(_bn)] = str(_bt)
 # constants: {NAME: text | [label, text]} -> approved text snippets (coursework/teaching phrasings, instrument models)
 CONSTANTS = {}
 for _cn, _cv in (CLAIMS.get("constants", {}) or {}).items():
     CONSTANTS[str(_cn)] = tuple(str(x) for x in _cv) if isinstance(_cv, (list, tuple)) else str(_cv)
-    globals()[str(_cn)] = CONSTANTS[str(_cn)]
+    _EXPORTS[str(_cn)] = CONSTANTS[str(_cn)]
 
 # ---- skills lines, publications, tenure, projects --------------------------------------------
 SKILLS_LINES = {}
@@ -79,7 +82,7 @@ for _lab, _val in (CLAIMS.get("skills_lines", {}) or {}).items():
         SKILLS_LINES[_lab] = (str(_val[0]), str(_val[1]))
     else:
         SKILLS_LINES[_lab] = (str(_lab), str(_val))
-    globals()[str(_lab)] = SKILLS_LINES[_lab]
+    _EXPORTS[str(_lab)] = SKILLS_LINES[_lab]
 
 _pubs = CLAIMS.get("publications", {}) or {}
 PUBS = ("Publications", str(_pubs.get("line", ""))) if _pubs.get("line") else None
@@ -137,21 +140,29 @@ for _e in EXPERIENCE:
     EXPERIENCE_BY_SECTION.setdefault(str(_e.get("section", "research")).lower(), []).append(_e)
 
 
+# v0.8 (code audit M8): the whitelist is built from the keys that HOLD approved wording, never from "everything in the file".
+_APPROVED_KEYS = ("summaries", "tenure", "experience", "entry_variants", "bullet_bank", "constants", "skills_lines",
+                  "publications", "projects", "cv")
+_TEXT_FIELDS = ("org", "dates", "role", "loc", "bullets", "line", "short", "title", "bullet", "text", "citation",
+                "institution", "degree", "section_titles", "education", "publications", "presentations", "field_experience",
+                "certifications", "skills", "teaching", "grants_awards", "service", "references")
+
+
 def approved_texts():
-    """EVERY string the YAML approves, normalized - the audit's traceability set for CV mode (audit_claims)."""
+    """EVERY string the YAML approves, normalized - the audit's traceability set (audit_claims)."""
     out = set()
-    def walk(o):
+    def walk(o, allow_all=False):
         if isinstance(o, dict):
             for k, v in o.items():
-                if k in ("evidence", "nda", "keywords", "question", "pending", "retired_claims", "never_claims",
-                         "hedged_phrases", "banned_words", "consistency_items", "status", "key", "base", "kind", "match"):
+                if k in ("evidence", "nda", "keywords", "question", "status", "key", "base", "kind", "match", "counts", "years"):
                     continue
-                walk(v)
+                if allow_all or k in _TEXT_FIELDS or k in _APPROVED_KEYS:
+                    walk(v, allow_all=True)
         elif isinstance(o, (list, tuple)):
-            for v in o: walk(v)
+            for v in o: walk(v, allow_all)
         elif isinstance(o, str):
             out.add(o)
-    walk({k: v for k, v in CLAIMS.items() if k not in ("pending", "retired_claims", "never_claims", "consistency_items")})
+    walk({k: v for k, v in CLAIMS.items() if k in _APPROVED_KEYS})
     for lab, (l, t) in {**SKILLS_LINES, **CV_SKILLS}.items():
         out.add(f"{l} : {t}"); out.add(f"{l}: {t}")
     return {_norm(x) for x in out if x}
@@ -172,6 +183,23 @@ HEDGED_PHRASES = [str(x) for x in (CLAIMS.get("hedged_phrases", []) or [])]
 CONSISTENCY_ITEMS = CLAIMS.get("consistency_items", []) or []
 PENDING = CLAIMS.get("pending", []) or []
 WORK_AUTH_LINE = work_auth()["resume_line"]
+
+
+class ReservedClaimName(ValueError):
+    """A bullet / entry / constant in approved_claims.yaml uses a name the engine needs for itself."""
+
+
+def _export_names():
+    import builtins, keyword
+    taken = {k for k in globals() if not k.startswith("__")} | set(dir(builtins)) | set(keyword.kwlist)
+    bad = sorted(k for k in _EXPORTS if k in taken or not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", k))
+    if bad:
+        raise ReservedClaimName(f"profile/approved_claims.yaml uses reserved or invalid names: {bad}. Rename these bullets / keys "
+                                "(e.g. B_ERMC_CARE, ERMC); names like EXPERIENCE, SUMMARIES, FORBIDDEN, PUBS belong to the engine.")
+    globals().update(_EXPORTS)
+
+
+_export_names()
 
 
 def loaded():

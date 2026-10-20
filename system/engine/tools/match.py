@@ -99,10 +99,8 @@ def lane_ref_docs():
     return {g['name']:(T(g['ref']) if g['ref'] and os.path.exists(g['ref']) else "") for g in GATES}
 _QUAL=re.compile(r"(qualificat|responsib|requirement|years? of experience|degree in|bachelor|master|ph\.?d|you will|what you)",re.I)
 def is_stub_text(t):
-    """Same stub definition as rubric.py (_stub): under 700 chars of body or no qualifications/responsibilities language."""
-    body=(t or '').split('==========')[-1] if '==========' in (t or '') else (t or '')
-    body=re.sub(r"\s+"," ",body).strip()
-    return len(body)<700 or not _QUAL.search(body)
+    """One stub definition for every arm: funnel.stub_text."""
+    import funnel; return funnel.stub_text(t)
 
 # ── ELIGIBILITY DROPS (corpus arm) - each pattern acts only when the matching work-authorization flag is closed ──
 _WA=_work_auth()

@@ -49,7 +49,7 @@ def sr(s):
             det=J(f"https://api.smartrecruiters.com/v1/companies/{s}/postings/{p['id']}")
             sec=(det.get('jobAd',{}) or {}).get('sections',{}) or {}
             txt=' '.join(strip(str(x.get('text',''))) for x in sec.values() if isinstance(x,dict))
-        except Exception: pass
+        except Exception as ex: print(f"corpus error (smartrecruiters {s} posting {p.get('id')}): {type(ex).__name__}"); continue   # v0.8 (M12): a posting without text is a failure, not a thin JD
         loc=p.get('location') or {}
         out.append(dict(src=s,title=p.get('name',''),loc=(loc.get('city','') or '')+', '+(loc.get('country','') or '').upper(),
             url=f"https://jobs.smartrecruiters.com/{s}/{p['id']}",posted=(p.get('releasedDate') or '')[:10],updated='',text=txt[:7000]))

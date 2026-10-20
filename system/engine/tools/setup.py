@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SETUP - the one script Claude runs to get a computer ready for jobkit (v0.4). Safe to run any number of times.
+"""SETUP - the one script Claude runs to get a computer ready for jobkit . Safe to run any number of times.
 
   <launcher> setup            # full: venv, packages, templates, folders, database, checks, lock, status table
   <launcher> setup --quick    # before a daily run: no installs unless something is missing, no network

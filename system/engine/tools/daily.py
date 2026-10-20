@@ -115,8 +115,7 @@ applied={(_canon(re.sub(r"\s*\([^)]*\)","",r[0] or ""))[:10],re.sub(r"\s*\([^)]*
 cands=json.load(open(os.path.join(TR,"candidates.json"), encoding="utf-8"))
 # merge feeds + hard-ATS arms into the same funnel (normalized; undated -> OPEN band)
 import re as _re
-_T1=_re.compile(_loc_cfg()["tier1_regex"] or r"Remote",_re.I)     # JOBKIT: geography tiers from settings.yaml location.tier1_regex
-_T2=_re.compile(_loc_cfg()["tier2_regex"] or r"(?!x)x",_re.I)     # JOBKIT: settings.yaml location.tier2_regex ("" = none)
+import funnel as _funnel   # v0.8 (M10): one definition of band / tier / stub
 # arm A: profile matches — every in-window matched.json doc that passes the judgment gate; closed-lane titles ANNOTATED, never dropped.
 # The annotation regex is workspace data: profile/critic_rules.yaml -> closed_lanes.title_hint_regex ("" = no annotation).
 _LANE_HINT=_re.compile((_critic_rules().get("closed_lanes") or {}).get("title_hint_regex") or r"(?!x)x",_re.I)
@@ -141,8 +140,8 @@ for m in json.load(open(os.path.join(TR,"matched.json"), encoding="utf-8")):
     age=_age(m.get('updated') or m['posted'])
     if not (0<=age<=int(win)): continue
     loc=m['loc'] or ''
-    cands.append(dict(band="FRESH" if age<=7 else ("RECENT" if age<=14 else "OPEN"),
-        tier="1" if _T1.search(loc) else ("2" if _T2.search(loc) else "3"),age=age,
+    cands.append(dict(band=_funnel.band(age),
+        tier=_funnel.tier(loc),age=age,
         posted_age=_age(m['posted']),
         src=m['src'],title=m['title'],loc=loc,url=m['url'],
         score=m['score'],lane=("lane?" if _LANE_HINT.search(m['title']) else ""),gate=(_via if _via!='std' else "")))
@@ -167,13 +166,20 @@ for path,srckey in (("feed_candidates.json","src"),("hard_candidates.json","comp
         try: _a=(datetime.date.today()-datetime.date.fromisoformat(str(x.get('posted'))[:10])).days
         except Exception: _a=99
         _a=max(_a,0)
-        cands.append(dict(band="FRESH" if _a<=7 else ("RECENT" if _a<=14 else "OPEN"),
-            tier="1" if _T1.search(loc) else ("2" if _T2.search(loc) else "3"),
+        cands.append(dict(band=_funnel.band(_a),
+            tier=_funnel.tier(loc),
             age=_a,src=str(x.get(srckey,'feed')),title=x.get('title',''),loc=loc,url=x.get('url',''),
             **({'desc':x['desc']} if x.get('desc') else {})))   # 2026-10-16 port: listing snippet = screen fallback text
 # 2026-10-01 audit H1/H4: ONE geo test for every arm (loc text, URL path, title). Workday "N Locations" placeholders
 # and corpus "Remote" matches leaked Onto Remote-Germany / AMAT Bangalore / CuspAI Berlin into the queue.
 _n_geo=len(cands); cands=[x for x in cands if not _NONUS_ANY(x.get('loc',''),x.get('url',''),x.get('title',''))]
+# v0.8 (code audit M4): places the person said they would NEVER move to (settings.yaml location.never_places) are dropped
+# here, in code, not only by the agent; remote postings are kept (they are not "in" a place)
+_NEVER=[p for p in _loc_cfg().get("never_places",[]) if str(p).strip()]
+if _NEVER:
+    _NEVER_RE=_re.compile("|".join(r"\b"+_re.escape(str(p).strip())+r"\b" for p in _NEVER),_re.I)
+    _n_nev=len(cands); cands=[x for x in cands if not (_NEVER_RE.search(x.get('loc','') or '') and not _re.search(r"\bremote\b",x.get('loc','') or '',_re.I))]
+    print(f"never-places filter: {_n_nev-len(cands)} candidates in places you would never move to dropped (settings.yaml location.never_places)")
 print(f"geo filter (all arms): {_n_geo-len(cands)} candidates outside {_geo.COUNTRY_NAME} dropped")
 # employer exclusions (settings.yaml exclusions.employers) - matched on src/URL only, never JD text
 _n_emp=len(cands); cands=[x for x in cands if not _EXCL_EMP(x.get('src',''),x.get('url',''))]
@@ -183,6 +189,7 @@ fresh=[x for x in cands if not any(a[:8] in _canon(x['src']) and _canon(b)==_can
 try:
     _last={}
     for _l in open(os.path.join(TR,"dispositions.jsonl"), encoding="utf-8"):
+        if not _l.strip(): continue   # v0.8 (M6): a blank line is not a decision
         _d=json.loads(_l); _last[_curl(_d['url'])]=_d['decision']   # LAST decision per CANONICAL URL wins (2026-09-15; canon 2026-10-01)
     judged={u for u,d in _last.items() if d not in ("WATCH","REOPEN","DEFER")}   # DEFER (v0.5, run.judge_top_n): not scored yet, comes back
 except FileNotFoundError: judged=set()
@@ -269,11 +276,11 @@ backfill=[]
 for m in json.load(open(os.path.join(TR,"matched.json"), encoding="utf-8")):
     if m['score']<0.42: break
     if _curl(m['url']) in judged: continue   # 2026-10-01: canonical compare (backfill arm re-surfaced judged SES AI / Redwood)
-    if any(a[:8] in _canon(m['src']) and b[:32]==m['title'].lower()[:32] for a,b in applied): continue
+    if any(a[:8] in _canon(m['src']) and _canon(b)==_canon(m['title']) for a,b in applied): continue   # v0.8 (M5): full-title equality, same as the main path
     age=_age(m.get('updated') or m['posted'])
     if age<=int(win): continue  # in-window (by activity date) ones already joined above
     loc=m['loc'] or ''
-    backfill.append(dict(band="OPEN",tier="1" if _T1.search(loc) else ("2" if _T2.search(loc) else "3"),
+    backfill.append(dict(band="OPEN",tier=_funnel.tier(loc),
         age=age,posted_age=_age(m['posted']),src=m['src'],title=m['title'],loc=loc,url=m['url'],score=m['score'],backfill=True))
 backfill=backfill[:10]
 print(f"backfill arm: {len(backfill)} older-but-open strong matches added")

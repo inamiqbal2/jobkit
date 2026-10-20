@@ -122,6 +122,10 @@ run:                                   # discovery arms. Employer boards (packs 
   jd_text_cap_chars: 6000              # the scorers read at most this many characters of each posting (the requirements block is
   judgment_check: true                 # (v0.7) warn when a job at or above the build line goes 7 days without a decision
   judge_model: ""                      # (v0.7 light mode) model for the two judges, e.g. "sonnet"; "" = the strongest available
+
+rubric:                                # (optional) the blind judges
+  b_band: [30, 70]                     # scorer B re-reads only postings scorer A put in this band (rubric.py prep-b)
+  protect_title_regex: ""              # titles the judges are known to under-score for YOU; never auto-skipped ("" = none)
                                        # always kept whole); long postings are trimmed, not dropped
 
 build:

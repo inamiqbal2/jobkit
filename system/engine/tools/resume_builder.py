@@ -231,7 +231,7 @@ class Resume:
         cp.modified = now
         cp.comments = ""
         cp.keywords = ""
-        cp.subject = ""
+        cp.subject = "jobkit:resume"   # v0.8: the audit reads this stamp to decide how strictly to check the file
         cp.category = ""
         cp.revision = 1
 
@@ -412,6 +412,7 @@ class AcademicCV(Resume):
         self._flush_jobs()
         self._set_core_properties()
         self.doc.core_properties.title = f"{NAME} - Curriculum Vitae"
+        self.doc.core_properties.subject = "jobkit:cv"
         self.doc.save(path)
         print("wrote", path)
         return path

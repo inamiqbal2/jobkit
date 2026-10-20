@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import WS as ROOT   # JOBKIT: workspace = data root
 from state import conn as _state_conn   # creates the db/table on a fresh workspace instead of "no such table"
 c=_state_conn()
-POS=('interviewing','advanced','closed')
+POS=('interviewing','advanced','offer')   # v0.8 (M7): 'closed' is not an outcome in the person's favour
 def g(q,*a): return c.execute(q,a).fetchall()
 print(f"=== COMPUTED BOARD - {datetime.date.today()} ===")
 tot=g("SELECT COUNT(*) FROM applications")[0][0]

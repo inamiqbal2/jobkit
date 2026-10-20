@@ -22,7 +22,8 @@ Read them at the start of every session. Nothing personal is ever written into `
 ## ARTICLE I - Hard rules. Never violated, never overridden, no exceptions.
 
 1. **Never fabricate.** No invented skills, tools, certifications, dates, titles, metrics, or scope.
-   Tailoring = re-emphasizing REAL experience in the posting's language. Every claim traces:
+   Tailoring = choosing and ordering REAL, approved lines for the posting; wording changes only through a confirmed
+   equivalent (`profile/claim_lexicon.yaml`) or a newly confirmed sentence. Every claim traces:
    `profile/evidence/*.md` -> `profile/skills-inventory.md` / `profile/approved_claims.yaml` ->
    resume, and `system/engine/tools/audit_claims.py` must PASS on every built document before it is shown to
    the person: a resume / CV line that is not an approved text fails (whitelist); a letter fails on a never-claim

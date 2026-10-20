@@ -28,7 +28,7 @@ def oracle(e):
                     out.append((e['name'],r.get('Title',''),r.get('PrimaryLocation',''),
                         f"https://{e['host']}/hcmUI/CandidateExperience/en/sites/{e['site']}/job/{r.get('Id','')}",
                         (r.get('PostedDate') or '')[:10]))
-        except Exception: pass
+        except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 def adp(e):
     out=[]
@@ -39,7 +39,7 @@ def adp(e):
             out.append((e['name'],j.get('requisitionTitle',''),loc,
                 f"https://workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid={e['cid']}&ccId={e['ccId']}&jobId={j.get('itemID','')}",
                 (j.get('postDate') or '')[:10]))
-    except Exception: pass
+    except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 def eightfold(e):
     out=[]
@@ -50,7 +50,7 @@ def eightfold(e):
                 dt=str(datetime.date.fromtimestamp(p['postedTs'])) if p.get('postedTs') else ''
                 out.append((e['name'],p.get('name',''),"; ".join(p.get('standardizedLocations',[])[:1]),
                     f"{e['base']}/careers?pid={p.get('id','')}&domain={e['domain']}",dt))
-        except Exception: pass
+        except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 def phenom(e):
     out=[]
@@ -61,7 +61,7 @@ def phenom(e):
             for j in (d.get('refineSearch',{}).get('data',{}).get('jobs') or []):
                 out.append((e['name'],j.get('title',''),f"{j.get('city','')}, {j.get('state','')}",
                     f"{e['base']}/{e.get('locale','us/en')}/job/{j.get('jobId','')}",(j.get('postedDate') or '')[:10]))
-        except Exception: pass
+        except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 def sap(e):
     out=[]
@@ -75,7 +75,7 @@ def sap(e):
                 except Exception: continue
             for m in re.finditer(r'href="(/job/[^"]+)"[^>]*>\s*([^<]{4,90})\s*<',h):
                 out.append((e['name'],html.unescape(m.group(2)).strip(),"",e['base']+m.group(1),""))
-        except Exception: pass
+        except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 def icims(e):
     # 2026-10-16 port: iCIMS sites are not always careers-<tenant>.icims.com (uscareers-, jobs-, external-...). A registry entry
@@ -89,7 +89,7 @@ def icims(e):
             if not out:
                 for m in re.finditer(r'<a[^>]+href="(https://[a-z0-9-]+\.icims\.com/jobs/\d+/[^"]+/job)[^"]*"[^>]*(?:title="([^"]+)")?',h):
                     out.append((e['name'],html.unescape(m.group(2) or m.group(1).split('/')[-2].replace('-',' ')).strip(),"",m.group(1),""))
-        except Exception: pass
+        except Exception as ex: print(f"hard-ATS error ({e.get('name','?')}): {type(ex).__name__}")
     return out
 import urllib.parse
 def main():

@@ -32,22 +32,8 @@ INDEX_JSON = os.path.join(INTAKE_EXTRACTED, "index.json")
 
 
 def _docx(path):
-    from docx import Document
-    d = Document(path)
-    parts = [p.text for p in d.paragraphs]
-    for t in d.tables:
-        for row in t.rows:
-            cells = [c.text.strip() for c in row.cells]
-            if any(cells):
-                parts.append(" | ".join(cells))
-    # headers/footers often carry the name and contact line
-    for s in d.sections:
-        for hf in (s.header, s.footer):
-            try:
-                parts += [p.text for p in hf.paragraphs if p.text.strip()]
-            except Exception:
-                pass
-    return "\n".join(parts)
+    import docxtext   # v0.8: one reader for every text channel (tables, headers, footers, text boxes included)
+    return docxtext.text(path)
 
 
 def _pdf(path):

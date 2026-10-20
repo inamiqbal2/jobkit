@@ -92,14 +92,8 @@ def readability(paragraphs):
 
 
 def docx_text(path):
-    from docx import Document
-    d = Document(path)
-    parts = [p.text for p in d.paragraphs]
-    for t in d.tables:
-        for row in t.rows:
-            for c in row.cells:
-                parts.append(c.text)
-    return "\n".join(parts)
+    import docxtext   # v0.8: every text channel (body, tables, headers, footers, text boxes), shared with the audit
+    return docxtext.text(path)
 
 
 def _soffice_candidates():
