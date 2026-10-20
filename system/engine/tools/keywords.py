@@ -45,11 +45,13 @@ if os.path.exists(_lexp):
     if _user:
         LEX = {str(t): (list((v or {}).get("syn", []) or []), str((v or {}).get("claim", "ASK"))) for t, v in _user.items()}
         LEX_SOURCE = _lexp
-try:
-    import approved_claims as _ac
-    HEDGED = list(getattr(_ac, "HEDGED_PHRASES", []) or [])
-except Exception:
-    HEDGED = []
+def _hedged():
+    """approved_claims.yaml hedged_phrases, read at call time (v1.0, audit M26: importing this module reads no file)."""
+    try:
+        import claims_loader as _cl
+        return list(_cl.load().HEDGED_PHRASES or [])
+    except Exception:
+        return []
 
 import re as _re
 # 2026-09-12 red-team defect 6: hyphen/space and singular/plural are normalized when matching, so
@@ -146,6 +148,7 @@ def check(resume_path, jd_path):
     for t, note in present: print(f"  + {t}  ({note})")
     print("\n-- MISSING but CLAIMABLE - the person HAS these; use an approved line that carries the term, a confirmed lexicon equivalent, or confirm a new sentence:")
     for t in add: print(f"  + {t}")
+    HEDGED = _hedged()
     print("\n-- MISSING, classification UTIL/ASK - add with correct phrasing or confirm with the user:")
     for t, c in ask: print(f"  ? {t} [{c}]" + (f"  (UTIL = only with a hedged phrase: {' / '.join(HEDGED)})" if c == "UTIL" and HEDGED else ""))
     print("\n-- MISSING and NEVER-CLAIM - honest gaps, do NOT add:")

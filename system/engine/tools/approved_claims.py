@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""APPROVED CLAIMS - loader for My Job Search/profile/approved_claims.yaml (jobkit refactor 2026-10-08).
+"""APPROVED CLAIMS - the build script's view of My Job Search/profile/approved_claims.yaml (jobkit refactor 2026-10-08).
 
 The original module was a hand-written Python file of one person's constants (experience tuples,
 bullet strings, skills lines, publication line, forbidden terms). In jobkit the SAME content is DATA
 the user owns: profile/approved_claims.yaml (see My Job Search/profile/approved_claims.yaml.example).
 
 Back-compat: build scripts do `from approved_claims import <ENTRY_KEY>, <BULLET_NAME>, PUBS, ...`.
-This module re-creates those names from the YAML so existing build-script patterns keep working:
-  - experience[].key          -> module global <KEY> = (org, dates, role, loc)
-  - experience[].bullets      -> module global <BULLET_NAME> = text   and  <KEY>_BULLETS = [texts]
-  - skills_lines.<LABEL>      -> module global <LABEL> = (label, text)
+This module serves those names from the YAML so existing build-script patterns keep working:
+  - experience[].key          -> <KEY> = (org, dates, role, loc)
+  - experience[].bullets      -> <BULLET_NAME> = text   and  <KEY>_BULLETS = [texts]
+  - skills_lines.<LABEL>      -> <LABEL> = (label, text)
   - publications.line / short -> PUBS, PUBS_SHORT
   - tenure.line / short       -> TENURE, TENURE_SHORT
   - projects.<key>            -> PROJECTS[key] = (title, bullet)
@@ -18,198 +18,58 @@ This module re-creates those names from the YAML so existing build-script patter
   - constants.<NAME>          -> <NAME> = text or (label, text)     (approved phrasings)
   - never_claims.forbidden_terms -> FORBIDDEN
 Everything is also reachable as CLAIMS (the raw dict). Nothing here is person-specific.
+
+v1.0 (audit M26): importing this module reads NOTHING. The YAML is parsed on the first call of load() (cached for the
+process; claims_loader holds the code) or on the first attribute access - `from approved_claims import ERMC` and
+`approved_claims.EXPERIENCE` both go through the module __getattr__ below, which calls load(). The reserved-name
+refusal (ReservedClaimName, v0.8 H7) therefore fires on that first use - before any document is built or audited -
+and no longer on `import`, so a tool can be imported, py_compiled and self-tested on a bare checkout. Engine modules
+call load() once per function and read the returned Claims; the attribute form exists for build scripts.
 """
 import sys as _sys0
 try: _sys0.stdout.reconfigure(encoding="utf-8", errors="replace")   # Windows: never die on a non-cp1252 character
 except Exception: pass
-import os, re, sys
+import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from userconfig import APPROVED_CLAIMS_YAML, load_yaml, work_auth
-
-CLAIMS = load_yaml(APPROVED_CLAIMS_YAML, default={}) or {}
-# v0.8 (code audit H7): names from the person's YAML (entry keys, bullet names, constants, skills labels) are collected here and
-# exported as module names only at the END of loading, after a check that none collides with the module's own names.
-_EXPORTS = {}
-
-# ---- experience entries --------------------------------------------------------------------
-EXPERIENCE = []            # list of dicts as in the YAML (key, org, dates, role, loc, bullets, ...)
-ENTRY = {}                 # key -> (org, dates, role, loc)
-BULLETS = {}               # bullet name -> text   (global namespace of named bullets)
-FROZEN = {}                # org heading -> [approved bullet texts]  (audit: every bullet under that heading must match)
-for _e in CLAIMS.get("experience", []) or []:
-    _k = str(_e.get("key", "")).strip()
-    if not _k:
-        continue
-    EXPERIENCE.append(_e)
-    ENTRY[_k] = (_e.get("org", ""), _e.get("dates", ""), _e.get("role", ""), _e.get("loc", ""))
-    _EXPORTS[_k] = ENTRY[_k]
-    _bl = _e.get("bullets", {}) or {}
-    if isinstance(_bl, dict):
-        _texts = []
-        for _bn, _bt in _bl.items():
-            BULLETS[str(_bn)] = str(_bt)
-            _EXPORTS[str(_bn)] = str(_bt)
-            _texts.append(str(_bt))
-    else:
-        _texts = [str(x) for x in _bl]
-    _EXPORTS[f"{_k}_BULLETS"] = _texts
-    if _e.get("frozen"):
-        FROZEN[_e.get("org", "")] = list(_texts)
-
-# ---- optional extras: entry variants, a free bullet bank, named text constants ----------------
-# entry_variants: {NAME: {base: KEY, role: "...", org/dates/loc overrides}} -> module global NAME = (org, dates, role, loc)
-#   (e.g. the same employer with a different title read on engineer reqs; same facts, same dates)
-ENTRY_VARIANTS = {}
-for _vn, _vv in (CLAIMS.get("entry_variants", {}) or {}).items():
-    _vv = _vv or {}
-    _base = ENTRY.get(str(_vv.get("base", "")), ("", "", "", ""))
-    ENTRY_VARIANTS[str(_vn)] = (str(_vv.get("org", _base[0])), str(_vv.get("dates", _base[1])), str(_vv.get("role", _base[2])), str(_vv.get("loc", _base[3])))
-    _EXPORTS[str(_vn)] = ENTRY_VARIANTS[str(_vn)]
-# bullet_bank: {NAME: text} -> approved bullets not tied to one entry (dissertation / publication bullets)
-for _bn, _bt in (CLAIMS.get("bullet_bank", {}) or {}).items():
-    BULLETS[str(_bn)] = str(_bt)
-    _EXPORTS[str(_bn)] = str(_bt)
-# constants: {NAME: text | [label, text]} -> approved text snippets (coursework/teaching phrasings, instrument models)
-CONSTANTS = {}
-for _cn, _cv in (CLAIMS.get("constants", {}) or {}).items():
-    CONSTANTS[str(_cn)] = tuple(str(x) for x in _cv) if isinstance(_cv, (list, tuple)) else str(_cv)
-    _EXPORTS[str(_cn)] = CONSTANTS[str(_cn)]
-
-# ---- skills lines, publications, tenure, projects --------------------------------------------
-SKILLS_LINES = {}
-for _lab, _val in (CLAIMS.get("skills_lines", {}) or {}).items():
-    if isinstance(_val, (list, tuple)) and len(_val) == 2:
-        SKILLS_LINES[_lab] = (str(_val[0]), str(_val[1]))
-    else:
-        SKILLS_LINES[_lab] = (str(_lab), str(_val))
-    _EXPORTS[str(_lab)] = SKILLS_LINES[_lab]
-
-_pubs = CLAIMS.get("publications", {}) or {}
-PUBS = ("Publications", str(_pubs.get("line", ""))) if _pubs.get("line") else None
-PUBS_SHORT = ("Publications", str(_pubs.get("short", _pubs.get("line", "")))) if _pubs.get("line") or _pubs.get("short") else None
-PUB_COUNTS = _pubs.get("counts", {}) or {}
-
-_ten = CLAIMS.get("tenure", {}) or {}
-TENURE = str(_ten.get("line", "")) if _ten.get("line") else None
-TENURE_SHORT = str(_ten.get("short", _ten.get("line", ""))) if _ten.get("short") or _ten.get("line") else None
-TENURE_YEARS = _ten.get("years")
-
-PROJECTS = {}
-for _pk, _pv in (CLAIMS.get("projects", {}) or {}).items():
-    if isinstance(_pv, dict):
-        PROJECTS[_pk] = (str(_pv.get("title", _pk)), str(_pv.get("bullet", "")))
-    elif isinstance(_pv, (list, tuple)) and len(_pv) == 2:
-        PROJECTS[_pk] = (str(_pv[0]), str(_pv[1]))
-
-SUMMARIES = CLAIMS.get("summaries", {}) or {}
-
-# ---- academic CV sections (2026-10-09; optional `cv:` block, see approved_claims.yaml.example) ----------------
-# Every item is confirmed text the CV may print verbatim. Items may be strings or dicts; dict items carry `evidence`.
-#   cv.education[]        {institution, dates, degree, loc, details[]}   (the CV's own education block; settings.yaml
-#                                                                        education is the one-page resume's)
-#   cv.publications[]     str | {citation, status, evidence}             printed as given (numbered, newest first)
-#   cv.presentations[]    str | {text, evidence}
-#   cv.field_experience[] {title, org, dates, loc, bullets[], evidence}  expeditions, cruises, field seasons
-#   cv.certifications[]   str | {text, evidence}                         diving / boat / first-aid / permits
-#   cv.technical_skills   {LABEL: text}                                  (skills_lines is used when absent)
-#   cv.teaching[]         str | {org, dates, role, loc, bullets[]}
-#   cv.grants_awards[]    str | {text, evidence}
-#   cv.service[]          str | {text, evidence}
-#   cv.references         str (e.g. "Available upon request") | [str]
-# experience[].section   optional: research | professional | field | teaching -> AcademicCV groups entries by it
-def _cv_text(x, *keys):
-    if isinstance(x, dict):
-        for k in keys:
-            if x.get(k): return str(x[k])
-        return ""
-    return str(x) if x is not None else ""
-CV = CLAIMS.get("cv", {}) or {}
-CV_EDUCATION = [e for e in (CV.get("education", []) or []) if isinstance(e, dict)]
-CV_PUBLICATIONS = [_cv_text(x, "citation", "text") for x in (CV.get("publications", []) or [])]
-CV_PRESENTATIONS = [_cv_text(x, "text", "citation") for x in (CV.get("presentations", []) or [])]
-CV_FIELD = [e for e in (CV.get("field_experience", []) or []) if isinstance(e, dict)]
-CV_CERTIFICATIONS = [_cv_text(x, "text") for x in (CV.get("certifications", []) or [])]
-CV_SKILLS = {str(k): (tuple(str(x) for x in v) if isinstance(v, (list, tuple)) else (str(k), str(v)))
-             for k, v in (CV.get("technical_skills", {}) or {}).items()} or dict(SKILLS_LINES)
-CV_TEACHING = list(CV.get("teaching", []) or [])
-CV_GRANTS = [_cv_text(x, "text") for x in (CV.get("grants_awards", []) or [])]
-CV_SERVICE = [_cv_text(x, "text") for x in (CV.get("service", []) or [])]
-CV_REFERENCES = CV.get("references", "Available upon request")
-EXPERIENCE_BY_SECTION = {}
-for _e in EXPERIENCE:
-    EXPERIENCE_BY_SECTION.setdefault(str(_e.get("section", "research")).lower(), []).append(_e)
-
-
-# v0.8 (code audit M8): the whitelist is built from the keys that HOLD approved wording, never from "everything in the file".
-_APPROVED_KEYS = ("summaries", "tenure", "experience", "entry_variants", "bullet_bank", "constants", "skills_lines",
-                  "publications", "projects", "cv")
-_TEXT_FIELDS = ("org", "dates", "role", "loc", "bullets", "line", "short", "title", "bullet", "text", "citation",
-                "institution", "degree", "section_titles", "education", "publications", "presentations", "field_experience",
-                "certifications", "skills", "teaching", "grants_awards", "service", "references")
-
-
-def approved_texts():
-    """EVERY string the YAML approves, normalized - the audit's traceability set (audit_claims)."""
-    out = set()
-    def walk(o, allow_all=False):
-        if isinstance(o, dict):
-            for k, v in o.items():
-                if k in ("evidence", "nda", "keywords", "question", "status", "key", "base", "kind", "match", "counts", "years"):
-                    continue
-                if allow_all or k in _TEXT_FIELDS or k in _APPROVED_KEYS:
-                    walk(v, allow_all=True)
-        elif isinstance(o, (list, tuple)):
-            for v in o: walk(v, allow_all)
-        elif isinstance(o, str):
-            out.add(o)
-    walk({k: v for k, v in CLAIMS.items() if k in _APPROVED_KEYS})
-    for lab, (l, t) in {**SKILLS_LINES, **CV_SKILLS}.items():
-        out.add(f"{l} : {t}"); out.add(f"{l}: {t}")
-    return {_norm(x) for x in out if x}
-
-
-def _norm(t):
-    import re as _re
-    return _re.sub(r"\s+", " ", str(t or "").replace("\u2022", " ").replace("\t", " ")).strip().lower()
-
-
-# ---- claim boundaries ----------------------------------------------------------------------
-_nc = CLAIMS.get("never_claims", {}) or {}
-FORBIDDEN = [str(x) for x in (_nc.get("forbidden_terms", []) or [])]
-OPERATOR_PATTERNS = [str(x) for x in (_nc.get("operator_patterns", []) or [])]
-RETIRED = [str(x) for x in (CLAIMS.get("retired_claims", []) or [])]
-BANNED_WORDS = [str(x) for x in (CLAIMS.get("banned_words", ["local"]) or [])]
-HEDGED_PHRASES = [str(x) for x in (CLAIMS.get("hedged_phrases", []) or [])]
-CONSISTENCY_ITEMS = CLAIMS.get("consistency_items", []) or []
-PENDING = CLAIMS.get("pending", []) or []
-WORK_AUTH_LINE = work_auth()["resume_line"]
-
-
-class ReservedClaimName(ValueError):
-    """A bullet / entry / constant in approved_claims.yaml uses a name the engine needs for itself."""
-
-
-def _export_names():
-    import builtins, keyword
-    taken = {k for k in globals() if not k.startswith("__")} | set(dir(builtins)) | set(keyword.kwlist)
-    bad = sorted(k for k in _EXPORTS if k in taken or not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", k))
-    if bad:
-        raise ReservedClaimName(f"profile/approved_claims.yaml uses reserved or invalid names: {bad}. Rename these bullets / keys "
-                                "(e.g. B_ERMC_CARE, ERMC); names like EXPERIENCE, SUMMARIES, FORBIDDEN, PUBS belong to the engine.")
-    globals().update(_EXPORTS)
-
-
-_export_names()
+from userconfig import APPROVED_CLAIMS_YAML
+import claims_loader as _cl
+from claims_loader import Claims, ReservedClaimName, load, reload, DATA_NAMES, _APPROVED_KEYS, _norm
 
 
 def loaded():
     """True when a real approved_claims.yaml is present (the engine refuses to build without one)."""
-    return bool(CLAIMS)
+    return load().loaded()
+
+
+def approved_texts():
+    """EVERY string the YAML approves, normalized - the audit's traceability set (audit_claims)."""
+    return load().approved_texts()
+
+
+def __getattr__(name):
+    """PEP 562: a YAML name (entry key, bullet, constant, skills label) or an engine table (EXPERIENCE, FORBIDDEN, ...)
+    is served from load() on first use. Dunder / private lookups stay plain AttributeErrors so importlib, unittest and
+    hasattr() probes never trigger a file read."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    c = load()
+    if name in c.exports:
+        return c.exports[name]
+    if name in DATA_NAMES:
+        return getattr(c, name)
+    if not c.loaded():
+        # ImportError, not AttributeError: `from approved_claims import ERMC` would otherwise replace this sentence with
+        # Python's "cannot import name" and the person would never read WHY (the file is missing).
+        raise ImportError(f"approved_claims has no name {name!r}: " + c.missing_sentence(), name="approved_claims")
+    raise AttributeError(f"approved_claims has no name {name!r}: it is not an entry key, bullet name, constant or "
+                         f"skills label in {c.path} (and not one of the engine's tables).")
 
 
 def audit(path):
     """Fail loudly if a built resume contains a forbidden claim. Delegates to audit_claims.check
-    (never/retired/operator/frozen/work-auth/banned-word checks) and returns its problem list."""
+    (never/retired/operator/frozen/work-auth/banned-word checks) and returns its problem list.
+    v1.0 (audit M26): audit_claims sits ABOVE this module (it imports claims_loader, never approved_claims), so this
+    late import is a one-way edge up the dependency order, not a cycle."""
     try:
         import audit_claims as _strict
         return _strict.check(path)
@@ -218,11 +78,15 @@ def audit(path):
 
 
 if __name__ == "__main__":
-    print("approved_claims.yaml:", APPROVED_CLAIMS_YAML, "(loaded)" if loaded() else "(MISSING - run onboarding)")
-    print("experience keys:", list(ENTRY))
-    print("named bullets:", len(BULLETS), "| frozen entries:", list(FROZEN))
-    print("skills lines:", list(SKILLS_LINES))
-    print("PUBS:", PUBS)
-    print("FORBIDDEN:", FORBIDDEN)
-    print("RETIRED patterns:", len(RETIRED), "| pending (unusable):", len(PENDING))
-    if CV: print("cv sections:", {k: (len(v) if isinstance(v, (list, dict)) else 1) for k, v in CV.items()})
+    try:
+        c = load()
+    except ReservedClaimName as e:
+        print(str(e), file=sys.stderr); sys.exit(2)
+    print("approved_claims.yaml:", APPROVED_CLAIMS_YAML, "(loaded)" if c.loaded() else "(MISSING - run onboarding)")
+    print("experience keys:", list(c.ENTRY))
+    print("named bullets:", len(c.BULLETS), "| frozen entries:", list(c.FROZEN))
+    print("skills lines:", list(c.SKILLS_LINES))
+    print("PUBS:", c.PUBS)
+    print("FORBIDDEN:", c.FORBIDDEN)
+    print("RETIRED patterns:", len(c.RETIRED), "| pending (unusable):", len(c.PENDING))
+    if c.CV: print("cv sections:", {k: (len(v) if isinstance(v, (list, dict)) else 1) for k, v in c.CV.items()})

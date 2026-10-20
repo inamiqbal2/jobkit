@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Honesty audit for built documents. Run on EVERY .docx before it is shown to the person (CONSTITUTION I.1, I.8).
-All claim boundaries come from My Job Search/profile/approved_claims.yaml (via approved_claims.py).
+All claim boundaries come from My Job Search/profile/approved_claims.yaml (via claims_loader.load(), read once per process).
 
 WHITELIST (since v0.5): a resume or CV is a list of approved sentences, nothing else.
   Every non-structural paragraph of a resume (Resume*.docx / build.resume_filename) or CV (CV*.docx / build.cv_filename)
@@ -32,7 +32,7 @@ Usage: <jobkit python> audit_claims.py <folder-or-docx> [...]   (exit 1 if any f
 import re, sys, glob, os, json, hashlib, datetime
 from docx import Document
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import approved_claims as _ac
+import claims_loader as _cl   # v1.0 (audit M26): the loader, not the approved_claims facade - the facade's audit() imports THIS module
 from userconfig import build as _build_cfg, get as _cfg, EVIDENCE as _EVIDENCE
 
 PASS_FILE = "AUDIT_PASS.json"
@@ -79,8 +79,9 @@ def _builder_footer_lines():
 
 def _approved_set():
     """Every normalized string a resume / CV line may equal (the builder's composed lines included)."""
+    _ac = _cl.load()
     ok = _ac.approved_texts()
-    n = _ac._norm
+    n = _cl._norm
     for e in _ac.EXPERIENCE + _ac.CV_FIELD + [t for t in _ac.CV_TEACHING if isinstance(t, dict)]:
         org = e.get("org") or e.get("title") or ""
         for d in (e.get("dates", ""), _norm_dates(e.get("dates", ""))):
@@ -124,8 +125,9 @@ _PREFIX_OK = re.compile(r"^[A-Za-z][A-Za-z ,'&/()\-]{0,58}$")   # a role-noun op
 
 def _traceability(paras):
     """Untraceable paragraphs of a resume / CV (see module docstring). Returns a list of offending texts."""
+    _ac = _cl.load()
     ok = _approved_set()
-    n = _ac._norm
+    n = _cl._norm
     labels = {n(l) for l, _ in {**_ac.SKILLS_LINES, **_ac.CV_SKILLS}.values()} | {n(c[0]) for c in _ac.CONSTANTS.values() if isinstance(c, tuple) and len(c) == 2} \
              | {n(_ac.PUBS[0]) if _ac.PUBS else ""} | {n(p["title"]) for p in _ac.PROJECTS.values() if isinstance(p, dict) and p.get("title")}
     summaries = {n(v) for v in _ac.SUMMARIES.values() if v}
@@ -209,6 +211,7 @@ def _jd_text(path):
 def _letter_numbers(paras, path):
     """Numbers in a letter / statement that no approved text, confirmed evidence file or (for third-person sentences)
     the posting itself carries. Returns ["<number> in: <sentence>"...]."""
+    _ac = _cl.load()
     pool_person = " ".join(sorted(_ac.approved_texts())) + "\n" + _confirmed_evidence_text().lower()
     pool_person += " " + " ".join(str(e.get(k, "")) for e in (_cfg("education", []) or []) for k in ("dates", "line")).lower()
     pool_person += " " + str(_cfg("identity.phone", "")) + " " + " ".join(str(x) for x in (_cfg("identity.links", []) or []))
@@ -232,6 +235,7 @@ def _letter_numbers(paras, path):
 
 def _pending_hits(t):
     """A paraphrase of a PENDING claim: its numbers plus one of its significant words within 80 characters."""
+    _ac = _cl.load()
     hits = []
     low = t.lower()
     for p in _ac.PENDING:
@@ -249,6 +253,10 @@ def _pending_hits(t):
 
 
 def check(path):
+    # v1.0 (audit M26): the YAML is read here, at call time, BEFORE the document is opened; a reserved YAML name raises
+    # ReservedClaimName out of this call (main turns it into one stderr sentence and exit 2), so nothing is audited against a
+    # file the engine refused.
+    _ac = _cl.load()
     problems = []
     if not _ac.loaded():
         return ["profile/approved_claims.yaml is missing - nothing can be audited (run onboarding first)"]
@@ -265,9 +273,9 @@ def check(path):
     if is_resume and offpage:
         # a resume / CV built by jobkit has no tables, headers or footers (the CV page footer is the builder's own and is
         # whitelisted below); anything else there is text the person did not approve
-        own_footer = {_ac._norm(x) for x in _builder_footer_lines()}
+        own_footer = {_cl._norm(x) for x in _builder_footer_lines()}
         extra = [x for (q, where), x in zip([(q, w) for q, w in located if w != "body" and q.text.strip()], offpage)
-                 if re.sub(r"\s*\d+$", "", _ac._norm(q.text.strip())).strip() not in own_footer]
+                 if re.sub(r"\s*\d+$", "", _cl._norm(q.text.strip())).strip() not in own_footer]
         if extra:
             problems.append(f"text outside the page body (tables / headers / footers): {extra[:4]}")
 
@@ -314,8 +322,8 @@ def check(path):
         problems.append("MISSING work-auth line")
     if is_resume:
         # the builder's own CV page footer is structure, not a claim (its text is whitelisted above); every other paragraph is checked
-        _own = {_ac._norm(x) for x in _builder_footer_lines()}
-        untraced = _traceability([q for q, where in located if not (where == "footer" and re.sub(r"\s*\d+$", "", _ac._norm(q.text.strip())).strip() in _own)])
+        _own = {_cl._norm(x) for x in _builder_footer_lines()}
+        untraced = _traceability([q for q, where in located if not (where == "footer" and re.sub(r"\s*\d+$", "", _cl._norm(q.text.strip())).strip() in _own)])
         if untraced:
             problems.append(f"{'CV' if _is_cv(path) else 'resume'} traceability: {len(untraced)} line(s) not in approved_claims.yaml: {untraced[:3]}")
     else:
@@ -378,6 +386,10 @@ if __name__ == "__main__":
     except Exception:
         pass
     args = sys.argv[1:] or ["."]
+    try:
+        _cl.load()   # v1.0 (audit M26): read + validate the YAML once, up front; a reserved name is one sentence and exit 2, never a traceback
+    except _cl.ReservedClaimName as e:
+        print(f"audit_claims: {e}", file=sys.stderr); sys.exit(2)
     bad = 0
     folders = {}
     for a in args:

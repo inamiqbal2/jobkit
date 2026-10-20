@@ -18,7 +18,7 @@ from docx.oxml import OxmlElement
 import datetime, re, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import get as _cfg, work_auth as _work_auth, build as _build_cfg
-import approved_claims as _ac   # CV sections (optional `cv:` block)
+import claims_loader as _cl   # v1.0 (audit M26): CV sections read the YAML at call time (claims_loader.load(), cached), not at import
 
 NAME = _cfg("identity.name", "")
 CITY = _cfg("identity.city_state", "")     # ATS location prefill needs a city/state; OFF the contact line by default
@@ -46,6 +46,7 @@ class Resume:
         """
         if not NAME:
             raise RuntimeError("settings.yaml identity.name is empty - run the onboarding skill first")
+        _cl.load()   # v1.0 (audit M26): read + validate approved_claims.yaml BEFORE any document is drawn; a reserved YAML name raises here
         self.doc = self._new_doc()
         parts = [p for p in [PHONE, EMAIL] + LINKS if p]
         parts.append(location_line or LOCATION_LINE_DEFAULT)
@@ -275,7 +276,7 @@ class AcademicCV(Resume):
     def cv_education(self, entries=None):
         """approved_claims.yaml cv.education[] {institution, dates, degree, loc, details[]}; falls back to settings.yaml education."""
         self._flush_jobs()
-        entries = entries if entries is not None else _ac.CV_EDUCATION
+        entries = entries if entries is not None else _cl.load().CV_EDUCATION
         if not entries:
             return self.education()
         self._heading("Education")
@@ -299,11 +300,11 @@ class AcademicCV(Resume):
         self._flush_jobs()
         if entries is None:
             if section == "field":
-                entries = _ac.CV_FIELD
+                entries = _cl.load().CV_FIELD
             elif section == "teaching":
-                entries = [t for t in _ac.CV_TEACHING if isinstance(t, dict)]
+                entries = [t for t in _cl.load().CV_TEACHING if isinstance(t, dict)]
             else:
-                entries = _ac.EXPERIENCE_BY_SECTION.get(section, [])
+                entries = _cl.load().EXPERIENCE_BY_SECTION.get(section, [])
         if not entries:
             return self
         self._heading(title or self.SECTION_TITLES.get(section, section.title()))
@@ -340,18 +341,18 @@ class AcademicCV(Resume):
         return self
 
     def publications(self, items=None):
-        return self.list_section("Publications", _ac.CV_PUBLICATIONS if items is None else items, numbered=True)
+        return self.list_section("Publications", _cl.load().CV_PUBLICATIONS if items is None else items, numbered=True)
 
     def presentations(self, items=None):
-        return self.list_section("Presentations", _ac.CV_PRESENTATIONS if items is None else items)
+        return self.list_section("Presentations", _cl.load().CV_PRESENTATIONS if items is None else items)
 
     def certifications(self, items=None):
-        return self.list_section("Certifications & Training", _ac.CV_CERTIFICATIONS if items is None else items)
+        return self.list_section("Certifications & Training", _cl.load().CV_CERTIFICATIONS if items is None else items)
 
     def technical_skills(self, lines=None):
         """Skills lines: cv.technical_skills (or skills_lines) as (label, text) pairs."""
         self._flush_jobs()
-        lines = lines if lines is not None else list(_ac.CV_SKILLS.values())
+        lines = lines if lines is not None else list(_cl.load().CV_SKILLS.values())
         if not lines:
             return self
         self._heading("Technical Skills")
@@ -363,8 +364,8 @@ class AcademicCV(Resume):
 
     def teaching(self):
         """cv.teaching: dict items become dated entries, string items a plain list."""
-        dicts = [t for t in _ac.CV_TEACHING if isinstance(t, dict)]
-        strs = [str(t) for t in _ac.CV_TEACHING if not isinstance(t, dict)]
+        dicts = [t for t in _cl.load().CV_TEACHING if isinstance(t, dict)]
+        strs = [str(t) for t in _cl.load().CV_TEACHING if not isinstance(t, dict)]
         if dicts:
             self.experience_section("teaching", dicts)
             if strs:
@@ -374,14 +375,14 @@ class AcademicCV(Resume):
         return self
 
     def grants_awards(self, items=None):
-        return self.list_section("Grants, Fellowships & Awards", _ac.CV_GRANTS if items is None else items)
+        return self.list_section("Grants, Fellowships & Awards", _cl.load().CV_GRANTS if items is None else items)
 
     def service(self, items=None):
-        return self.list_section("Service & Outreach", _ac.CV_SERVICE if items is None else items)
+        return self.list_section("Service & Outreach", _cl.load().CV_SERVICE if items is None else items)
 
     def references(self, text=None):
         self._flush_jobs()
-        text = _ac.CV_REFERENCES if text is None else text
+        text = _cl.load().CV_REFERENCES if text is None else text
         if not text:
             return self
         self._heading("References")

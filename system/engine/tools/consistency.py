@@ -18,15 +18,22 @@ except Exception: pass
 import sys, os, re, sqlite3, difflib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from userconfig import WS as ROOT, build as _build_cfg
-import approved_claims as _ac
+import claims_loader as _cl
 
 DB = os.path.join(ROOT, "tracking", "state.db")
 _B = _build_cfg()
 RESUME = _B["cv_filename"] if _B["format"] == "academic_cv" else _B["resume_filename"]   # 2026-10-09: CV mode compares CVs
 _SKIP = re.compile(r"^\s*(#|SOURCE:|APPLY:|URL:|FIT:|Verified|Posted|=+|-+\s*$)", re.I)
 
-ITEMS = list(_ac.CONSISTENCY_ITEMS) or [{"label": "Publications line", "kind": "line_startswith", "match": ["publications"]}]
-LABELS = [it["label"] for it in ITEMS]
+
+def _items():
+    """approved_claims.yaml consistency_items (v1.0, audit M26: read at call time through claims_loader.load(), so importing
+    this module reads no file); the publications line is the default story item when the YAML names none."""
+    return list(_cl.load().CONSISTENCY_ITEMS) or [{"label": "Publications line", "kind": "line_startswith", "match": ["publications"]}]
+
+
+def _labels():
+    return [it["label"] for it in _items()]
 
 
 def company_of(folder):
@@ -99,7 +106,7 @@ def extract(path):
     """The configured story items from one docx."""
     import docxtext   # v0.8: all text channels
     paras = [(p.text.strip(), p.style.name) for p, _ in docxtext.paragraphs(path)]
-    out = {k: [] for k in LABELS}
+    out = {k: [] for k in _labels()}
 
     def bullets_after(i):
         j = i + 1
@@ -116,7 +123,7 @@ def extract(path):
         low = t.lower()
         is_org = st != "List Bullet" and "\t" in t and i + 1 < len(paras) and paras[i + 1][1] != "List Bullet"
         is_title = st != "List Bullet" and "\t" not in t and i + 1 < len(paras) and paras[i + 1][1] == "List Bullet"
-        for it in ITEMS:
+        for it in _items():
             lab, kind = it["label"], it.get("kind", "bullet_contains")
             matches = [m.lower() for m in (it.get("match") or [])]
             hit = any(m in low for m in matches)
@@ -166,7 +173,7 @@ def main():
             continue
         readable += 1
         old = extract(path)
-        for k in LABELS:
+        for k in _labels():
             a, b = norm(old[k]), norm(new[k])
             verdict = "PASS" if a == b else "DIFF"
             any_diff |= verdict == "DIFF"
