@@ -66,7 +66,8 @@ Freshness is a tie-breaker, not a priority: the original project's own data show
 Citizenship-only, clearance, export-control and sponsorship gates are knockouts ONLY according to the
 user's flags; the engine assumes nothing. Negated statements ("no clearance required"), conditional
 boilerplate ("may be contingent upon ability to obtain") and alternatives lists ("one or more of") never
-trip a knockout (`_hit` / `_elig_hit` guards). An explicit "permanent residents are eligible" sentence
+trip a knockout (`eligibility.negated_hit` / `eligibility_hit`, the one negation rule shared by the corpus arm, the
+screener and the critic since v1.0). An explicit "permanent residents are eligible" sentence
 overrides a clearance line (soft flag, routed to judgment). Employer exclusions match SOURCE/URL only.
 
 ## Verification

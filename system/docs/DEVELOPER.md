@@ -187,8 +187,9 @@ with no stamp and no such name is audited as a resume. Structural exemptions are
 builder drew with its bottom border, the contact line is the line under the name carrying the email or phone, a
 `Label : text` line needs an approved label (skills line, constant, project title), and a summary prefix is a short
 role noun with no digits. Unreadable files are FAIL lines; `~$` lock files and `.bak-<date>` folders are ignored.
-`approved_claims.py` exports YAML names to the module only after a reserved-name check (`ReservedClaimName`), and the
-whitelist is built from the keys that hold approved wording (`_APPROVED_KEYS`), never from the whole file.
+`claims_loader.load()` (v1.0) reads `approved_claims.yaml` on first use - never at import - and refuses a bullet named like an
+engine constant (`ReservedClaimName`) before any document is built or audited; `approved_claims.py` is a thin facade over it.
+The whitelist is built from the keys that hold approved wording (`_APPROVED_KEYS`), never from the whole file.
 `system/engine/tools/tests/test_audit_channels.py` holds the probes that once passed and must now fail.
 
 ## What changed in v0.9 (second code audit, 2026-10-20)

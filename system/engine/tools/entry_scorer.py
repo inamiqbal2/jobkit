@@ -18,21 +18,36 @@ import sys, itertools, re, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import approved_claims as _ac
+import claims_loader as _cl
 
 # Canonical text for each entry = role + org + bullets + keywords.
-ENTRIES = {}
-ANCHORS = []
-for _e in _ac.EXPERIENCE:
-    _k = _e["key"]
-    _bl = _e.get("bullets", {}) or {}
-    _texts = list(_bl.values()) if isinstance(_bl, dict) else list(_bl)
-    ENTRIES[_k] = " ".join([str(_e.get("role", "")), str(_e.get("org", ""))] + [str(x) for x in _texts] + [str(_e.get("keywords", ""))])
-    if _e.get("always_include"):
-        ANCHORS.append(_k)
+# v1.0 (audit M26): built on first use, not at import - importing this module reads no file.
+_CACHE = None
+
+
+def _entries():
+    global _CACHE
+    if _CACHE is None:
+        entries, anchors = {}, []
+        for _e in _cl.load().EXPERIENCE:
+            _k = _e["key"]
+            _bl = _e.get("bullets", {}) or {}
+            _texts = list(_bl.values()) if isinstance(_bl, dict) else list(_bl)
+            entries[_k] = " ".join([str(_e.get("role", "")), str(_e.get("org", ""))] + [str(x) for x in _texts] + [str(_e.get("keywords", ""))])
+            if _e.get("always_include"):
+                anchors.append(_k)
+        _CACHE = (entries, anchors)
+    return _CACHE
+
+
+def __getattr__(name):   # ENTRIES / ANCHORS kept as lazy module attributes for any older caller
+    if name == "ENTRIES": return _entries()[0]
+    if name == "ANCHORS": return _entries()[1]
+    raise AttributeError(name)
 
 
 def score(jd_text):
+    ENTRIES, ANCHORS = _entries()
     names = list(ENTRIES)
     if not names:
         raise RuntimeError("no experience entries in profile/approved_claims.yaml")
